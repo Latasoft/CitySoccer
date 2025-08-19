@@ -1,6 +1,5 @@
 'use client';
 import { useEffect, useRef } from "react";
-import { Calendar, MapPin, Clock } from "lucide-react";
 
 const Hero = () => {
   const bgRef = useRef(null);
@@ -26,19 +25,22 @@ const Hero = () => {
       <div
         ref={bgRef}
         className="absolute inset-0 bg-cover bg-center bg-no-repeat will-change-transform"
-        style={{ backgroundImage: `url(./Cancha1.jpeg)` }}
+        style={{ backgroundImage: `url(/imgPrincipal.jpeg)` }}
       >
         <div className="absolute inset-0 bg-brand-dark-gray/50"></div>
       </div>
       
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 text-center text-white">
-        <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight text-white drop-shadow-lg" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
-          City
-          <span className="block" style={{ color: '#FFD700' }}>
-            Soccer
-          </span>
-        </h1>
+        {/* Logo/Image */}
+        <img
+          src="./logo.png"
+          alt="City Soccer Logo"
+          className="mx-auto mb-8 w-52 h-52 object-contain"
+          style={{ filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.5))' }}
+        />
+
+
         
         <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-white/90">
           Fútbol y Pickleball en las mejores instalaciones deportivas. Reserva online y vive la experiencia City Soccer.

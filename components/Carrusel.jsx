@@ -81,10 +81,10 @@ const Carrusel = ({
   }, [currentIndex]);
 
   return (
-    <section className="relative bg-gray-100">
+    <section className="relative bg-black">
       <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.15)_0%,rgba(0,0,0,0.05)_2rem,rgba(0,0,0,0.02)_calc(100%_-_2rem),rgba(0,0,0,0.15)_100%)]" />
       <div className="max-w-5xl w-full mx-auto relative">
-        <h2 className="text-center font-bold text-[#000] text-4xl mx-8 mb-6 pt-12">{titulo}</h2>
+        <h2 className="text-center font-bold text-[#fff] text-4xl mx-8 mb-6 pt-12">{titulo}</h2>
         <hr className="block mx-auto h-1 max-w-20 border-none bg-[#57AA32] mb-8" />
       </div>
 

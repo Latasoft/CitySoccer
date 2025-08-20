@@ -5,103 +5,114 @@ const About = () => {
     {
       icon: Target,
       title: "Excelencia Deportiva",
-      description: "Instalaciones de primer nivel para una experiencia deportiva excepcional."
+      description:
+        "Instalaciones de primer nivel para una experiencia deportiva excepcional.",
     },
     {
       icon: Users,
       title: "Comunidad",
-      description: "Creamos espacios donde las familias y deportistas se conectan."
+      description:
+        "Creamos espacios donde las familias y deportistas se conectan.",
     },
     {
       icon: Award,
       title: "Profesionalismo",
-      description: "Técnicos certificados y servicios de la más alta calidad."
+      description: "Técnicos certificados y servicios de la más alta calidad.",
     },
     {
       icon: Heart,
       title: "Pasión por el Deporte",
-      description: "Promovemos el amor por el fútbol y los deportes de raqueta."
-    }
+      description:
+        "Promovemos el amor por el fútbol y los deportes de raqueta.",
+    },
   ];
 
   const partnerships = [
     {
       name: "CS West Palm",
-      icon: "/iconUSA.jpeg",
-      country: "USA"
+      country: "USA",
     },
     {
       name: "CS Port Saint Lucie",
-      icon: "/iconUSA.jpeg",
-      country: "USA"
+      country: "USA",
     },
     {
       name: "CS Punta del Este",
-      icon: "/iconURU.jpeg",
-      country: "Uruguay"
+      country: "Uruguay",
     },
-    {
-      name: "Kings League",
-      icon: "/iconUSA.jpeg",
-      country: "USA"
-    }
+
   ];
 
   return (
-    <section id="quienes-somos" className="py-20 bg-[#ECECEA]">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          {/* Left Content */}
-          <div>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#3B3F44]">
-              Quiénes <span className="text-[#57AA32]">Somos</span>
-            </h2>
-            <p className="text-lg text-[#3B3F44] mb-6">
-              City Soccer es más que un centro deportivo. Somos una comunidad comprometida con 
-              brindar las mejores instalaciones y servicios para que vivas tu pasión por el deporte.
+    <section id="quienes-somos" className="py-20 bg-gray">
+      <div className="container mx-auto px-6 max-w-7xl">
+        {/* Header Section */}
+        <div className="text-center mb-16">
+          <h2 className="text-5xl md:text-6xl font-bold mb-6 text-[#eeff00] leading-tight">
+            SOBRE CITY SOCCER
+          </h2>
+          <div className="max-w-4xl mx-auto">
+            <p className="text-xl text-white mb-8 leading-relaxed">
+              Más que un centro deportivo, somos una familia unida por la pasión del fútbol y los deportes de raqueta.
             </p>
-            <p className="text-lg text-[#3B3F44] mb-8">
-              Con años de experiencia en el sector deportivo, ofrecemos canchas de fútbol y 
-              pickleball de última generación, programas de entrenamiento profesional y 
-              eventos que fortalecen la comunidad deportiva.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button className="px-8 py-3 bg-[#57AA32] text-white font-semibold rounded-lg hover:bg-[#4a9429] transition-colors">
-                Conoce Nuestras Instalaciones
-              </button>
-            </div>
-          </div>
 
-          {/* Right Content - Values Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          </div>
+        </div>
+
+        {/* Values Section */}
+        <div className="mb-20">
+          <h3 className="text-3xl font-bold text-center mb-12 text-[#3B3F44]">
+            Nuestros Valores
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {values.map((value, index) => {
               const IconComponent = value.icon;
               return (
-                <div key={index} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow group p-6 text-center">
-                  <div className="mx-auto w-12 h-12 bg-transparent rounded-lg flex items-center justify-center mb-4">
-                    <IconComponent className="h-6 w-6 text-[#57AA32]" />
+                <div
+                  key={index}
+                  className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group p-8 text-center border border-gray-100"
+                >
+                  <div className="mx-auto w-16 h-16 bg-[#57AA32]/10 rounded-full flex items-center justify-center mb-6 group-hover:bg-[#57AA32]/20 transition-colors">
+                    <IconComponent className="h-8 w-8 text-[#57AA32]" />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-[#3B3F44]">{value.title}</h3>
-                  <p className="text-sm text-[#3B3F44]">{value.description}</p>
+                  <h4 className="text-xl font-bold mb-4 text-[#3B3F44]">
+                    {value.title}
+                  </h4>
+                  <p className="text-[#3B3F44]/70 leading-relaxed">
+                    {value.description}
+                  </p>
                 </div>
               );
             })}
           </div>
         </div>
 
+        {/* Call to Action */}
+        <div className="text-center mb-20">
+          <button className="px-10 py-4 bg-[#57AA32] text-white font-bold text-lg rounded-xl hover:bg-[#4a9429] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+            Conoce Nuestras Instalaciones
+          </button>
+        </div>
+
         {/* Partnerships Section */}
-        <div className="mt-20 text-center">
-          <h3 className="text-2xl font-bold mb-8 text-[#3B3F44]">Nuestras Alianzas</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center">
+        <div className="text-center">
+          <h3 className="text-3xl font-bold mb-12 text-[#ffee00]">
+            Nuestras Alianzas
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
             {partnerships.map((partnership, index) => (
-              <div key={index} className="flex flex-col items-center space-y-2 opacity-60 hover:opacity-100 transition-opacity">
-                <img 
-                  src={partnership.icon} 
-                  alt={`${partnership.country} flag`}
-                  className="w-8 h-8 rounded-full object-cover"
-                />
-                <div className="text-lg font-medium text-[#3B3F44]">{partnership.name}</div>
+              <div
+                key={index}
+                className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-all duration-300 opacity-80 hover:opacity-100"
+              >
+                <div className="w-12 h-8 bg-gray-200 rounded mx-auto mb-4 flex items-center justify-center">
+                  <span className="text-xs font-bold text-gray-600">
+                    {partnership.country}
+                  </span>
+                </div>
+                <div className="text-lg font-semibold text-[#3B3F44]">
+                  {partnership.name}
+                </div>
               </div>
             ))}
           </div>

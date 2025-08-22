@@ -81,7 +81,7 @@ const Carrusel = ({
   }, [currentIndex]);
 
   return (
-    <section className="relative bg-black">
+    <section className="relative bg-gradient-to-br from-black  via-gray-900 to-gray-950">
       <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.15)_0%,rgba(0,0,0,0.05)_2rem,rgba(0,0,0,0.02)_calc(100%_-_2rem),rgba(0,0,0,0.15)_100%)]" />
       <div className="max-w-5xl w-full mx-auto relative">
         <h2 className="text-center font-bold text-[#fff] text-4xl mx-8 mb-6 pt-12">{titulo}</h2>

@@ -1,4 +1,6 @@
 import { Users, Target, Award, Heart } from "lucide-react";
+import BotonReserva from "@/components/botonReserva";
+import Image from "next/image";
 
 const About = () => {
   const values = [
@@ -31,89 +33,90 @@ const About = () => {
     {
       name: "CS West Palm",
       country: "USA",
+      url: "/iconUSA.jpeg",
+      instagram: "https://instagram.com/cswestpalm",
     },
     {
       name: "CS Port Saint Lucie",
       country: "USA",
+      url: "/iconUSA.jpeg",
+      instagram: "https://instagram.com/csportsaintlucie",
     },
     {
       name: "CS Punta del Este",
       country: "Uruguay",
+      url: "/iconURU.jpeg",
+      instagram: "https://instagram.com/cspuntadeleste",
     },
-
   ];
 
+  const handlePartnershipClick = (instagramUrl) => {
+    window.open(instagramUrl, "_blank", "noopener,noreferrer");
+  };
+
   return (
-    <section id="quienes-somos" className="py-20 bg-gray">
-      <div className="container mx-auto px-6 max-w-7xl">
+    <section
+      id="quienes-somos"
+      className="py-20 bg-gradient-to-br from-black  via-gray-900 to-gray-950 overflow-hidden"
+    >
+      <div className="container mx-auto px-6 max-w-7xl relative z-10">
         {/* Header Section */}
-        <div className="text-center mb-16">
-          <h2 className="text-5xl md:text-6xl font-bold mb-6 text-[#eeff00] leading-tight">
+        <div className="text-center mb-20">
+          <h2 className="text-5xl md:text-6xl font-bold mb-8 text-[#eeff00] leading-tight">
             SOBRE CITY SOCCER
           </h2>
           <div className="max-w-4xl mx-auto">
-            <p className="text-xl text-white mb-8 leading-relaxed">
-              Más que un centro deportivo, somos una familia unida por la pasión del fútbol y los deportes de raqueta.
+            <p className="text-xl text-gray-300 mb-12 leading-relaxed">
+              Más que un centro deportivo, somos una familia unida por la pasión
+              del fútbol.
             </p>
-
           </div>
         </div>
 
-        {/* Values Section */}
-        <div className="mb-20">
-          <h3 className="text-3xl font-bold text-center mb-12 text-[#3B3F44]">
-            Nuestros Valores
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {values.map((value, index) => {
-              const IconComponent = value.icon;
-              return (
-                <div
-                  key={index}
-                  className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group p-8 text-center border border-gray-100"
-                >
-                  <div className="mx-auto w-16 h-16 bg-[#57AA32]/10 rounded-full flex items-center justify-center mb-6 group-hover:bg-[#57AA32]/20 transition-colors">
-                    <IconComponent className="h-8 w-8 text-[#57AA32]" />
-                  </div>
-                  <h4 className="text-xl font-bold mb-4 text-[#3B3F44]">
-                    {value.title}
-                  </h4>
-                  <p className="text-[#3B3F44]/70 leading-relaxed">
-                    {value.description}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+
 
         {/* Call to Action */}
-        <div className="text-center mb-20">
-          <button className="px-10 py-4 bg-[#57AA32] text-white font-bold text-lg rounded-xl hover:bg-[#4a9429] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-            Conoce Nuestras Instalaciones
-          </button>
+        <div className="mb-20">
+          <BotonReserva />
         </div>
 
         {/* Partnerships Section */}
         <div className="text-center">
-          <h3 className="text-3xl font-bold mb-12 text-[#ffee00]">
+          <h3 className="text-3xl font-bold mb-4 text-white">
             Nuestras Alianzas
           </h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+          <p className="text-gray-400 mb-12 max-w-2xl mx-auto">
+            Colaboramos con centros deportivos de clase mundial para ofrecer la
+            mejor experiencia
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {partnerships.map((partnership, index) => (
-              <div
+              <button
                 key={index}
-                className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-all duration-300 opacity-80 hover:opacity-100"
+                onClick={() => handlePartnershipClick(partnership.instagram)}
+                className="group bg-gradient-to-br from-[#ffee00] to-[#e6d000] rounded-xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border-2 border-transparent hover:border-white/20 cursor-pointer w-full"
               >
-                <div className="w-12 h-8 bg-gray-200 rounded mx-auto mb-4 flex items-center justify-center">
-                  <span className="text-xs font-bold text-gray-600">
-                    {partnership.country}
-                  </span>
+                <div className="w-30 h-20 bg-white/20 backdrop-blur-sm rounded-lg mx-auto mb-6 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform duration-300">
+                  <img
+                    src={partnership.url}
+                    alt={partnership.country}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
-                <div className="text-lg font-semibold text-[#3B3F44]">
+                <div className="text-xl font-bold text-gray-900 group-hover:text-black transition-colors mb-2">
                   {partnership.name}
                 </div>
-              </div>
+                <div className="flex items-center justify-center gap-2 text-gray-700 group-hover:text-black transition-colors">
+                  <Image
+                    src="/images/instagram.svg"
+                    alt="Instagram"
+                    width={20}
+                    height={20}
+                    className="group-hover:scale-110 transition-transform duration-300 filter brightness-0"
+                  />
+                  <span className="text-sm font-medium">Instagram</span>
+                </div>
+              </button>
             ))}
           </div>
         </div>

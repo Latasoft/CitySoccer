@@ -3,8 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
-
 const navItems = [
   { linkText: "Inicio", href: "/" },
   { linkText: "Quienes somos", href: "/quienessomos" },
@@ -28,9 +26,6 @@ const navItems = [
       { linkText: "Eventos", href: "/eventos" },
     ],
   },
-  { linkText: "Conocenos", href: "/conocenos" },
-  { linkText: "Alianzas", href: "/alianzas" },
-  { linkText: "Social Media", href: "/socialmedia" },
   { linkText: "Contacto", href: "/contacto" },
   { linkText: "Login", href: "/login" },
 ];
@@ -133,19 +128,23 @@ export default function Navigation() {
 
   const getLinkClass = (path, subTitulos) => {
     const isActive = path === activePath || isSubItemActive(subTitulos);
-    return `text-white ${isActive ? 'text-[#57AA32] font-medium' : 'hover:text-[#57AA32]'}`;
+    return `text-white ${
+      isActive ? "text-[#57AA32] font-medium" : "hover:text-[#57AA32]"
+    }`;
   };
 
   const getSubLinkClass = (path) => {
     const isActive = path === activePath;
-    return `text-gray-300 ${isActive ? 'text-[#57AA32] font-medium' : 'hover:text-white'}`;
+    return `text-gray-300 ${
+      isActive ? "text-[#57AA32] font-medium" : "hover:text-white"
+    }`;
   };
 
   return (
     <>
       {/* Mobile Header - Fixed on top for mobile */}
       {isMobile && (
-        <div className="fixed top-0 left-0 right-0 bg-black z-50 p-4 border-b border-white/20">
+        <div className="fixed top-0 left-0 right-0 bg-black z-50 p-6 border-b border-white/20">
           <div className="flex items-center justify-between">
             <div
               className="flex flex-col items-center cursor-pointer"

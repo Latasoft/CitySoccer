@@ -18,26 +18,39 @@ export default function Login() {
     setError('');
 
     try {
-      // Buscar el administrador en la tabla
-      const { data: admin, error: queryError } = await supabase
-        .from('administradores')
-        .select('*')
-        .eq('correo', email)
-        .eq('contrasena', password) // En producción, deberías usar hash para las contraseñas
-        .single();
+      // Usar la autenticación de Supabase
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
 
-      if (queryError || !admin) {
+      if (authError) {
         setError('Credenciales incorrectas. Verifica tu correo y contraseña.');
+        console.error('Error de autenticación:', authError);
       } else {
-        // Guardar información del administrador en localStorage o sessionStorage
-        localStorage.setItem('admin', JSON.stringify({
-          id: admin.id,
-          correo: admin.correo,
-          rol: admin.rol
-        }));
-        
-        // Redirigir al dashboard
-        router.push('/dashboard');
+        // Verificar si el usuario autenticado es un administrador
+        const { data: admin, error: queryError } = await supabase
+          .from('administradores')
+          .select('*')
+          .eq('correo', email)
+          .single();
+
+        if (queryError || !admin) {
+          // Si no es administrador, cerrar sesión y mostrar error
+          await supabase.auth.signOut();
+          setError('No tienes permisos de administrador.');
+        } else {
+          // Guardar información del administrador en localStorage
+          localStorage.setItem('admin', JSON.stringify({
+            id: admin.id,
+            correo: admin.correo,
+            rol: admin.rol,
+            userId: data.user.id
+          }));
+          
+          // Redirigir al dashboard
+          router.push('/dashboard');
+        }
       }
     } catch (err) {
       setError('Error inesperado. Intenta nuevamente.');

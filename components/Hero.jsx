@@ -37,7 +37,7 @@ const Hero = () => {
       <div className="relative z-10 container mx-auto px-4 text-center text-white">
         {/* Logo/Image */}
         <img
-          src="./logo2.png"
+          src="./Logo2.png"
           alt="City Soccer Logo"
           className="mx-auto mb-8 w-150 h-150 object-contain"
           style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.5))" }}

@@ -21,7 +21,7 @@ const navItems = [
         href: "/clasesparticularespickleball",
       },
       { linkText: "Academia de futbol", href: "/academiadefutbol" },
-      { linkText: "Academia de Pickeball", href: "/academiadepickeball" },
+      { linkText: "Academia de Pickeball", href: "/academiadepickleball" },
       { linkText: "Summer Camp", href: "/summer-camp" },
       { linkText: "Eventos", href: "/eventos" },
     ],
@@ -129,14 +129,14 @@ export default function Navigation() {
   const getLinkClass = (path, subTitulos) => {
     const isActive = path === activePath || isSubItemActive(subTitulos);
     return `text-white ${
-      isActive ? "text-[#57AA32] font-medium" : "hover:text-[#57AA32]"
+      isActive ? "text-[#57AA32] font-medium" : "hover:text-[#FFED00]"
     }`;
   };
 
   const getSubLinkClass = (path) => {
     const isActive = path === activePath;
     return `text-gray-300 ${
-      isActive ? "text-[#57AA32] font-medium" : "hover:text-white"
+      isActive ? "text-[#57AA32] font-medium" : "hover:text-[#FFED00]"
     }`;
   };
 

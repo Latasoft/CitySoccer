@@ -2,21 +2,15 @@
 import { useEffect, useRef } from "react";
 
 const Hero = () => {
-  const bgRef = useRef(null);
+  const videoRef = useRef(null);
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (bgRef.current) {
-        const scrollY = window.scrollY;
-        bgRef.current.style.transform = `translateY(${scrollY * 0.3}px)`;
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    // Asegurar que el video se reproduzca automáticamente
+    if (videoRef.current) {
+      videoRef.current.play().catch((error) => {
+        console.log("Error al reproducir el video:", error);
+      });
+    }
   }, []);
 
   return (
@@ -24,12 +18,23 @@ const Hero = () => {
       id="inicio"
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
-      {/* Background Image */}
-      <div
-        ref={bgRef}
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat will-change-transform"
-        style={{ backgroundImage: `url(/imgPrincipal.jpeg)` }}
-      >
+      {/* Background Video */}
+      <div className="absolute inset-0">
+        <video
+          ref={videoRef}
+          className="absolute inset-0 w-full h-full object-cover"
+          autoPlay
+          loop
+          muted
+          playsInline
+          poster="/imgPrincipal.jpeg" // Fallback image mientras carga el video
+        >
+          <source src="/videofutbol.mp4" type="video/mp4" />
+          {/* Fallback para navegadores que no soportan video */}
+          Tu navegador no soporta videos HTML5.
+        </video>
+
+        {/* Overlay oscuro para mejor legibilidad del texto */}
         <div className="absolute inset-0 bg-brand-dark-gray/50"></div>
       </div>
 
@@ -46,9 +51,9 @@ const Hero = () => {
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
           <button
             className="text-2xl px-16 py-6 text-black rounded-lg font-black flex items-center gap-2 shadow-lg hover:opacity-90 transition-all duration-200 uppercase tracking-wider"
-            style={{ 
+            style={{
               backgroundColor: "#FFED00",
-              fontFamily: "Arial Black, Arial, sans-serif"
+              fontFamily: "Arial Black, Arial, sans-serif",
             }}
           >
             RESERVA HOY

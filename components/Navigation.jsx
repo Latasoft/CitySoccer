@@ -8,20 +8,6 @@ const navItems = [
     { linkText: "Inicio", href: "/" },
     { linkText: "Quienes somos", href: "/quienessomos" },
     {
-        linkText: "Servicios",
-        subTitulos: [
-            { linkText: "Arriendos Futbol 7", href: "/arrendarcancha/futbol7" },
-            { linkText: "Arriendos Futbol 9", href: "/arrendarcancha/futbol9" },
-            { linkText: "Arriendos Pickleball", href: "/arrendarcancha/pickleball" },
-            { linkText: "Clases particulares Futbol", href: "/clasesparticularesfutbol" },
-            { linkText: "Clases particulares Pickleball", href: "/clasesparticularespickleball" },
-            { linkText: "Academia de futbol", href: "/academiadefutbol" },
-            { linkText: "Academia de Pickeball", href: "/academiadepickleball" },
-            { linkText: "Summer Camp", href: "/summer-camp" },
-            { linkText: "Eventos", href: "/eventos" },
-        ],
-    },
-    {
         linkText: "Futbol",
         subTitulos: [
             { linkText: "Arriendos Futbol 7", href: "/arrendarcancha/futbol7" },

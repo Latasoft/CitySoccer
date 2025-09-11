@@ -1,4 +1,4 @@
-
+import CardCarousel from "@/components/CardCarousel";
 import Hero from "@/components/Hero";
 
 import Carrusel from "@/components/Carrusel";
@@ -11,7 +11,8 @@ export default function Page() {
         <Hero />
 
         {/* Galería */}
-        <Carrusel />
+
+        <CardCarousel />
       </div>
     </main>
   );

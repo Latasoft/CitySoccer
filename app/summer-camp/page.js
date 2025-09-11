@@ -56,108 +56,170 @@ export default function SummerCamp() {
   };
 
   const handleWhatsAppClick = () => {
-    const message = encodeURIComponent("Hola! Me interesa información sobre el Summer Camp 2026. ¿Podrían contarme más detalles sobre precios, fechas disponibles y proceso de inscripción?");
+    const message = encodeURIComponent("¡Hola! Me interesa inscribir a mi hijo/a en el Summer Camp 2026. ¿Podrían contarme más sobre precios, fechas disponibles y el proceso de inscripción?");
     window.open(`https://wa.me/${campData.whatsapp.replace('+', '')}?text=${message}`, '_blank');
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-950 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-white py-12 px-4">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-[#eeff00]">
-            {campData.title}
-          </h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            {campData.description}
-          </p>
+        {/* Header con diseño deportivo */}
+        <div className="text-center mb-12 relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-blue-400/10 rounded-3xl -z-10"></div>
+          <div className="py-16">
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-green-600 via-blue-600 to-green-500 bg-clip-text text-transparent">
+              {campData.title}
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-700 max-w-4xl mx-auto font-medium leading-relaxed">
+              {campData.description}
+            </p>
+            <div className="flex justify-center mt-6">
+              <div className="w-24 h-1 bg-gradient-to-r from-green-500 to-blue-500 rounded-full"></div>
+            </div>
+          </div>
         </div>
 
-        {/* Información de fechas y horarios */}
-        <div className="bg-gradient-to-br from-orange-800 to-orange-900 rounded-xl p-8 border border-orange-700 mb-12 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">Información General</h2>
-          <div className="grid md:grid-cols-3 gap-6 text-orange-100">
-            <div>
-              <h3 className="text-xl font-semibold mb-2">Duración</h3>
-              <p className="text-lg">{campData.schedule.duration}</p>
+        {/* Información de fechas y horarios - Diseño energético */}
+        <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-3xl p-8 mb-12 text-center shadow-2xl transform hover:scale-105 transition-all duration-300">
+          <h2 className="text-4xl font-bold text-white mb-8 flex items-center justify-center gap-3">
+            <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+            ¡Información del Camp!
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8 text-white">
+            <div className="bg-white/20 rounded-2xl p-6 backdrop-blur-sm">
+              <h3 className="text-2xl font-bold mb-4">🗓️ Duración</h3>
+              <p className="text-xl font-semibold">{campData.schedule.duration}</p>
             </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-2">Horario</h3>
-              <p className="text-lg">{campData.schedule.dailyHours}</p>
+            <div className="bg-white/20 rounded-2xl p-6 backdrop-blur-sm">
+              <h3 className="text-2xl font-bold mb-4">⏰ Horario</h3>
+              <p className="text-xl font-semibold">{campData.schedule.dailyHours}</p>
             </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-2">Modalidades</h3>
-              <div className="space-y-1">
+            <div className="bg-white/20 rounded-2xl p-6 backdrop-blur-sm">
+              <h3 className="text-2xl font-bold mb-4">🏃‍♂️ Modalidades</h3>
+              <div className="space-y-2">
                 {campData.schedule.options.map((option, index) => (
-                  <p key={index} className="text-sm">{option}</p>
+                  <p key={index} className="text-lg font-medium">{option}</p>
                 ))}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Grupos por edades */}
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-white mb-8 text-center">Grupos por Edades</h2>
-          <div className="grid lg:grid-cols-3 gap-6">
-            {campData.ages.map((group, index) => (
-              <div key={index} className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700 hover:border-[#eeff00]/30 transition-all duration-300 hover:-translate-y-2 shadow-lg hover:shadow-xl">
-                <h3 className="text-xl font-bold text-[#eeff00] mb-2">{group.name}</h3>
-                <p className="text-gray-300 mb-4">{group.description}</p>
-                <div className="space-y-2">
-                  <p className="text-white font-semibold">Actividades:</p>
-                  {group.activities.map((activity, idx) => (
-                    <div key={idx} className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 bg-[#eeff00] rounded-full"></div>
-                      <span className="text-gray-400 text-sm">{activity}</span>
+        {/* Grupos por edades - Diseño más dinámico */}
+        <div className="mb-16">
+          <h2 className="text-4xl font-bold text-center mb-12 text-gray-800">
+            🏆 Grupos por Edades
+          </h2>
+          <div className="grid lg:grid-cols-3 gap-8">
+            {campData.ages.map((group, index) => {
+              const colors = [
+                'from-yellow-400 to-orange-500',
+                'from-green-400 to-blue-500', 
+                'from-blue-500 to-purple-500'
+              ];
+              const bgColors = [
+                'bg-yellow-50',
+                'bg-green-50',
+                'bg-blue-50'
+              ];
+              
+              return (
+                <div key={index} className={`${bgColors[index]} rounded-3xl p-8 border-4 border-transparent hover:border-white transition-all duration-500 hover:-translate-y-4 shadow-xl hover:shadow-2xl relative overflow-hidden`}>
+                  <div className={`absolute inset-0 bg-gradient-to-br ${colors[index]} opacity-10 rounded-3xl`}></div>
+                  <div className="relative z-10">
+                    <div className={`w-16 h-16 bg-gradient-to-br ${colors[index]} rounded-2xl flex items-center justify-center mb-6 mx-auto`}>
+                      <span className="text-2xl font-bold text-white">{index + 1}</span>
                     </div>
-                  ))}
+                    <h3 className="text-2xl font-bold text-gray-800 mb-4 text-center">{group.name}</h3>
+                    <p className="text-gray-600 mb-6 text-center font-medium">{group.description}</p>
+                    <div className="space-y-3">
+                      <p className="text-gray-800 font-bold text-center mb-4">⚽ Actividades:</p>
+                      {group.activities.map((activity, idx) => (
+                        <div key={idx} className="flex items-center gap-3 bg-white/70 rounded-xl p-3">
+                          <div className={`w-3 h-3 bg-gradient-to-r ${colors[index]} rounded-full`}></div>
+                          <span className="text-gray-700 font-medium">{activity}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
-        {/* Qué incluye */}
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700 mb-8">
-          <h2 className="text-2xl font-bold text-white mb-6">¿Qué incluye el Summer Camp?</h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            {campData.includes.map((item, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-[#eeff00] rounded-full"></div>
-                <span className="text-gray-300">{item}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Beneficios */}
-        <div className="bg-gradient-to-br from-blue-800 to-blue-900 rounded-xl p-6 border border-blue-700 mb-8">
-          <h2 className="text-2xl font-bold text-white mb-6">Beneficios para tu hijo/a</h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            {campData.benefits.map((benefit, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-blue-300 rounded-full"></div>
-                <span className="text-blue-100">{benefit}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Contacto WhatsApp */}
-        <div className="bg-gradient-to-br from-green-800 to-green-900 rounded-xl p-8 border border-green-700 text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">¡Reserva el Cupo de tu Hijo/a!</h2>
-          <p className="text-green-100 mb-6">
-            Cupos limitados. Contacta con nosotros para conocer precios, fechas disponibles y realizar la inscripción
-          </p>
-          <button 
-            onClick={handleWhatsAppClick}
-            className="bg-green-600 hover:bg-green-500 text-white px-8 py-4 rounded-lg transition-all duration-300 text-lg font-semibold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 flex items-center gap-3 mx-auto"
-          >
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
+        {/* Qué incluye - Diseño fresco */}
+        <div className="bg-gradient-to-br from-green-100 to-blue-100 rounded-3xl p-8 border-4 border-green-200 mb-12 shadow-xl">
+          <h2 className="text-4xl font-bold text-gray-800 mb-8 text-center flex items-center justify-center gap-3">
+            <svg className="w-10 h-10 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
             </svg>
-            Consultar Inscripciones
-          </button>
+            ¡Todo Incluido en tu Summer Camp!
+          </h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            {campData.includes.map((item, index) => (
+              <div key={index} className="flex items-center gap-4 bg-white rounded-2xl p-4 shadow-md hover:shadow-lg transition-all duration-300">
+                <div className="w-4 h-4 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex-shrink-0"></div>
+                <span className="text-gray-700 font-medium">{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Beneficios - Diseño motivacional */}
+        <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-3xl p-8 border-4 border-blue-200 mb-12 shadow-xl">
+          <h2 className="text-4xl font-bold text-gray-800 mb-8 text-center flex items-center justify-center gap-3">
+            <svg className="w-10 h-10 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            Beneficios para tu Campeón/a
+          </h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            {campData.benefits.map((benefit, index) => (
+              <div key={index} className="flex items-center gap-4 bg-white rounded-2xl p-4 shadow-md hover:shadow-lg transition-all duration-300">
+                <div className="w-4 h-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex-shrink-0"></div>
+                <span className="text-gray-700 font-medium">{benefit}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Contacto WhatsApp - CTA poderoso */}
+        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-3xl p-12 text-center shadow-2xl relative overflow-hidden">
+          <div
+            className="absolute inset-0 opacity-30"
+            style={{
+              backgroundImage:
+                "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")"
+            }}
+          ></div>
+          <div className="relative z-10">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              🚀 ¡Asegura el Cupo de tu Hijo/a!
+            </h2>
+            <p className="text-xl text-green-100 mb-8 max-w-3xl mx-auto font-medium">
+              Los cupos son limitados y se agotan rápido. No dejes que tu hijo/a se pierda la mejor experiencia deportiva del verano.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+              <div className="bg-white/20 rounded-2xl px-6 py-3 backdrop-blur-sm">
+                <span className="text-white font-bold">⏰ Inscripciones Abiertas</span>
+              </div>
+              <div className="bg-white/20 rounded-2xl px-6 py-3 backdrop-blur-sm">
+                <span className="text-white font-bold">🏃‍♂️ Cupos Limitados</span>
+              </div>
+            </div>
+            <button 
+              onClick={handleWhatsAppClick}
+              className="bg-white text-green-600 px-12 py-6 rounded-2xl transition-all duration-300 text-xl font-bold shadow-xl hover:shadow-2xl transform hover:-translate-y-2 hover:scale-105 flex items-center gap-4 mx-auto group"
+            >
+              <svg className="w-8 h-8 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
+              </svg>
+              ¡Inscríbelo Ahora por WhatsApp!
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -63,7 +63,10 @@ export const pricesData = {
     name: "Fútbol 9",
     schedule: {
       weekdays: {
-        "9:00": { price: 65000 },
+        "06:00": { price: 45000 },
+        "07:00": { price: 45000 },
+        "08:00": { price: 45000 },
+        "09:00": { price: 65000 },
         "10:00": { price: 65000 },
         "11:00": { price: 65000 },
         "12:00": { price: 65000 },
@@ -80,7 +83,8 @@ export const pricesData = {
         "23:00": { price: 75000 }
       },
       saturday: {
-        "9:00": { price: 65000 },
+        "06:00": { price: 55000 },
+        "09:00": { price: 65000 },
         "10:00": { price: 65000 },
         "11:00": { price: 65000 },
         "12:00": { price: 65000 },
@@ -97,7 +101,8 @@ export const pricesData = {
         "23:00": { price: 75000 }
       },
       sunday: {
-        "9:00": { price: 65000 },
+        "06:00": { price: 65000 },
+        "09:00": { price: 65000 },
         "10:00": { price: 65000 },
         "11:00": { price: 65000 },
         "12:00": { price: 65000 },
@@ -115,70 +120,69 @@ export const pricesData = {
       }
     },
     equipment: {
-      rent_ball: { name: "Arriendo de Balón N4 y N5", price: 5000 },
-      sell_ball: { name: "Venta de Balón N4 y N5", price: 20000 }
+      ball: { name: "Balón de Fútbol", price: 5000 },
+      vest: { name: "Petos (juego completo)", price: 8000 }
     }
   },
   pickleball: {
     name: "Pickleball",
     schedule: {
       weekdays: {
-        "9:00": { single: 15000, double: 20000 },
-        "10:00": { single: 15000, double: 20000 },
-        "11:00": { single: 15000, double: 20000 },
-        "12:00": { single: 15000, double: 20000 },
-        "13:00": { single: 15000, double: 20000 },
-        "14:00": { single: 15000, double: 20000 },
-        "15:00": { single: 15000, double: 20000 },
-        "16:00": { single: 15000, double: 20000 },
-        "17:00": { single: 15000, double: 20000 },
-        "18:00": { single: 15000, double: 20000 },
-        "19:00": { single: 15000, double: 20000 },
-        "20:00": { single: 15000, double: 20000 },
-        "21:00": { single: 15000, double: 20000 },
-        "22:00": { single: 15000, double: 20000 },
-        "23:00": { single: 15000, double: 20000 }
+        "06:00": { price: 15000 },
+        "07:00": { price: 15000 },
+        "08:00": { price: 15000 },
+        "09:00": { price: 15000 },
+        "10:00": { price: 15000 },
+        "11:00": { price: 15000 },
+        "12:00": { price: 15000 },
+        "13:00": { price: 15000 },
+        "14:00": { price: 15000 },
+        "15:00": { price: 15000 },
+        "16:00": { price: 15000 },
+        "17:00": { price: 15000 },
+        "18:00": { price: 15000 },
+        "19:00": { price: 15000 },
+        "20:00": { price: 15000 },
+        "21:00": { price: 15000 },
+        "22:00": { price: 15000 },
+        "23:00": { price: 15000 }
       },
       saturday: {
-        "9:00": { single: 15000, double: 20000 },
-        "10:00": { single: 15000, double: 20000 },
-        "11:00": { single: 15000, double: 20000 },
-        "12:00": { single: 15000, double: 20000 },
-        "13:00": { single: 15000, double: 20000 },
-        "14:00": { single: 15000, double: 20000 },
-        "15:00": { single: 15000, double: 20000 },
-        "16:00": { single: 15000, double: 20000 },
-        "17:00": { single: 15000, double: 20000 },
-        "18:00": { single: 15000, double: 20000 },
-        "19:00": { single: 15000, double: 20000 },
-        "20:00": { single: 15000, double: 20000 },
-        "21:00": { single: 15000, double: 20000 },
-        "22:00": { single: 15000, double: 20000 },
-        "23:00": { single: 15000, double: 20000 }
+        "06:00": { price: 20000 },
+        "09:00": { price: 15000 },
+        "10:00": { price: 15000 },
+        "11:00": { price: 15000 },
+        "12:00": { price: 15000 },
+        "13:00": { price: 15000 },
+        "14:00": { price: 15000 },
+        "15:00": { price: 15000 },
+        "16:00": { price: 15000 },
+        "17:00": { price: 15000 },
+        "18:00": { price: 15000 },
+        "19:00": { price: 15000 },
+        "20:00": { price: 15000 },
+        "21:00": { price: 15000 },
+        "22:00": { price: 15000 },
+        "23:00": { price: 15000 }
       },
       sunday: {
-        "9:00": { single: 15000, double: 20000 },
-        "10:00": { single: 15000, double: 20000 },
-        "11:00": { single: 15000, double: 20000 },
-        "12:00": { single: 15000, double: 20000 },
-        "13:00": { single: 15000, double: 20000 },
-        "14:00": { single: 15000, double: 20000 },
-        "15:00": { single: 15000, double: 20000 },
-        "16:00": { single: 15000, double: 20000 },
-        "17:00": { single: 15000, double: 20000 },
-        "18:00": { single: 15000, double: 20000 },
-        "19:00": { single: 15000, double: 20000 },
-        "20:00": { single: 15000, double: 20000 },
-        "21:00": { single: 15000, double: 20000 },
-        "22:00": { single: 15000, double: 20000 },
-        "23:00": { single: 15000, double: 20000 }
+        "06:00": { price: 25000 },
+        "09:00": { price: 15000 },
+        "10:00": { price: 15000 },
+        "11:00": { price: 15000 },
+        "12:00": { price: 15000 },
+        "13:00": { price: 15000 },
+        "14:00": { price: 15000 },
+        "15:00": { price: 15000 },
+        "16:00": { price: 15000 },
+        "17:00": { price: 15000 },
+        "18:00": { price: 15000 },
+        "19:00": { price: 15000 },
+        "20:00": { price: 15000 },
+        "21:00": { price: 15000 },
+        "22:00": { price: 15000 },
+        "23:00": { price: 15000 }
       }
-    },
-    equipment: {
-      rent_paddles: { name: "Arriendo de Palas (2)", price: 5000 },
-      rent_balls: { name: "Arriendo de pelotas (12)", price: 2500 },
-      sell_paddles: { name: "Venta de Palas (2)", price: 30000 },
-      sell_balls: { name: "Venta de pelotas (12)", price: 10000 }
     }
   }
 };

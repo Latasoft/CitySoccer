@@ -5,32 +5,24 @@ import { useTarifas } from './hooks/useTarifas';
 import TarifasTable from './components/TarifasTable';
 import CanchaImage from './components/CanchaImage';
 import ErrorDisplay from './components/ErrorDisplay';
-import { canchaConfig } from './data/canchaConfig';
+import ReservaForm from './components/ReservaForm';
+import { canchasConfig, getTiposDisponibles } from './data/canchasConfig';
 
 export default function TestPage() {
-  // Estado para manejar el tipo de cancha seleccionado
   const [tipoCancha, setTipoCancha] = useState('futbol7');
   const [reservaCompleta, setReservaCompleta] = useState(null);
 
-  // Definir los tipos disponibles
-  const tiposDisponibles = [
-    { value: 'futbol7', label: 'Fútbol 7' },
-    { value: 'futbol9', label: 'Fútbol 9' },
-    { value: 'pickleball-individual', label: 'Pickleball Individual' },
-    { value: 'pickleball-dobles', label: 'Pickleball Dobles' }
-  ];
-
-  const config = canchaConfig[tipoCancha];
+  const tiposDisponibles = getTiposDisponibles();
+  const config = canchasConfig[tipoCancha];
   const { data, error, loading } = useTarifas(tipoCancha);
 
-  // Función para cambiar el tipo de cancha
   const handleCanchaChange = (nuevoTipo) => {
     setTipoCancha(nuevoTipo);
+    setReservaCompleta(null);
   };
 
   const handleReservaCompleta = (reserva) => {
     setReservaCompleta(reserva);
-    // Aquí podrías mostrar un mensaje de éxito o redirigir
     console.log('Reserva completada:', reserva);
   };
 
@@ -50,55 +42,33 @@ export default function TestPage() {
           <p className="text-slate-600">{config.description}</p>
         </div>
 
-        {/* Panel de pruebas - Movido arriba para mejor UX */}
+        {/* Selector de tipo de cancha */}
         <div className="mb-8 bg-white rounded-lg shadow-md p-6 border">
           <h3 className="text-lg font-semibold mb-4 text-slate-800">Seleccionar Tipo de Cancha</h3>
           <div className="flex gap-4 flex-wrap">
-            <button 
-              onClick={() => handleCanchaChange('futbol7')}
-              className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
-                tipoCancha === 'futbol7' 
-                  ? 'bg-yellow-500 text-white shadow-lg scale-105' 
-                  : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
-              }`}
-            >
-              Fútbol 7
-            </button>
-            <button 
-              onClick={() => handleCanchaChange('futbol9')}
-              className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
-                tipoCancha === 'futbol9' 
-                  ? 'bg-blue-500 text-white shadow-lg scale-105' 
-                  : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
-              }`}
-            >
-              Fútbol 9
-            </button>
-            <button 
-              onClick={() => handleCanchaChange('pickleball-individual')}
-              className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
-                tipoCancha === 'pickleball-individual' 
-                  ? 'bg-green-500 text-white shadow-lg scale-105' 
-                  : 'bg-green-100 text-green-800 hover:bg-green-200'
-              }`}
-            >
-              Pickleball Individual
-            </button>
-            <button 
-              onClick={() => handleCanchaChange('pickleball-dobles')}
-              className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
-                tipoCancha === 'pickleball-dobles' 
-                  ? 'bg-green-500 text-white shadow-lg scale-105' 
-                  : 'bg-green-100 text-green-800 hover:bg-green-200'
-              }`}
-            >
-              Pickleball Dobles
-            </button>
+            {tiposDisponibles.map(tipo => {
+              const tipoConfig = canchasConfig[tipo.value];
+              const colorClass = tipoConfig.color === 'yellow' ? 'yellow' : tipoConfig.color === 'blue' ? 'blue' : 'green';
+              
+              return (
+                <button 
+                  key={tipo.value}
+                  onClick={() => handleCanchaChange(tipo.value)}
+                  className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
+                    tipoCancha === tipo.value 
+                      ? `bg-${colorClass}-500 text-white shadow-lg scale-105` 
+                      : `bg-${colorClass}-100 text-${colorClass}-800 hover:bg-${colorClass}-200`
+                  }`}
+                >
+                  {tipo.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* Grid layout: tabla + imagen */}
-        <div className="grid grid-cols-12 gap-8 items-start">
+        <div className="grid grid-cols-12 gap-8 items-start mb-8">
           <TarifasTable data={data} colorScheme={config.color} />
           <CanchaImage 
             src={config.image} 
@@ -106,31 +76,23 @@ export default function TestPage() {
           />
         </div>
 
-        {/* Sistema de Reservas - Siempre visible */}
+        {/* Sistema de Reservas */}
         <div className="mt-8">
           <h2 className="text-2xl font-bold mb-4">Reserva tu Cancha</h2>
-          <div className="mb-6">
-            <label htmlFor="tipoCancha" className="block mb-2">
-              Selecciona el tipo de cancha:
-            </label>
-            <select
-              id="tipoCancha"
-              value={tipoCancha}
-              onChange={(e) => setTipoCancha(e.target.value)}
-              className="border rounded px-3 py-2 w-full max-w-md"
-            >
-              <option value="">-- Selecciona --</option>
-              {tiposDisponibles.map(tipo => (
-                <option key={tipo.value} value={tipo.value}>
-                  {tipo.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-
-
+          <ReservaForm 
+            tipoCancha={tipoCancha}
+            onReservaCompleta={handleReservaCompleta}
+          />
         </div>
+
+        {/* Mostrar reserva completada */}
+        {reservaCompleta && (
+          <div className="mt-8 p-4 bg-green-100 border border-green-300 rounded-lg">
+            <h3 className="font-bold text-green-800">¡Reserva Exitosa!</h3>
+            <p>ID: {reservaCompleta.id}</p>
+            <p>Total: ${reservaCompleta.precio?.toLocaleString()}</p>
+          </div>
+        )}
       </div>
     </div>
   );

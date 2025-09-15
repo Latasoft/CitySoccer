@@ -19,7 +19,8 @@ const navItems = [
     {
         linkText: "Pickleball",
         subTitulos: [
-            { linkText: "Arriendos Pickleball", href: "/arrendarcancha/pickleball" },
+            { linkText: "Arriendos Pickleball Single", href: "/arrendarcancha/pickleball-individual" },
+            { linkText: "Arriendos Pickleball Dobles", href: "/arrendarcancha/pickleball-dobles" },
             { linkText: "Clases particulares Pickleball", href: "/clasesparticularespickleball" },
             { linkText: "Academia de Pickeball", href: "/academiadepickleball" },
         ],

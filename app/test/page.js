@@ -6,17 +6,33 @@ import TarifasTable from './components/TarifasTable';
 import CanchaImage from './components/CanchaImage';
 import ErrorDisplay from './components/ErrorDisplay';
 import { canchaConfig } from './data/canchaConfig';
+import ReservaSystem from './components/ReservaSystem';
 
 export default function TestPage() {
   // Estado para manejar el tipo de cancha seleccionado
   const [tipoCancha, setTipoCancha] = useState('futbol7');
-  
+  const [reservaCompleta, setReservaCompleta] = useState(null);
+
+  // Definir los tipos disponibles
+  const tiposDisponibles = [
+    { value: 'futbol7', label: 'Fútbol 7' },
+    { value: 'futbol9', label: 'Fútbol 9' },
+    { value: 'pickleball-individual', label: 'Pickleball Individual' },
+    { value: 'pickleball-dobles', label: 'Pickleball Dobles' }
+  ];
+
   const config = canchaConfig[tipoCancha];
   const { data, error, loading } = useTarifas(tipoCancha);
 
   // Función para cambiar el tipo de cancha
   const handleCanchaChange = (nuevoTipo) => {
     setTipoCancha(nuevoTipo);
+  };
+
+  const handleReservaCompleta = (reserva) => {
+    setReservaCompleta(reserva);
+    // Aquí podrías mostrar un mensaje de éxito o redirigir
+    console.log('Reserva completada:', reserva);
   };
 
   if (error) return <ErrorDisplay error={error} />;
@@ -89,6 +105,45 @@ export default function TestPage() {
             src={config.image} 
             alt={config.imageAlt} 
           />
+        </div>
+
+        {/* Sistema de Reservas - Siempre visible */}
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-4">Reserva tu Cancha</h2>
+          <div className="mb-6">
+            <label htmlFor="tipoCancha" className="block mb-2">
+              Selecciona el tipo de cancha:
+            </label>
+            <select
+              id="tipoCancha"
+              value={tipoCancha}
+              onChange={(e) => setTipoCancha(e.target.value)}
+              className="border rounded px-3 py-2 w-full max-w-md"
+            >
+              <option value="">-- Selecciona --</option>
+              {tiposDisponibles.map(tipo => (
+                <option key={tipo.value} value={tipo.value}>
+                  {tipo.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {tipoCancha && (
+            <ReservaSystem 
+              tipoCancha={tipoCancha}
+              onReservaCompleta={handleReservaCompleta}
+            />
+          )}
+
+          {reservaCompleta && (
+            <div className="mt-6 p-4 bg-green-100 border border-green-400 rounded">
+              <h3 className="font-bold text-green-800">¡Reserva Exitosa!</h3>
+              <p>Cancha: {reservaCompleta.tipo_cancha}</p>
+              <p>Fecha: {reservaCompleta.fecha}</p>
+              <p>Precio: ${reservaCompleta.precio}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

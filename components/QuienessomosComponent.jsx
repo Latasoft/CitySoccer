@@ -1,52 +1,23 @@
+  import React from 'react';
 import { Users, Target, Award, Heart } from "lucide-react";
 import BotonReserva from "@/components/botonReserva";
 import Image from "next/image";
 
-const About = () => {
-  const values = [
-    {
-      icon: Target,
-      title: "Excelencia Deportiva",
-      description:
-        "Instalaciones de primer nivel para una experiencia deportiva excepcional.",
-    },
-    {
-      icon: Users,
-      title: "Comunidad",
-      description:
-        "Creamos espacios donde las familias y deportistas se conectan.",
-    },
-    {
-      icon: Award,
-      title: "Profesionalismo",
-      description: "Técnicos certificados y servicios de la más alta calidad.",
-    },
-    {
-      icon: Heart,
-      title: "Pasión por el Deporte",
-      description:
-        "Promovemos el amor por el fútbol y los deportes de raqueta.",
-    },
-  ];
-
+const QuienessomosComponent = () => {
+  
   const partnerships = [
     {
-      name: "CS West Palm",
+      name: "CS Florida, USA",
       country: "USA",
-      url: "/iconUSA.jpeg",
-      instagram: "https://instagram.com/cswestpalm",
+      url: "/iconUSA.png",
+      instagram: "https://www.instagram.com/citysoccerfc/",
     },
+
     {
-      name: "CS Port Saint Lucie",
-      country: "USA",
-      url: "/iconUSA.jpeg",
-      instagram: "https://instagram.com/csportsaintlucie",
-    },
-    {
-      name: "CS Punta del Este",
+      name: "CS San Carlos, Uruguay",
       country: "Uruguay",
-      url: "/iconURU.jpeg",
-      instagram: "https://instagram.com/cspuntadeleste",
+      url: "/iconURU.png",
+      instagram: "https://www.instagram.com/citysoccer.uy/",
     },
   ];
 
@@ -54,75 +25,97 @@ const About = () => {
     window.open(instagramUrl, "_blank", "noopener,noreferrer");
   };
 
+  const handleWhatsAppClick = () => {
+    const message = encodeURIComponent("Hola! Me gustaría conocer más sobre City Soccer y sus servicios.");
+    window.open(`https://wa.me/56912345678?text=${message}`, '_blank');
+  };
+
   return (
-    <section
-      id="quienes-somos"
-      className="py-20 bg-gradient-to-br from-black  via-gray-900 to-gray-950 overflow-hidden"
-    >
-      <div className="container mx-auto px-6 max-w-7xl relative z-10">
-        {/* Header Section */}
-        <div className="text-center mb-20">
-          <h2 className="text-5xl md:text-6xl font-bold mb-8 text-[#eeff00] leading-tight">
-            SOBRE CITY SOCCER
-          </h2>
-          <div className="max-w-4xl mx-auto">
-            <p className="text-xl text-gray-300 mb-12 leading-relaxed">
-              Más que un centro deportivo, somos una familia unida por la pasión
-              del fútbol.
-            </p>
+    <div className="min-h-screen bg-gray-900">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-blue-900 via-green-900 to-emerald-800 min-h-screen flex items-center pb-16">
+        <div className="max-w-7xl mx-auto px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            {/* Texto del Hero */}
+            <div className="flex flex-col gap-8">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight text-white uppercase">
+                <span className="text-green-400">Sobre </span>
+                <span className="text-blue-400">City Soccer</span>
+              </h1>
+              
+              <div className="flex flex-col gap-6 text-gray-300">
+                <p className="text-xl leading-relaxed">
+                  Más que un centro deportivo, somos una familia unida por la pasión del fútbol. 
+                  En City Soccer creamos espacios donde el deporte se vive con profesionalismo, 
+                  diversión y valores que trascienden las canchas.
+                </p>
+              </div>
+              
+              <button 
+                onClick={handleWhatsAppClick}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-4 px-8 rounded-full text-base uppercase tracking-wide transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-500/40 self-start"
+              >
+                Contáctanos
+              </button>
+            </div>
+            
+            {/* Grid de Imágenes */}
+            <div className="flex justify-center items-center">
+              <div className="grid grid-cols-2 gap-12 w-full max-w-2xl">
+                <img 
+                  src="./Cancha1.jpeg" 
+                  alt="Instalaciones City Soccer" 
+                  className="w-full h-[500px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl" 
+                />
+                <img 
+                  src="./Pelota.jpg" 
+                  alt="Pasión por el fútbol" 
+                  className="w-full h-[500px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl" 
+                />
+              </div>
+            </div>
           </div>
         </div>
+      </section>
 
 
-
-        {/* Call to Action */}
-        <div className="mb-20">
-          <BotonReserva />
-        </div>
-
-        {/* Partnerships Section */}
-        <div className="text-center">
-          <h3 className="text-3xl font-bold mb-4 text-white">
-            Nuestras Alianzas
-          </h3>
-          <p className="text-gray-400 mb-12 max-w-2xl mx-auto">
-            Colaboramos con centros deportivos de clase mundial para ofrecer la
-            mejor experiencia
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+      {/* Alianzas Section */}
+      <section className="py-20 bg-gray-800">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Nuestras Alianzas</h2>
+            <p className="text-xl text-gray-300">Colaboramos con centros deportivos de clase mundial</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {partnerships.map((partnership, index) => (
-              <button
-                key={index}
-                onClick={() => handlePartnershipClick(partnership.instagram)}
-                className="group bg-gradient-to-br from-[#ffee00] to-[#e6d000] rounded-xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border-2 border-transparent hover:border-white/20 cursor-pointer w-full"
-              >
-                <div className="w-30 h-20 bg-white/20 backdrop-blur-sm rounded-lg mx-auto mb-6 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform duration-300">
-                  <img
-                    src={partnership.url}
-                    alt={partnership.country}
-                    className="w-full h-full object-contain"
-                  />
+              <div key={index} className="bg-gray-700 rounded-xl p-6 hover:bg-gray-600 transition-all duration-300 hover:scale-105">
+                <div className="text-center">
+                  <div className="w-28 h-20   rounded-lg mx-auto mb-4 flex items-center justify-center overflow-hidden">
+                    <img
+                      src={partnership.url}
+                      alt={partnership.country}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">{partnership.name}</h3>
+                  <p className="text-gray-300 mb-4">{partnership.country}</p>
+                  <button 
+                    onClick={() => handlePartnershipClick(partnership.instagram)}
+                    className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-semibold transition-colors duration-300 text-sm"
+                  >
+                    Ver Instagram
+                  </button>
                 </div>
-                <div className="text-xl font-bold text-gray-900 group-hover:text-black transition-colors mb-2">
-                  {partnership.name}
-                </div>
-                <div className="flex items-center justify-center gap-2 text-gray-700 group-hover:text-black transition-colors">
-                  <Image
-                    src="/images/instagram.svg"
-                    alt="Instagram"
-                    width={20}
-                    height={20}
-                    className="group-hover:scale-110 transition-transform duration-300 filter brightness-0"
-                  />
-                  <span className="text-sm font-medium">Instagram</span>
-                </div>
-              </button>
+              </div>
             ))}
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+
+    </div>
   );
 };
 
-export default About;
+export default QuienessomosComponent;

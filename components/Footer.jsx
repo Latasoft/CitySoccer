@@ -92,7 +92,7 @@ export default function Footer() {
 
                 <li>
                   <a
-                    href="#"
+                    href="https://www.instagram.com/citysoccersantiago/"
                     rel="noreferrer"
                     target="_blank"
                     className="text-white hover:text-yellow-200 transition-colors duration-300 transform hover:scale-110"

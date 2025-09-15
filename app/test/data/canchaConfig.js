@@ -43,7 +43,7 @@ export const getDayName = (dayNumber) => {
   const days = {
     1: 'Lunes a Viernes',
     6: 'Sábado', 
-    0: 'Domingo'
+    7: 'Domingo'
   };
   return days[dayNumber] || 'N/A';
 };

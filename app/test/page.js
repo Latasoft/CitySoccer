@@ -6,7 +6,6 @@ import TarifasTable from './components/TarifasTable';
 import CanchaImage from './components/CanchaImage';
 import ErrorDisplay from './components/ErrorDisplay';
 import { canchaConfig } from './data/canchaConfig';
-import ReservaSystem from './components/ReservaSystem';
 
 export default function TestPage() {
   // Estado para manejar el tipo de cancha seleccionado
@@ -129,21 +128,8 @@ export default function TestPage() {
             </select>
           </div>
 
-          {tipoCancha && (
-            <ReservaSystem 
-              tipoCancha={tipoCancha}
-              onReservaCompleta={handleReservaCompleta}
-            />
-          )}
 
-          {reservaCompleta && (
-            <div className="mt-6 p-4 bg-green-100 border border-green-400 rounded">
-              <h3 className="font-bold text-green-800">¡Reserva Exitosa!</h3>
-              <p>Cancha: {reservaCompleta.tipo_cancha}</p>
-              <p>Fecha: {reservaCompleta.fecha}</p>
-              <p>Precio: ${reservaCompleta.precio}</p>
-            </div>
-          )}
+
         </div>
       </div>
     </div>

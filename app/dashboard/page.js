@@ -16,17 +16,21 @@ import {
   UserCheck,
   Activity,
   DollarSign,
-  Target
+  Target,
+  Clock,
+  TrendingUp
 } from 'lucide-react';
 
 export default function Dashboard() {
   const [admin, setAdmin] = useState(null);
   const [stats, setStats] = useState({
-    totalJugadores: 0,
-    totalEquipos: 0,
-    partidosHoy: 0,
+    totalClientes: 0,
+    totalReservas: 0,
+    reservasHoy: 0,
     ingresosMes: 0
   });
+  const [topClientes, setTopClientes] = useState([]);
+  const [reservasRecientes, setReservasRecientes] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -46,22 +50,121 @@ export default function Dashboard() {
   const loadDashboardData = async () => {
     try {
       // Cargar estadísticas
-      const [jugadores, equipos, partidos] = await Promise.all([
-        supabase.from('jugadores').select('id', { count: 'exact' }),
-        supabase.from('equipos').select('id', { count: 'exact' }),
-        supabase.from('partidos').select('id', { count: 'exact' }).gte('fecha', new Date().toISOString().split('T')[0])
+      await Promise.all([
+        loadGeneralStats(),
+        loadTopClientes(),
+        loadReservasRecientes()
       ]);
-
-      setStats({
-        totalJugadores: jugadores.count || 0,
-        totalEquipos: equipos.count || 0,
-        partidosHoy: partidos.count || 0,
-        ingresosMes: 15000 // Placeholder - ajustar según tu lógica de negocio
-      });
     } catch (error) {
       console.error('Error cargando datos:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadGeneralStats = async () => {
+    try {
+      // Total clientes únicos
+      const { data: clientesData, error: clientesError } = await supabase
+        .from('clientes')
+        .select('id', { count: 'exact' });
+
+      // Total reservas
+      const { data: reservasData, error: reservasError } = await supabase
+        .from('reservas')
+        .select('id', { count: 'exact' });
+
+      // Reservas de hoy
+      const hoy = new Date().toISOString().split('T')[0];
+      const { data: reservasHoyData, error: reservasHoyError } = await supabase
+        .from('reservas')
+        .select('id', { count: 'exact' })
+        .eq('fecha', hoy);
+
+      // Calcular ingresos del mes
+      const inicioMes = new Date();
+      inicioMes.setDate(1);
+      const { data: reservasMes } = await supabase
+        .from('reservas')
+        .select('*')
+        .gte('fecha', inicioMes.toISOString().split('T')[0]);
+
+      // Calcular ingresos estimados (precio promedio por tipo de cancha)
+      let ingresosMes = 0;
+      if (reservasMes) {
+        ingresosMes = reservasMes.length * 35000; // Precio promedio estimado
+      }
+
+      setStats({
+        totalClientes: clientesData?.length || 0,
+        totalReservas: reservasData?.length || 0,
+        reservasHoy: reservasHoyData?.length || 0,
+        ingresosMes
+      });
+    } catch (error) {
+      console.error('Error cargando estadísticas:', error);
+    }
+  };
+
+  const loadTopClientes = async () => {
+    try {
+      const { data: reservas } = await supabase
+        .from('reservas')
+        .select(`
+          cliente_id,
+          clientes(nombre, correo)
+        `)
+        .not('cliente_id', 'is', null);
+
+      if (reservas) {
+        // Contar reservas por cliente
+        const clienteCount = {};
+        reservas.forEach(reserva => {
+          const clienteId = reserva.cliente_id;
+          if (clienteId && reserva.clientes) {
+            if (!clienteCount[clienteId]) {
+              clienteCount[clienteId] = {
+                count: 0,
+                cliente: reserva.clientes
+              };
+            }
+            clienteCount[clienteId].count++;
+          }
+        });
+
+        // Convertir a array y ordenar
+        const topClientes = Object.entries(clienteCount)
+          .map(([id, data]) => ({
+            id,
+            nombre: data.cliente?.nombre || 'Cliente',
+            correo: data.cliente?.correo || '',
+            reservas: data.count
+          }))
+          .sort((a, b) => b.reservas - a.reservas)
+          .slice(0, 5);
+
+        setTopClientes(topClientes);
+      }
+    } catch (error) {
+      console.error('Error cargando top clientes:', error);
+    }
+  };
+
+  const loadReservasRecientes = async () => {
+    try {
+      const { data } = await supabase
+        .from('reservas')
+        .select(`
+          *,
+          clientes(nombre, correo),
+          canchas(nombre, tipo)
+        `)
+        .order('creado_en', { ascending: false })
+        .limit(6);
+
+      setReservasRecientes(data || []);
+    } catch (error) {
+      console.error('Error cargando reservas recientes:', error);
     }
   };
 
@@ -113,10 +216,10 @@ export default function Dashboard() {
             <nav className="space-y-2">
               {[
                 { id: 'overview', label: 'Resumen', icon: Activity },
-                { id: 'jugadores', label: 'Jugadores', icon: Users },
-                { id: 'equipos', label: 'Equipos', icon: Trophy },
-                { id: 'partidos', label: 'Partidos', icon: Calendar },
+                { id: 'clientes', label: 'Clientes', icon: Users },
+                { id: 'reservas', label: 'Reservas', icon: Calendar },
                 { id: 'canchas', label: 'Canchas', icon: MapPin },
+                { id: 'tarifas', label: 'Tarifas', icon: DollarSign },
                 { id: 'configuracion', label: 'Configuración', icon: Settings }
               ].map((item) => (
                 <button
@@ -143,23 +246,23 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {[
                     {
-                      title: 'Total Jugadores',
-                      value: stats.totalJugadores,
+                      title: 'Total Clientes',
+                      value: stats.totalClientes,
                       icon: Users,
                       color: 'from-blue-500 to-blue-600',
                       change: '+12%'
                     },
                     {
-                      title: 'Equipos Activos',
-                      value: stats.totalEquipos,
-                      icon: Trophy,
+                      title: 'Total Reservas',
+                      value: stats.totalReservas,
+                      icon: Calendar,
                       color: 'from-green-500 to-green-600',
                       change: '+8%'
                     },
                     {
-                      title: 'Partidos Hoy',
-                      value: stats.partidosHoy,
-                      icon: Calendar,
+                      title: 'Reservas Hoy',
+                      value: stats.reservasHoy,
+                      icon: Clock,
                       color: 'from-purple-500 to-purple-600',
                       change: '+5%'
                     },
@@ -184,45 +287,70 @@ export default function Dashboard() {
                   ))}
                 </div>
 
-                {/* Quick Actions */}
-                <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
-                  <h2 className="text-xl font-bold text-white mb-6">Acciones Rápidas</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {[
-                      { label: 'Nuevo Jugador', icon: Plus, color: 'bg-blue-600' },
-                      { label: 'Crear Equipo', icon: Plus, color: 'bg-green-600' },
-                      { label: 'Programar Partido', icon: Calendar, color: 'bg-purple-600' },
-                      { label: 'Ver Reportes', icon: Eye, color: 'bg-orange-600' }
-                    ].map((action, index) => (
-                      <button
-                        key={index}
-                        className={`${action.color} hover:opacity-90 text-white p-4 rounded-lg flex items-center gap-3 transition-all hover:scale-105`}
-                      >
-                        <action.icon className="w-5 h-5" />
-                        {action.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Recent Activity */}
-                <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
-                  <h2 className="text-xl font-bold text-white mb-6">Actividad Reciente</h2>
-                  <div className="space-y-4">
-                    {[
-                      { action: 'Nuevo jugador registrado', user: 'Carlos Mendoza', time: 'Hace 2 horas' },
-                      { action: 'Partido programado', user: 'Equipo A vs Equipo B', time: 'Hace 4 horas' },
-                      { action: 'Equipo creado', user: 'Los Tigres FC', time: 'Hace 1 día' },
-                      { action: 'Pago procesado', user: '$500 - Inscripción', time: 'Hace 1 día' }
-                    ].map((activity, index) => (
-                      <div key={index} className="flex items-center justify-between p-4 bg-gray-700/50 rounded-lg">
-                        <div>
-                          <p className="text-white font-medium">{activity.action}</p>
-                          <p className="text-gray-400 text-sm">{activity.user}</p>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* Top Clientes */}
+                  <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                    <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
+                      <Trophy className="w-6 h-6 text-[#ffee00]" />
+                      Clientes Más Frecuentes
+                    </h2>
+                    <div className="space-y-4">
+                      {topClientes.map((cliente, index) => (
+                        <div key={cliente.id} className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <span className="w-8 h-8 bg-[#ffee00] text-black rounded-full flex items-center justify-center font-bold">
+                              {index + 1}
+                            </span>
+                            <div>
+                              <p className="text-white font-medium">{cliente.nombre}</p>
+                              <p className="text-gray-300 text-sm">{cliente.correo}</p>
+                            </div>
+                          </div>
+                          <span className="bg-[#ffee00] text-black px-3 py-1 rounded-full text-sm font-bold">
+                            {cliente.reservas} reservas
+                          </span>
                         </div>
-                        <span className="text-gray-400 text-sm">{activity.time}</span>
-                      </div>
-                    ))}
+                      ))}
+                      {topClientes.length === 0 && (
+                        <p className="text-gray-400 text-center py-4">No hay datos de clientes disponibles</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Reservas Recientes */}
+                  <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                    <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
+                      <TrendingUp className="w-6 h-6 text-[#ffee00]" />
+                      Reservas Recientes
+                    </h2>
+                    <div className="space-y-3 max-h-80 overflow-y-auto">
+                      {reservasRecientes.map((reserva) => (
+                        <div key={reserva.id} className="p-3 bg-gray-700/50 rounded-lg">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <p className="text-white font-medium">
+                                {reserva.clientes?.nombre || 'Cliente'}
+                              </p>
+                              <p className="text-gray-300 text-sm">
+                                {reserva.clientes?.correo}
+                              </p>
+                              <p className="text-[#ffee00] text-sm">
+                                {reserva.canchas?.nombre || `Cancha ${reserva.cancha_id}`} - {reserva.fecha}
+                              </p>
+                              <p className="text-gray-400 text-xs">
+                                {reserva.hora_inicio} - Estado: {reserva.estado}
+                              </p>
+                            </div>
+                            <span className="text-xs text-gray-400">
+                              {new Date(reserva.creado_en).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                      {reservasRecientes.length === 0 && (
+                        <p className="text-gray-400 text-center py-4">No hay reservas recientes</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

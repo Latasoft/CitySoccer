@@ -12,12 +12,26 @@ export default function Login() {
   const [error, setError] = useState('');
   const router = useRouter();
 
+  // Lista de emails de administradores autorizados
+  const adminEmails = [
+    'admin@citysoccer.com',
+    'administrador@citysoccer.com',
+    // Agrega aquí los emails de administradores autorizados
+  ];
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
+      // Verificar si el email es de administrador antes de autenticar
+      if (!adminEmails.includes(email.toLowerCase())) {
+        setError('No tienes permisos de administrador.');
+        setLoading(false);
+        return;
+      }
+
       // Usar la autenticación de Supabase
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email: email,
@@ -28,29 +42,15 @@ export default function Login() {
         setError('Credenciales incorrectas. Verifica tu correo y contraseña.');
         console.error('Error de autenticación:', authError);
       } else {
-        // Verificar si el usuario autenticado es un administrador
-        const { data: admin, error: queryError } = await supabase
-          .from('administradores')
-          .select('*')
-          .eq('correo', email)
-          .single();
-
-        if (queryError || !admin) {
-          // Si no es administrador, cerrar sesión y mostrar error
-          await supabase.auth.signOut();
-          setError('No tienes permisos de administrador.');
-        } else {
-          // Guardar información del administrador en localStorage
-          localStorage.setItem('admin', JSON.stringify({
-            id: admin.id,
-            correo: admin.correo,
-            rol: admin.rol,
-            userId: data.user.id
-          }));
-          
-          // Redirigir al dashboard
-          router.push('/dashboard');
-        }
+        // Guardar información del administrador en localStorage
+        localStorage.setItem('admin', JSON.stringify({
+          correo: email,
+          rol: 'admin',
+          userId: data.user.id
+        }));
+        
+        // Redirigir al dashboard
+        router.push('/dashboard');
       }
     } catch (err) {
       setError('Error inesperado. Intenta nuevamente.');

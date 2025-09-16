@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { pricesData } from "../data/pricesData";
 import { obtenerTarifasPorTipo } from "../data/supabaseService";
 
 const CanchaPageBase = ({ 
@@ -9,7 +8,7 @@ const CanchaPageBase = ({
   titulo, 
   colorPrimario = "#eeff00", 
   ArrendamientoComponent,
-  mostrarEquipos = true 
+  mostrarEquipos = false // Cambiado a false por defecto ya que no tienes equipos en BD
 }) => {
   const [showReservation, setShowReservation] = useState(false);
   const [tarifas, setTarifas] = useState(null);
@@ -19,21 +18,9 @@ const CanchaPageBase = ({
   // Mapeo de nombres de tipos de cancha para la BD
   const mapTipoCancha = (tipo) => {
     const mapping = {
-      'f7': 'f7',
-      'f9': 'f9', 
+      'f7': 'futbol7', // Según tu BD, usas 'futbol7' no 'f7'
+      'f9': 'futbol9', // Probablemente necesites 'futbol9' en tu BD
       'pickleball': 'pickleball',
-      'futbol7': 'f7',
-      'futbol9': 'f9'
-    };
-    return mapping[tipo] || tipo;
-  };
-
-  // Mapeo para pricesData (fallback)
-  const mapTipoCanchaPrecios = (tipo) => {
-    const mapping = {
-      'f7': 'futbol7',
-      'f9': 'futbol9',
-      'pickleball': 'pickleball', // ← Corregido aquí
       'futbol7': 'futbol7',
       'futbol9': 'futbol9'
     };
@@ -46,27 +33,18 @@ const CanchaPageBase = ({
         setLoading(true);
         const tipoBD = mapTipoCancha(tipoCancha);
         
-        // Intentar obtener tarifas reales de la base de datos
+        console.log('Buscando tarifas para tipo:', tipoBD);
         const tarifasDB = await obtenerTarifasPorTipo(tipoBD);
         
-        if (tarifasDB && Object.keys(tarifasDB.weekdays).length > 0) {
-          console.log('Usando tarifas de la base de datos:', tarifasDB);
+        if (tarifasDB && Object.keys(tarifasDB.weekdays || {}).length > 0) {
+          console.log('Tarifas encontradas:', tarifasDB);
           setTarifas(tarifasDB);
         } else {
-          // Fallback a datos locales
-          console.log('Usando tarifas de fallback para:', tipoCancha);
-          const tipoPrecios = mapTipoCanchaPrecios(tipoCancha);
-          const sportData = pricesData[tipoPrecios];
-          setTarifas(sportData?.schedule || null);
+          throw new Error(`No se encontraron tarifas para ${tipoBD} en la base de datos`);
         }
       } catch (error) {
         console.error('Error cargando tarifas:', error);
         setError(error.message);
-        
-        // Fallback a datos locales en caso de error
-        const tipoPrecios = mapTipoCanchaPrecios(tipoCancha);
-        const sportData = pricesData[tipoPrecios];
-        setTarifas(sportData?.schedule || null);
       } finally {
         setLoading(false);
       }
@@ -101,10 +79,6 @@ const CanchaPageBase = ({
       </div>
     );
   }
-
-  // Obtener datos de equipos (solo de pricesData ya que no están en la BD)
-  const tipoPrecios = mapTipoCanchaPrecios(tipoCancha);
-  const sportData = pricesData[tipoPrecios];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-950 py-12 px-4">
@@ -173,31 +147,6 @@ const CanchaPageBase = ({
             </div>
           </div>
         </div>
-
-        {/* Equipos disponibles */}
-        {mostrarEquipos && sportData?.equipment && (
-          <div className="mt-8">
-            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-2xl border border-gray-700 p-6">
-              <h3 className="text-xl font-bold mb-4 text-white">
-                Equipos Disponibles
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.entries(sportData.equipment).map(([key, item]) => (
-                  <div
-                    key={key}
-                    className="bg-gradient-to-br from-gray-700 to-gray-800 p-4 rounded-lg border border-gray-600 hover:border-opacity-30 hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-xl"
-                    style={{ '--hover-border-color': `${colorPrimario}30` }}
-                  >
-                    <p className="font-semibold text-gray-300">{item.name}</p>
-                    <p className="text-lg font-bold" style={{ color: colorPrimario }}>
-                      ${item.price.toLocaleString()}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

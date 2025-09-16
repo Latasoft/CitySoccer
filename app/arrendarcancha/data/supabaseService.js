@@ -33,7 +33,7 @@ export const obtenerTarifasPorTipo = async (tipoCancha) => {
         tarifasOrganizadas.weekdays[hora] = tarifaData;
       } else if (diaSemana === 6) { // Sábado
         tarifasOrganizadas.saturday[hora] = tarifaData;
-      } else if (diaSemana === 0) { // Domingo
+      } else if (diaSemana === 7) { // Domingo
         tarifasOrganizadas.sunday[hora] = tarifaData;
       }
     });

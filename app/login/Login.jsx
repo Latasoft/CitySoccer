@@ -14,6 +14,7 @@ export default function Login() {
 
   // Lista de emails de administradores autorizados
   const adminEmails = [
+    'benja@gmail.com',
     'admin@citysoccer.com',
     'administrador@citysoccer.com',
     // Agrega aquí los emails de administradores autorizados

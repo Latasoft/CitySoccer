@@ -7,16 +7,9 @@ import {
   Calendar, 
   MapPin, 
   Trophy, 
-  Settings, 
   LogOut, 
-  Plus,
-  Edit,
-  Trash2,
-  Eye,
-  UserCheck,
   Activity,
   DollarSign,
-  Target,
   Clock,
   TrendingUp
 } from 'lucide-react';
@@ -219,12 +212,17 @@ export default function Dashboard() {
                 { id: 'clientes', label: 'Clientes', icon: Users },
                 { id: 'reservas', label: 'Reservas', icon: Calendar },
                 { id: 'canchas', label: 'Canchas', icon: MapPin },
-                { id: 'tarifas', label: 'Tarifas', icon: DollarSign },
-                { id: 'configuracion', label: 'Configuración', icon: Settings }
+                { id: 'tarifas', label: 'Tarifas', icon: DollarSign },              
               ].map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => {
+                    if (item.id === 'reservas') {
+                      router.push('/dashboard/reservas');
+                    } else {
+                      setActiveTab(item.id);
+                    }
+                  }}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                     activeTab === item.id
                       ? 'bg-[#ffee00] text-black font-semibold'
@@ -250,31 +248,46 @@ export default function Dashboard() {
                       value: stats.totalClientes,
                       icon: Users,
                       color: 'from-blue-500 to-blue-600',
-                      change: '+12%'
+                      change: '+12%',
+                      clickable: false
                     },
                     {
                       title: 'Total Reservas',
                       value: stats.totalReservas,
                       icon: Calendar,
                       color: 'from-green-500 to-green-600',
-                      change: '+8%'
+                      change: '+8%',
+                      clickable: true,
+                      action: () => router.push('/dashboard/reservas')
                     },
                     {
                       title: 'Reservas Hoy',
                       value: stats.reservasHoy,
                       icon: Clock,
                       color: 'from-purple-500 to-purple-600',
-                      change: '+5%'
+                      change: '+5%',
+                      clickable: true,
+                      action: () => {
+                        const today = new Date().toISOString().split('T')[0];
+                        router.push(`/dashboard/reservas?fecha=${today}`);
+                      }
                     },
                     {
                       title: 'Ingresos del Mes',
                       value: `$${stats.ingresosMes.toLocaleString()}`,
                       icon: DollarSign,
                       color: 'from-yellow-500 to-yellow-600',
-                      change: '+15%'
+                      change: '+15%',
+                      clickable: false
                     }
                   ].map((stat, index) => (
-                    <div key={index} className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                    <div 
+                      key={index} 
+                      className={`bg-gray-800/50 rounded-xl p-6 border border-gray-700 ${
+                        stat.clickable ? 'cursor-pointer hover:bg-gray-800/70 transition-colors' : ''
+                      }`}
+                      onClick={stat.clickable ? stat.action : undefined}
+                    >
                       <div className="flex items-center justify-between mb-4">
                         <div className={`p-3 rounded-lg bg-gradient-to-r ${stat.color}`}>
                           <stat.icon className="w-6 h-6 text-white" />
@@ -283,6 +296,9 @@ export default function Dashboard() {
                       </div>
                       <h3 className="text-gray-400 text-sm font-medium">{stat.title}</h3>
                       <p className="text-2xl font-bold text-white mt-1">{stat.value}</p>
+                      {stat.clickable && (
+                        <p className="text-[#ffee00] text-xs mt-2">Click para ver detalles →</p>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -319,13 +335,22 @@ export default function Dashboard() {
 
                   {/* Reservas Recientes */}
                   <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
-                    <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
-                      <TrendingUp className="w-6 h-6 text-[#ffee00]" />
-                      Reservas Recientes
-                    </h2>
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-xl font-bold text-white flex items-center gap-3">
+                        <TrendingUp className="w-6 h-6 text-[#ffee00]" />
+                        Reservas Recientes
+                      </h2>
+                      <button
+                        onClick={() => router.push('/dashboard/reservas')}
+                        className="text-[#ffee00] hover:text-[#e6d000] text-sm font-medium transition-colors"
+                      >
+                        Ver todas →
+                      </button>
+                    </div>
                     <div className="space-y-3 max-h-80 overflow-y-auto">
                       {reservasRecientes.map((reserva) => (
-                        <div key={reserva.id} className="p-3 bg-gray-700/50 rounded-lg">
+                        <div key={reserva.id} className="p-3 bg-gray-700/50 rounded-lg hover:bg-gray-700/70 transition-colors cursor-pointer"
+                             onClick={() => router.push('/dashboard/reservas')}>
                           <div className="flex justify-between items-start">
                             <div>
                               <p className="text-white font-medium">
@@ -338,7 +363,13 @@ export default function Dashboard() {
                                 {reserva.canchas?.nombre || `Cancha ${reserva.cancha_id}`} - {reserva.fecha}
                               </p>
                               <p className="text-gray-400 text-xs">
-                                {reserva.hora_inicio} - Estado: {reserva.estado}
+                                {reserva.hora_inicio} - Estado: 
+                                <span className={`ml-1 px-2 py-0.5 rounded text-xs font-semibold
+                                  ${reserva.estado === 'confirmada' ? 'bg-green-600/30 text-green-300' :
+                                    reserva.estado === 'pendiente' ? 'bg-yellow-600/30 text-yellow-300' :
+                                    'bg-red-600/30 text-red-300'}`}>
+                                  {reserva.estado}
+                                </span>
                               </p>
                             </div>
                             <span className="text-xs text-gray-400">

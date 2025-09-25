@@ -219,6 +219,8 @@ export default function Dashboard() {
                   onClick={() => {
                     if (item.id === 'reservas') {
                       router.push('/dashboard/reservas');
+                    } else if (item.id === 'clientes') {
+                      router.push('/dashboard/clientes');
                     } else {
                       setActiveTab(item.id);
                     }

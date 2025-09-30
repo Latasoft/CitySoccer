@@ -1,99 +1,152 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useTarifas } from './hooks/useTarifas';
-import TarifasTable from './components/TarifasTable';
-import CanchaImage from './components/CanchaImage';
-import ErrorDisplay from './components/ErrorDisplay';
-import ReservaForm from './components/ReservaForm';
-import { canchasConfig, getTiposDisponibles } from './data/canchasConfig';
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
-export default function TestPage() {
-  const [tipoCancha, setTipoCancha] = useState('futbol7');
-  const [reservaCompleta, setReservaCompleta] = useState(null);
+export default function TestPayment() {
+  const [formData, setFormData] = useState({
+    amount: 1000,
+    currency: 'CLP',
+    buyerName: 'Juan Pérez',
+    buyerEmail: 'juan@example.com',
+    description: 'Reserva de cancha CitySoccer'
+  })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  
+  const router = useRouter()
 
-  const tiposDisponibles = getTiposDisponibles();
-  const config = canchasConfig[tipoCancha];
-  const { data, error, loading } = useTarifas(tipoCancha);
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
 
-  const handleCanchaChange = (nuevoTipo) => {
-    setTipoCancha(nuevoTipo);
-    setReservaCompleta(null);
-  };
+    console.log('Sending payment data:', formData)
 
-  const handleReservaCompleta = (reserva) => {
-    setReservaCompleta(reserva);
-    console.log('Reserva completada:', reserva);
-  };
+    try {
+      const response = await fetch('/test/api/payment/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
 
-  if (error) return <ErrorDisplay error={error} />;
+      console.log('Response status:', response.status)
+      
+      const data = await response.json()
+      console.log('Response data:', data)
+
+      if (data.success) {
+        // Redirigir a la URL de checkout de Getnet
+        console.log('Redirecting to:', data.checkoutUrl)
+        window.location.href = data.checkoutUrl
+      } else {
+        setError(data.error || 'Error creando el pago')
+        console.error('Payment creation failed:', data)
+      }
+    } catch (error) {
+      console.error('Request error:', error)
+      setError('Error de conexión')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    })
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">
-            Tarifas de 
-            <span className={`${config.color === 'yellow' ? 'text-yellow-500' : config.color === 'blue' ? 'text-blue-500' : 'text-green-500'} ml-2`}>
-              {config.title}
-            </span>
-          </h1>
-          <p className="text-slate-600">{config.description}</p>
-        </div>
-
-        {/* Selector de tipo de cancha */}
-        <div className="mb-8 bg-white rounded-lg shadow-md p-6 border">
-          <h3 className="text-lg font-semibold mb-4 text-slate-800">Seleccionar Tipo de Cancha</h3>
-          <div className="flex gap-4 flex-wrap">
-            {tiposDisponibles.map(tipo => {
-              const tipoConfig = canchasConfig[tipo.value];
-              const colorClass = tipoConfig.color === 'yellow' ? 'yellow' : tipoConfig.color === 'blue' ? 'blue' : 'green';
-              
-              return (
-                <button 
-                  key={tipo.value}
-                  onClick={() => handleCanchaChange(tipo.value)}
-                  className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
-                    tipoCancha === tipo.value 
-                      ? `bg-${colorClass}-500 text-white shadow-lg scale-105` 
-                      : `bg-${colorClass}-100 text-${colorClass}-800 hover:bg-${colorClass}-200`
-                  }`}
-                >
-                  {tipo.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Grid layout: tabla + imagen */}
-        <div className="grid grid-cols-12 gap-8 items-start mb-8">
-          <TarifasTable data={data} colorScheme={config.color} />
-          <CanchaImage 
-            src={config.image} 
-            alt={config.imageAlt} 
-          />
-        </div>
-
-        {/* Sistema de Reservas */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-4">Reserva tu Cancha</h2>
-          <ReservaForm 
-            tipoCancha={tipoCancha}
-            onReservaCompleta={handleReservaCompleta}
-          />
-        </div>
-
-        {/* Mostrar reserva completada */}
-        {reservaCompleta && (
-          <div className="mt-8 p-4 bg-green-100 border border-green-300 rounded-lg">
-            <h3 className="font-bold text-green-800">¡Reserva Exitosa!</h3>
-            <p>ID: {reservaCompleta.id}</p>
-            <p>Total: ${reservaCompleta.precio?.toLocaleString()}</p>
+    <div className="min-h-screen bg-gray-100 py-12">
+      <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 className="text-2xl font-bold text-center mb-6 text-gray-800">
+          Test de Pago - CitySoccer
+        </h1>
+        
+        {error && (
+          <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-md">
+            {error}
           </div>
         )}
+
+        <form onSubmit={handleSubmit} className="space-y-4 text-black">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nombre
+            </label>
+            <input
+              type="text"
+              name="buyerName"
+              value={formData.buyerName}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
+            <input
+              type="email"
+              name="buyerEmail"
+              value={formData.buyerEmail}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Monto
+            </label>
+            <input
+              type="number"
+              name="amount"
+              value={formData.amount}
+              onChange={handleChange}
+              required
+              min="100"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Descripción
+            </label>
+            <input
+              type="text"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Procesando...' : 'Pagar'}
+          </button>
+        </form>
+
+        {/* Debug info */}
+        <div className="mt-6 p-4 bg-gray-100 rounded-md">
+          <h3 className="font-medium text-gray-700 mb-2">Debug Info:</h3>
+          <pre className="text-xs text-gray-600">
+            {JSON.stringify(formData, null, 2)}
+          </pre>
+        </div>
       </div>
     </div>
-  );
+  )
 }

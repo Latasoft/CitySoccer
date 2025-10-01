@@ -3,13 +3,67 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
+// Función utilitaria para crear pagos
+export const createPayment = async ({
+  amount,
+  buyerName,
+  buyerEmail,
+  description,
+  fecha,
+  hora,
+  cancha_id
+}) => {
+  const formData = {
+    amount,
+    currency: 'CLP',
+    buyerName,
+    buyerEmail,
+    description,
+    fecha,
+    hora,
+    cancha_id
+  }
+
+  console.log('Sending payment data:', formData)
+
+  try {
+    const response = await fetch('/test/api/payment/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(formData)
+    })
+
+    console.log('Response status:', response.status)
+    
+    const data = await response.json()
+    console.log('Response data:', data)
+
+    if (data.success) {
+      console.log('Redirecting to:', data.checkoutUrl)
+      window.location.href = data.checkoutUrl
+      return { success: true, checkoutUrl: data.checkoutUrl }
+    } else {
+      console.error('Payment creation failed:', data)
+      return { success: false, error: data.error || 'Error creando el pago' }
+    }
+  } catch (error) {
+    console.error('Request error:', error)
+    return { success: false, error: 'Error de conexión' }
+  }
+}
+
 export default function TestPayment() {
   const [formData, setFormData] = useState({
     amount: 1000,
     currency: 'CLP',
     buyerName: 'Juan Pérez',
     buyerEmail: 'juan@example.com',
-    description: 'Reserva de cancha CitySoccer'
+    description: 'Reserva de cancha CitySoccer',
+    fecha: new Date().toISOString().split('T')[0], // Fecha actual en formato YYYY-MM-DD
+    hora: '14:00',
+    cancha_id: 1
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -21,33 +75,22 @@ export default function TestPayment() {
     setLoading(true)
     setError('')
 
-    console.log('Sending payment data:', formData)
-
     try {
-      const response = await fetch('/test/api/payment/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
+      const result = await createPayment({
+        amount: formData.amount,
+        buyerName: formData.buyerName,
+        buyerEmail: formData.buyerEmail,
+        description: formData.description,
+        fecha: formData.fecha,
+        hora: formData.hora,
+        cancha_id: formData.cancha_id
       })
 
-      console.log('Response status:', response.status)
-      
-      const data = await response.json()
-      console.log('Response data:', data)
-
-      if (data.success) {
-        // Redirigir a la URL de checkout de Getnet
-        console.log('Redirecting to:', data.checkoutUrl)
-        window.location.href = data.checkoutUrl
-      } else {
-        setError(data.error || 'Error creando el pago')
-        console.error('Payment creation failed:', data)
+      if (!result.success) {
+        setError(result.error)
       }
     } catch (error) {
-      console.error('Request error:', error)
-      setError('Error de conexión')
+      setError('Error inesperado')
     } finally {
       setLoading(false)
     }
@@ -130,6 +173,50 @@ export default function TestPayment() {
             />
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Fecha
+            </label>
+            <input
+              type="date"
+              name="fecha"
+              value={formData.fecha}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Hora
+            </label>
+            <input
+              type="time"
+              name="hora"
+              value={formData.hora}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              ID de Cancha
+            </label>
+            <input
+              type="number"
+              name="cancha_id"
+              value={formData.cancha_id}
+              onChange={handleChange}
+              required
+              min="1"
+              placeholder="ID de la cancha"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
           <button
             type="submit"
             disabled={loading}
@@ -149,4 +236,23 @@ export default function TestPayment() {
       </div>
     </div>
   )
+}
+
+// Ejemplo de uso
+const handleReservation = async () => {
+  const result = await createPayment({
+    amount: 15000,
+    buyerName: 'María González',
+    buyerEmail: 'maria@email.com',
+    description: 'Reserva de cancha CitySoccer',
+    fecha: '2025-10-15',
+    hora: '16:30',
+    cancha_id: 3
+  })
+  
+  if (result.success) {
+    console.log('Pago iniciado correctamente')
+  } else {
+    console.error('Error:', result.error)
+  }
 }

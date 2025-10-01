@@ -6,10 +6,10 @@ import {
   obtenerCanchasPorTipo, 
   obtenerReservasPorFecha, 
   verificarDisponibilidad,
-  crearReserva,
   obtenerTarifasPorTipo,
   obtenerDisponibilidadPickleball
 } from "../data/supabaseService";
+import { createPayment } from "../page"; // Importar la función de pago
 
 const ArrendamientoBase = ({ 
   onBack, 
@@ -22,7 +22,9 @@ const ArrendamientoBase = ({
   const [selectedTime, setSelectedTime] = useState("");
   const [selectedCourt, setSelectedCourt] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
+  const [customerName, setCustomerName] = useState(""); // Nuevo campo para el nombre
   const [emailError, setEmailError] = useState("");
+  const [nameError, setNameError] = useState(""); // Error para el nombre
   const [availableTimes, setAvailableTimes] = useState([]);
   const [availableCourts, setAvailableCourts] = useState([]);
   const [canchasDisponiblesEnHorario, setCanchasDisponiblesEnHorario] = useState([]);
@@ -64,6 +66,11 @@ const ArrendamientoBase = ({
   const validarEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  };
+
+  // Validar nombre (mínimo 2 caracteres)
+  const validarNombre = (nombre) => {
+    return nombre && nombre.trim().length >= 2;
   };
 
   // Obtener tarifas reales al cargar el componente
@@ -292,6 +299,16 @@ const ArrendamientoBase = ({
     setCurrentStep(4);
   };
 
+  // Nueva función para manejar el cambio de nombre
+  const handleNameChange = (name) => {
+    setCustomerName(name);
+    setNameError("");
+    
+    if (name && !validarNombre(name)) {
+      setNameError("El nombre debe tener al menos 2 caracteres");
+    }
+  };
+
   // Nueva función para manejar el cambio de email
   const handleEmailChange = (email) => {
     setCustomerEmail(email);
@@ -303,18 +320,28 @@ const ArrendamientoBase = ({
   };
 
   // Nueva función para avanzar al paso de confirmación
-  const handleEmailConfirm = () => {
+  const handleContactInfoConfirm = () => {
+    let hasErrors = false;
+
+    if (!customerName) {
+      setNameError("El nombre es requerido");
+      hasErrors = true;
+    } else if (!validarNombre(customerName)) {
+      setNameError("El nombre debe tener al menos 2 caracteres");
+      hasErrors = true;
+    }
+
     if (!customerEmail) {
       setEmailError("El email es requerido");
-      return;
-    }
-    
-    if (!validarEmail(customerEmail)) {
+      hasErrors = true;
+    } else if (!validarEmail(customerEmail)) {
       setEmailError("Por favor ingresa un email válido");
-      return;
+      hasErrors = true;
     }
-    
-    setCurrentStep(5);
+
+    if (!hasErrors) {
+      setCurrentStep(5);
+    }
   };
 
   const handleConfirmReservation = async () => {
@@ -337,32 +364,30 @@ const ArrendamientoBase = ({
         return;
       }
 
-      const reservationData = {
+      const horario = availableTimes.find(h => h.hora === selectedTime);
+      
+      console.log('Iniciando proceso de pago...');
+      
+      // Llamar a createPayment en lugar de crear la reserva directamente
+      const result = await createPayment({
+        amount: horario.precio,
+        buyerName: customerName,
+        buyerEmail: customerEmail,
+        description: `Reserva ${titulo} - ${selectedDate} ${selectedTime}`,
         fecha: selectedDate,
-        hora_inicio: selectedTime,
-        cancha_id: parseInt(selectedCourt),
-        cliente_id: 1, // Aquí usarías el ID del usuario logueado
-        estado: 'confirmada'
-      };
+        hora: selectedTime,
+        cancha_id: parseInt(selectedCourt)
+      });
 
-      console.log('Confirmando reserva:', reservationData);
-      console.log('Email del cliente:', customerEmail); // Log del email (no se guarda en BD todavía)
-      
-      const resultado = await crearReserva(reservationData);
-      
-      if (resultado.success) {
-        const mensaje = esPickleball(tipoCancha)
-          ? `¡Reserva confirmada exitosamente! Se ha enviado la confirmación a ${customerEmail}. La cancha está bloqueada para ambas modalidades (individual y dobles).`
-          : `¡Reserva confirmada exitosamente! Se ha enviado la confirmación a ${customerEmail}.`;
-        
-        alert(mensaje);
-        onBack();
+      if (result.success) {
+        console.log('Redirigiendo al pago...');
+        // El createPayment ya redirige automáticamente
       } else {
-        alert(`Error al confirmar la reserva: ${resultado.error}`);
+        alert(`Error al procesar el pago: ${result.error}`);
       }
     } catch (error) {
-      console.error('Error confirmando reserva:', error);
-      alert('Error al confirmar la reserva');
+      console.error('Error procesando el pago:', error);
+      alert('Error al procesar el pago');
     } finally {
       setLoading(false);
     }
@@ -373,7 +398,7 @@ const ArrendamientoBase = ({
       case 1: return "Selecciona la fecha";
       case 2: return "Elige el horario";
       case 3: return "Selecciona la cancha";
-      case 4: return "Ingresa tu email";
+      case 4: return "Ingresa tus datos";
       case 5: return "Confirma tu reserva";
       default: return "";
     }
@@ -552,38 +577,68 @@ const ArrendamientoBase = ({
             </div>
           )}
 
-          {/* Paso 4: Ingresar email */}
+          {/* Paso 4: Ingresar datos del cliente */}
           {currentStep >= 4 && (selectedCourt || !requiereSeleccionCancha) && (
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-white mb-4">
-                {requiereSeleccionCancha ? "4" : "3"}. Ingresa tu correo electrónico
+                {requiereSeleccionCancha ? "4" : "3"}. Ingresa tus datos
               </h2>
-              <div className="max-w-md">
-                <input
-                  type="email"
-                  value={customerEmail}
-                  onChange={(e) => handleEmailChange(e.target.value)}
-                  placeholder="ejemplo@correo.com"
-                  className={`w-full p-3 rounded-lg bg-gray-700 text-white border ${
-                    emailError ? 'border-red-500' : 'border-gray-600'
-                  } focus:border-yellow-400 focus:outline-none`}
-                />
-                {emailError && (
-                  <p className="text-red-400 text-sm mt-2">{emailError}</p>
-                )}
-                {customerEmail && !emailError && (
-                  <p className="text-green-400 text-sm mt-2">
-                    ✓ Email válido
+              <div className="max-w-md space-y-4">
+                {/* Campo Nombre */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Nombre completo
+                  </label>
+                  <input
+                    type="text"
+                    value={customerName}
+                    onChange={(e) => handleNameChange(e.target.value)}
+                    placeholder="Tu nombre completo"
+                    className={`w-full p-3 rounded-lg bg-gray-700 text-white border ${
+                      nameError ? 'border-red-500' : 'border-gray-600'
+                    } focus:border-yellow-400 focus:outline-none`}
+                  />
+                  {nameError && (
+                    <p className="text-red-400 text-sm mt-2">{nameError}</p>
+                  )}
+                  {customerName && !nameError && (
+                    <p className="text-green-400 text-sm mt-2">
+                      ✓ Nombre válido
+                    </p>
+                  )}
+                </div>
+                
+                {/* Campo Email */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Correo electrónico
+                  </label>
+                  <input
+                    type="email"
+                    value={customerEmail}
+                    onChange={(e) => handleEmailChange(e.target.value)}
+                    placeholder="ejemplo@correo.com"
+                    className={`w-full p-3 rounded-lg bg-gray-700 text-white border ${
+                      emailError ? 'border-red-500' : 'border-gray-600'
+                    } focus:border-yellow-400 focus:outline-none`}
+                  />
+                  {emailError && (
+                    <p className="text-red-400 text-sm mt-2">{emailError}</p>
+                  )}
+                  {customerEmail && !emailError && (
+                    <p className="text-green-400 text-sm mt-2">
+                      ✓ Email válido
+                    </p>
+                  )}
+                  <p className="text-gray-400 text-xs mt-2">
+                    Te enviaremos la confirmación de tu reserva a este email
                   </p>
-                )}
-                <p className="text-gray-400 text-xs mt-2">
-                  Te enviaremos la confirmación de tu reserva a este email
-                </p>
+                </div>
               </div>
               
               <button
-                onClick={handleEmailConfirm}
-                disabled={!customerEmail || emailError}
+                onClick={handleContactInfoConfirm}i
+                disabled={!customerName || !customerEmail || nameError || emailError}
                 className="mt-4 px-6 py-3 rounded-lg font-semibold transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ 
                   backgroundColor: colorPrimario,
@@ -596,7 +651,7 @@ const ArrendamientoBase = ({
           )}
 
           {/* Paso 5: Confirmación */}
-          {currentStep >= 5 && customerEmail && (
+          {currentStep >= 5 && customerName && customerEmail && (
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-white mb-4">
                 {requiereSeleccionCancha ? "5" : "4"}. Confirma tu reserva
@@ -610,6 +665,7 @@ const ArrendamientoBase = ({
                   {requiereSeleccionCancha && (
                     <p><strong>Cancha:</strong> {cancha?.nombre.replace('_', ' ').toUpperCase()}</p>
                   )}
+                  <p><strong>Nombre:</strong> {customerName}</p>
                   <p><strong>Email:</strong> {customerEmail}</p>
                   <p><strong style={{ color: colorPrimario }}>
                     Precio: ${horario?.precio?.toLocaleString()}
@@ -638,7 +694,7 @@ const ArrendamientoBase = ({
                     color: colorPrimario === "#eeff00" ? "black" : "white"
                   }}
                 >
-                  {loading ? "Confirmando..." : "Confirmar Reserva"}
+                  {loading ? "Procesando pago..." : "Proceder al Pago"}
                 </button>
               </div>
             </div>

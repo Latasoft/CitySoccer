@@ -51,9 +51,9 @@ export async function POST(request) {
       )
     }
 
-    const { amount, currency, buyerEmail, buyerName, description } = body
+    const { amount, currency, buyerEmail, buyerName, description, fecha, hora, cancha_id } = body
 
-    console.log('Extracted fields:', { amount, currency, buyerEmail, buyerName, description })
+    console.log('Extracted fields:', { amount, currency, buyerEmail, buyerName, description, fecha, hora, cancha_id })
 
     // Validar datos requeridos
     if (!amount || !currency || !buyerEmail || !buyerName) {
@@ -85,6 +85,9 @@ export async function POST(request) {
         buyer_email: buyerEmail,
         buyer_name: buyerName,
         description: description || `Pago CitySoccer - ${orderId}`,
+        fecha: fecha || null,
+        hora: hora || null,
+        cancha_id: cancha_id || null,
         status: 'PENDING',
         created_at: new Date().toISOString()
       })

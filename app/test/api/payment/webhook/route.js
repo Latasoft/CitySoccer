@@ -103,7 +103,10 @@ export async function POST(request) {
     console.log('Found existing transaction:', {
       orderId: existingTransaction.order_id,
       currentStatus: existingTransaction.status,
-      newStatus: transactionStatus
+      newStatus: transactionStatus,
+      cancha_id: existingTransaction.cancha_id,
+      fecha: existingTransaction.fecha,
+      hora: existingTransaction.hora
     })
 
     // Actualizar transacción en Supabase
@@ -132,6 +135,64 @@ export async function POST(request) {
     }
 
     console.log('Transaction updated successfully:', data)
+
+    // Si el pago fue aprobado, crear la reserva
+    if (transactionStatus === 'APPROVED' && existingTransaction.cancha_id) {
+      console.log('Creating reservation for approved payment...')
+      
+      try {
+        // Crear la reserva en la tabla reservas
+        const { data: reservaData, error: reservaError } = await supabase
+          .from('reservas')
+          .insert({
+            cliente_id: 1, // Siempre cliente ID 1 como especificaste
+            cancha_id: existingTransaction.cancha_id,
+            fecha: existingTransaction.fecha,
+            hora_inicio: existingTransaction.hora,
+            estado: 'confirmada' // Siempre confirmada
+          })
+          .select()
+          .single()
+
+        if (reservaError) {
+          console.error('Error creating reservation:', reservaError)
+          // No falla el webhook, solo loguea el error
+          return NextResponse.json({ 
+            received: true,
+            status: transactionStatus,
+            orderId: reference,
+            message: 'Webhook processed successfully but reservation creation failed',
+            reservationError: reservaError.message
+          })
+        }
+
+        console.log('Reservation created successfully:', reservaData)
+
+        return NextResponse.json({ 
+          received: true,
+          status: transactionStatus,
+          orderId: reference,
+          message: 'Webhook processed successfully and reservation created',
+          reservation: {
+            id: reservaData.id,
+            cancha_id: reservaData.cancha_id,
+            fecha: reservaData.fecha,
+            hora_inicio: reservaData.hora_inicio,
+            estado: reservaData.estado
+          }
+        })
+
+      } catch (reservaError) {
+        console.error('Exception creating reservation:', reservaError)
+        return NextResponse.json({ 
+          received: true,
+          status: transactionStatus,
+          orderId: reference,
+          message: 'Webhook processed successfully but reservation creation failed',
+          reservationError: reservaError.message
+        })
+      }
+    }
 
     return NextResponse.json({ 
       received: true,

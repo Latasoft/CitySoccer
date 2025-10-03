@@ -7,18 +7,23 @@ const QuienessomosComponent = () => {
   
   const partnerships = [
     {
-      name: "CS Florida, USA",
-      country: "USA",
+      name: "City Soccer, West Palm",
+      country: "Florida, EE.UU.",
       url: "/iconUSA.png",
       instagram: "https://www.instagram.com/citysoccerfc/",
     },
-
     {
-      name: "CS San Carlos, Uruguay",
+      name: "City Soccer, Saint Lucie",
+      country: "Florida, EE.UU.",
+      url: "/iconUSA.png",
+      instagram: "https://www.instagram.com/citysoccerfc/",
+    },
+    {
+      name: "City Soccer, San Carlos",
       country: "Uruguay",
       url: "/iconURU.png",
       instagram: "https://www.instagram.com/citysoccer.uy/",
-    },
+    }
   ];
 
   const handlePartnershipClick = (instagramUrl) => {
@@ -87,7 +92,7 @@ const QuienessomosComponent = () => {
             <p className="text-xl text-gray-300">Colaboramos con centros deportivos de clase mundial</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {partnerships.map((partnership, index) => (
               <div key={index} className="bg-gray-700 rounded-xl p-6 hover:bg-gray-600 transition-all duration-300 hover:scale-105">
                 <div className="text-center">

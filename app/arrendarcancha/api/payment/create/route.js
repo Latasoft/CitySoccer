@@ -137,13 +137,13 @@ export async function POST(request) {
       },
       expiration: expiration,
       ipAddress: "127.0.0.1",
-      returnUrl: `${baseUrl}/test/payment/result?orderId=${orderId}`,
-      cancelUrl: `${baseUrl}/test/payment/cancel?orderId=${orderId}`,
+      returnUrl: `${baseUrl}/arrendarcancha/payment/result?orderId=${orderId}`,
+      cancelUrl: `${baseUrl}/arrendarcancha/payment/cancel?orderId=${orderId}`,
       userAgent: "CitySoccer/1.0"
     }
 
     console.log('Sending to Getnet:', JSON.stringify(paymentData, null, 2))
-    console.log('Webhook will be sent to:', `${baseUrl}/test/api/payment/webhook`)
+    console.log('Webhook will be sent to:', `${baseUrl}/arrendarcancha/api/payment/webhook`)
 
     const response = await axios.post(`${ENDPOINT_URL}/api/session/`, paymentData, {
       headers: {
@@ -169,7 +169,7 @@ export async function POST(request) {
       orderId: orderId,
       checkoutUrl: response.data.processUrl,
       requestId: response.data.requestID,
-      webhookUrl: `${baseUrl}/test/api/payment/webhook`
+      webhookUrl: `${baseUrl}/arrendarcancha/api/payment/webhook`
     })
 
   } catch (error) {

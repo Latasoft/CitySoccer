@@ -219,7 +219,7 @@ export async function GET(request) {
   return NextResponse.json({ 
     message: 'CitySoccer Webhook endpoint is working',
     timestamp: new Date().toISOString(),
-    url: 'https://0kt1mzhf-3000.brs.devtunnels.ms/test/api/payment/webhook',
+    url: 'https://0kt1mzhf-3000.brs.devtunnels.ms/arrendarcancha/api/payment/webhook',
     methods: ['GET', 'POST'],
     status: 'OK'
   })

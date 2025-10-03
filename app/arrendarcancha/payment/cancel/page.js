@@ -25,7 +25,7 @@ function PaymentCancelContent() {
         )}
         <div className="space-y-2">
           <Link 
-            href="/test"
+            href="/"
             className="block bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
           >
             Intentar de nuevo

@@ -42,7 +42,7 @@ export default function PaymentResultContent() {
       console.log('Simulating webhook with return data:', simulatedWebhook)
 
       try {
-        const webhookResponse = await fetch('/test/api/payment/webhook', {
+        const webhookResponse = await fetch('/arrendarcancha/api/payment/webhook', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -100,7 +100,7 @@ export default function PaymentResultContent() {
       }
 
       try {
-        const response = await fetch(`/test/api/payment/status?orderId=${orderId}`)
+        const response = await fetch(`/arrendarcancha/api/payment/status?orderId=${orderId}`)
         const data = await response.json()
 
         console.log('Status check response:', data)
@@ -208,7 +208,7 @@ export default function PaymentResultContent() {
           <h2 className="text-xl font-semibold text-gray-800 mb-2">Error</h2>
           <p className="text-gray-600 mb-4">{error}</p>
           <Link 
-            href="/test"
+            href="/"
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
           >
             Intentar de nuevo
@@ -266,7 +266,7 @@ export default function PaymentResultContent() {
 
         <div className="mt-6 text-center">
           <Link 
-            href="/test"
+            href="/arrendarcancha"
             className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
           >
             Hacer otro pago

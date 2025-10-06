@@ -61,7 +61,6 @@ const ArrendamientoBase = ({
   const esPickleball = (tipo) => {
     return tipo === 'pickleball';
   };
-
   // Validar formato de email
   const validarEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

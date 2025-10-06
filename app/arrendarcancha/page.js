@@ -237,22 +237,3 @@ export default function TestPayment() {
     </div>
   )
 }
-
-// Ejemplo de uso
-const handleReservation = async () => {
-  const result = await createPayment({
-    amount: 15000,
-    buyerName: 'María González',
-    buyerEmail: 'maria@email.com',
-    description: 'Reserva de cancha CitySoccer',
-    fecha: '2025-10-15',
-    hora: '16:30',
-    cancha_id: 3
-  })
-  
-  if (result.success) {
-    console.log('Pago iniciado correctamente')
-  } else {
-    console.error('Error:', result.error)
-  }
-}

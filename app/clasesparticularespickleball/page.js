@@ -1,7 +1,6 @@
 "use client";
 
 import HeroSection from '@/components/HeroSection';
-import BenefitsSection from '@/components/BenefitsSection';
 import SchedulePricingSection from '@/components/SchedulePricingSection';
 import CTASection from '@/components/CTASection';
 
@@ -16,8 +15,9 @@ export default function ClasesParticularePickleball() {
       buttonText: "Reservar Clase",
       buttonLink: "#contacto",
       images: {
-        img1: "./Pickleball.jpeg",
-        img2: "./Pickleball2.jpeg"
+        img1: "/Pickleball.jpeg",
+        img2: "/Pickleball2.jpeg",
+        img3: "/Pickleball.jpeg"
       },
       backgroundGradient: "bg-gradient-to-br from-orange-900 via-pink-900 to-purple-800"
     },

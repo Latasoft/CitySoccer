@@ -1,10 +1,8 @@
-  import React from 'react';
-import { Users, Target, Award, Heart } from "lucide-react";
-import BotonReserva from "@/components/botonReserva";
-import Image from "next/image";
+import React from 'react';
+
 
 const QuienessomosComponent = () => {
-  
+
   const partnerships = [
     {
       name: "City Soccer, West Palm",
@@ -47,36 +45,37 @@ const QuienessomosComponent = () => {
                 <span className="text-green-400">Sobre </span>
                 <span className="text-blue-400">City Soccer</span>
               </h1>
-              
+
               <div className="flex flex-col gap-6 text-gray-300">
                 <p className="text-xl leading-relaxed">
-                  Más que un centro deportivo, somos una familia unida por la pasión del fútbol. 
-                  En City Soccer creamos espacios donde el deporte se vive con profesionalismo, 
+                  Más que un centro deportivo, somos una familia unida por la pasión del fútbol.
+                  En City Soccer creamos espacios donde el deporte se vive con profesionalismo,
                   diversión y valores que trascienden las canchas.
                 </p>
               </div>
-              
-              <button 
+
+              <button
                 onClick={handleWhatsAppClick}
                 className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-4 px-8 rounded-full text-base uppercase tracking-wide transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-500/40 self-start"
               >
                 Contáctanos
               </button>
             </div>
-            
+
             {/* Grid de Imágenes */}
             <div className="flex justify-center items-center">
               <div className="grid grid-cols-2 gap-12 w-full max-w-2xl">
-                <img 
-                  src="./Cancha1.jpeg" 
-                  alt="Instalaciones City Soccer" 
-                  className="w-full h-[500px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl" 
+                <img
+                  src="/Cancha1.jpeg"
+                  alt="Instalaciones City Soccer"
+                  className="w-full h-[500px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
                 />
-                <img 
-                  src="./Pelota.jpg" 
-                  alt="Pasión por el fútbol" 
-                  className="w-full h-[500px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl" 
+                <img
+                  src="/Pelota.jpg"
+                  alt="Pasión por el fútbol"
+                  className="w-full h-[500px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
                 />
+
               </div>
             </div>
           </div>
@@ -91,7 +90,7 @@ const QuienessomosComponent = () => {
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Nuestras Alianzas</h2>
             <p className="text-xl text-gray-300">Colaboramos con centros deportivos de clase mundial</p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {partnerships.map((partnership, index) => (
               <div key={index} className="bg-gray-700 rounded-xl p-6 hover:bg-gray-600 transition-all duration-300 hover:scale-105">
@@ -105,7 +104,7 @@ const QuienessomosComponent = () => {
                   </div>
                   <h3 className="text-xl font-bold text-white mb-2">{partnership.name}</h3>
                   <p className="text-gray-300 mb-4">{partnership.country}</p>
-                  <button 
+                  <button
                     onClick={() => handlePartnershipClick(partnership.instagram)}
                     className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-semibold transition-colors duration-300 text-sm"
                   >

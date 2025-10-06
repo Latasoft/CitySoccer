@@ -16,8 +16,9 @@ export default function SummerCamp() {
         buttonText="Más Información"
         buttonLink="/summer-camp"
         images={{
-          img1: "./Entrenamiento.jpeg",
-          img2: "./Entrenamiento2.jpeg"
+          img1: "/Entrenamiento3.jpeg",
+          img2: "/Entrenamiento2.jpeg",
+          img3: "/Entrenamiento5.jpeg"
         }}
         backgroundGradient = "bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800"
       />  

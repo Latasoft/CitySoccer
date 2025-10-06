@@ -7,10 +7,9 @@ export default function Footer() {
       <footer className="bg-[#23262C] lg:grid lg:grid-cols-5 relative overflow-hidden">
         {/* Background decorativo */}
 
-
         <div className="relative block h-32 lg:col-span-2 lg:h-full">
           <img
-            src="./Cancha3.jpeg"
+            src="/Cancha3.jpeg"
             alt="Instalaciones City Soccer"
             className="absolute inset-0 h-full w-full object-cover opacity-80"
           />

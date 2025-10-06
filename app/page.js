@@ -1,7 +1,6 @@
 import CardCarousel from "@/components/CardCarousel";
 import Hero from "@/components/Hero";
 
-import Carrusel from "@/components/Carrusel";
 export default function Page() {
   return (
     <main className="min-h-screen w-full">

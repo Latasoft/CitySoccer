@@ -7,7 +7,7 @@ const HeroSection = ({
   description,
   buttonText = "Más Información",
   buttonLink = "#",
-  images = { img1, img2 },
+  images = { img1, img2, img3 },
   backgroundGradient
 }) => {
   
@@ -28,7 +28,7 @@ const HeroSection = ({
   };
 
   return (
-    <section className={`${backgroundGradient} min-h-screen flex items-center pb-12`}>
+    <section className={`${backgroundGradient} min-h-screen flex items-center pb-12 `}>
       <div className="max-w-7xl mx-auto px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           {/* Texto del Hero */}
@@ -58,18 +58,25 @@ const HeroSection = ({
             </button>
           </div>
           
-          {/* Grid de Imágenes */}
+          {/* Grid de 3 Imágenes */}
           <div className="flex justify-center items-center">
-            <div className="grid grid-cols-2 gap-12 w-full max-w-2xl">
+            <div className="grid grid-cols-2 gap-8 w-full max-w-2xl">
+              {/* Primera imagen - ocupa 2 columnas en la parte superior */}
               <img 
                 src={images.img1} 
                 alt="Experiencia 1" 
-                className="w-full h-[500px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl" 
+                className="col-span-2 w-full h-[300px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl" 
               />
+              {/* Segunda y tercera imagen - lado a lado en la parte inferior */}
               <img 
                 src={images.img2} 
                 alt="Experiencia 2" 
-                className="w-full h-[500px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl" 
+                className="w-full h-[250px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl" 
+              />
+              <img 
+                src={images.img3} 
+                alt="Experiencia 3" 
+                className="w-full h-[250px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl" 
               />
             </div>
           </div>

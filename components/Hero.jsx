@@ -27,7 +27,7 @@ const Hero = () => {
           loop
           muted
           playsInline
-          poster="/imgPrincipal.jpeg" // Fallback image mientras carga el video
+          poster="/imgPrincipal.jpeg" // Ya está correcto con /
         >
           <source src="/videofutbol.mp4" type="video/mp4" />
           {/* Fallback para navegadores que no soportan video */}
@@ -40,9 +40,9 @@ const Hero = () => {
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 text-center text-white">
-        {/* Logo/Image */}
+        {/* Logo/Image - Cambiado de "./Logo2.png" a "/Logo2.png" */}
         <img
-          src="./Logo2.png"
+          src="/Logo2.png"
           alt="City Soccer Logo"
           className="mx-auto mb-8 w-150 h-150 object-contain"
           style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.5))" }}

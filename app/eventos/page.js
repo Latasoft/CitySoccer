@@ -2,7 +2,6 @@
 
 import HeroSection from '@/components/HeroSection';
 import ProgramsSection from '@/components/ProgramsSection';
-import BenefitsSection from '@/components/BenefitsSection';
 import CTASection from '@/components/CTASection';
 
 export default function Eventos() {
@@ -16,8 +15,9 @@ export default function Eventos() {
       buttonText: "Ver Nuestros Eventos",
       buttonLink: "#eventos",
       images: {
-        img1: "./Cancha1.jpeg",
-        img2: "./Pelota.jpg"
+        img1: "/Birthday.jpeg",
+        img2: "/Pelota.jpg",
+        img3: "/Cancha1.jpeg"
       },
       backgroundGradient: "bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-800"
     },

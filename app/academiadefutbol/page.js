@@ -63,8 +63,9 @@ export default function AcademiaFutbol() {
     buttonText: "Ver Programas",
     buttonLink: "/academiadefutbol",
     images: {
-      img1: "./Entrenamiento3.jpeg",
-      img2: "./Entrenamiento5.jpeg"
+      img1: "/Entrenamiento3.jpeg",
+      img2: "/Entrenamiento5.jpeg",
+      img3: "/Entrenamiento4.jpeg"
     },
     backgroundGradient: "bg-gradient-to-br from-green-900 via-blue-900 to-green-800"
   };

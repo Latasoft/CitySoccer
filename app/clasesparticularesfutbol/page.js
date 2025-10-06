@@ -16,8 +16,9 @@ export default function ClasesParticulareFutbol() {
       buttonText: "Agendar Clase",
       buttonLink: "#contacto",
       images: {
-        img1: "./Entrenamiento.jpeg",
-        img2: "./Pelota.jpg"
+        img1: "/Entrenamiento.jpeg",
+        img2: "/Pelota.jpg",
+        img3: "/Cancha1.jpeg"
       },
       backgroundGradient: "bg-gradient-to-br from-green-900 via-blue-900 to-emerald-800"
     },

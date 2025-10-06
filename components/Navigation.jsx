@@ -29,7 +29,7 @@ const navItems = [
     { linkText: "Eventos", href: "/eventos" },
     { linkText: "Contacto", href: "/contacto" },
     { linkText: "Login", href: "/login" },
-    { linkText: "Test", href: "/test" },
+    
 ];
 
 const remToPixels = (rem) => {

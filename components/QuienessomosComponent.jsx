@@ -62,20 +62,29 @@ const QuienessomosComponent = () => {
               </button>
             </div>
 
-            {/* Grid de Imágenes */}
+            {/* Grid de Imágenes - Cambiado a 3 imágenes */}
             <div className="flex justify-center items-center">
-              <div className="grid grid-cols-2 gap-12 w-full max-w-2xl">
-                <img
-                  src="/Cancha1.jpeg"
-                  alt="Instalaciones City Soccer"
-                  className="w-full h-[500px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
-                />
+              <div className="grid grid-cols-2 gap-8 w-full max-w-2xl">
+                {/* Primera imagen - ocupa toda la fila superior */}
+                <div className="col-span-2">
+                  <img
+                    src="/Cancha1.jpeg"
+                    alt="Instalaciones City Soccer"
+                    className="w-full h-[300px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
+                  />
+                </div>
+                
+                {/* Segunda y tercera imagen - lado a lado en la fila inferior */}
                 <img
                   src="/Pelota.jpg"
                   alt="Pasión por el fútbol"
-                  className="w-full h-[500px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
+                  className="w-full h-[300px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
                 />
-
+                <img
+                  src="/Entrenamiento4.jpeg"
+                  alt="Entrenamiento profesional"
+                  className="w-full h-[300px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
+                />
               </div>
             </div>
           </div>
@@ -95,7 +104,7 @@ const QuienessomosComponent = () => {
             {partnerships.map((partnership, index) => (
               <div key={index} className="bg-gray-700 rounded-xl p-6 hover:bg-gray-600 transition-all duration-300 hover:scale-105">
                 <div className="text-center">
-                  <div className="w-28 h-20   rounded-lg mx-auto mb-4 flex items-center justify-center overflow-hidden">
+                  <div className="w-28 h-20 rounded-lg mx-auto mb-4 flex items-center justify-center overflow-hidden">
                     <img
                       src={partnership.url}
                       alt={partnership.country}

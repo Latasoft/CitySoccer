@@ -266,12 +266,13 @@ export default function PaymentResultContent() {
 
         <div className="mt-6 text-center">
           <Link 
-            href="/arrendarcancha"
+            href="/"
             className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
           >
-            Hacer otro pago
+            Volver al Inicio
           </Link>
-        </div>
+                 
+        </div>          
       </div>
     </div>
   )

@@ -9,7 +9,7 @@ import {
   obtenerTarifasPorTipo,
   obtenerDisponibilidadPickleball
 } from "../data/supabaseService";
-import { createPayment } from "../page"; // Importar la función de pago
+import { createPayment, validatePaymentData } from "../../../utils/paymentService"; // Nueva importación
 
 const ArrendamientoBase = ({ 
   onBack, 
@@ -365,10 +365,8 @@ const ArrendamientoBase = ({
 
       const horario = availableTimes.find(h => h.hora === selectedTime);
       
-      console.log('Iniciando proceso de pago...');
-      
-      // Llamar a createPayment en lugar de crear la reserva directamente
-      const result = await createPayment({
+      // Preparar datos de pago
+      const paymentData = {
         amount: horario.precio,
         buyerName: customerName,
         buyerEmail: customerEmail,
@@ -376,7 +374,20 @@ const ArrendamientoBase = ({
         fecha: selectedDate,
         hora: selectedTime,
         cancha_id: parseInt(selectedCourt)
-      });
+      };
+
+      // Validar datos antes de enviar
+      const validation = validatePaymentData(paymentData);
+      if (!validation.isValid) {
+        alert(`Error en los datos: ${validation.errors.join(', ')}`);
+        setLoading(false);
+        return;
+      }
+      
+      console.log('Iniciando proceso de pago...');
+      
+      // Llamar a createPayment desde el servicio
+      const result = await createPayment(paymentData);
 
       if (result.success) {
         console.log('Redirigiendo al pago...');

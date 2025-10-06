@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
+import Link from "next/link"; // Add this import
 
 const Hero = () => {
   const videoRef = useRef(null);
@@ -27,7 +28,7 @@ const Hero = () => {
           loop
           muted
           playsInline
-          poster="/imgPrincipal.jpeg" // Ya está correcto con /
+          poster="/imgPrincipal.jpeg"
         >
           <source src="/videofutbol.mp4" type="video/mp4" />
           {/* Fallback para navegadores que no soportan video */}
@@ -49,15 +50,17 @@ const Hero = () => {
         />
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-          <button
-            className="text-2xl px-16 py-6 text-black rounded-lg font-black flex items-center gap-2 shadow-lg hover:opacity-90 transition-all duration-200 uppercase tracking-wider"
-            style={{
-              backgroundColor: "#FFED00",
-              fontFamily: "Arial Black, Arial, sans-serif",
-            }}
-          >
-            RESERVA HOY
-          </button>
+          <Link href="/arrendarcancha">
+            <button
+              className="text-2xl px-16 py-6 text-black rounded-lg font-black flex items-center gap-2 shadow-lg hover:opacity-90 transition-all duration-200 uppercase tracking-wider"
+              style={{
+                backgroundColor: "#FFED00",
+                fontFamily: "Arial Black, Arial, sans-serif",
+              }}
+            >
+              RESERVA HOY
+            </button>
+          </Link>
         </div>
       </div>
     </section>

@@ -3,10 +3,16 @@ import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import axios from 'axios'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-)
+let supabase;
+
+try {
+  supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_KEY
+  )
+} catch (error) {
+  console.error('Error initializing Supabase client:', error);
+}
 
 // Getnet credentials
 const ENDPOINT_URL = 'https://checkout.test.getnet.cl'

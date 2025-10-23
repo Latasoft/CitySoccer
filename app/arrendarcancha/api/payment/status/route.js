@@ -1,14 +1,29 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-)
+let supabase;
+
+try {
+  supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_KEY
+  )
+} catch (error) {
+  console.error('Error initializing Supabase client:', error);
+}
 
 export async function GET(request) {
   try {
     console.log('=== Payment Status Check ===')
+    
+    // Verificar que Supabase esté inicializado
+    if (!supabase) {
+      console.error('Supabase client not initialized')
+      return NextResponse.json(
+        { error: 'Error de configuración del servidor' },
+        { status: 500 }
+      )
+    }
     
     const { searchParams } = new URL(request.url)
     const orderId = searchParams.get('orderId')

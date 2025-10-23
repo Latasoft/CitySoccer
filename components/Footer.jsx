@@ -152,11 +152,21 @@ export default function Footer() {
 
                   <li>
                     <a
-                      href="/arrendarcancha/pickleball"
+                      href="/arrendarcancha/pickleball-individual"
                       className="text-yellow-100 hover:text-white transition-colors duration-300 font-medium flex items-center gap-2"
                     >
                       <span className="w-2 h-2 bg-yellow-300 rounded-full"></span>
-                      Arriendo Canchas Pickleball
+                      Arriendo Cancha Pickleball Individual
+                    </a>
+                  </li>
+
+                  <li>
+                    <a
+                      href="/arrendarcancha/pickleball-dobles"
+                      className="text-yellow-100 hover:text-white transition-colors duration-300 font-medium flex items-center gap-2"
+                    >
+                      <span className="w-2 h-2 bg-yellow-300 rounded-full"></span>
+                      Arriendo Cancha Pickleball Dobles
                     </a>
                   </li>
 

@@ -6,7 +6,7 @@ import CTASection from '@/components/CTASection';
 
 export default function ClasesParticularePickleball() {
   const classData = {
-    whatsapp: "+56912345678",
+    whatsapp: "+56974265019",
     heroProps: {
       title: { first: "Clases", second: "Particulares" },
       subtitle: "de Pickleball",

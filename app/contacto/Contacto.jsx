@@ -28,7 +28,7 @@ export default function Contacto() {
         }
 
         const mensajePredefinido = `Hola! Mi nombre es ${nombre.trim()}. Me gustaría obtener más información sobre los servicios de CitySoccer. ¡Gracias!`;
-        const whatsappUrl = `https://wa.me/56912345678?text=${encodeURIComponent(mensajePredefinido)}`;
+        const whatsappUrl = `https://wa.me/56974265019?text=${encodeURIComponent(mensajePredefinido)}`;
         
         window.open(whatsappUrl, '_blank');
         setNombre(''); // Limpiar el campo después de enviar
@@ -60,8 +60,8 @@ export default function Contacto() {
                                     </div>
                                     <div>
                                         <p className="text-white font-medium">Teléfono:</p>
-                                        <a href="tel:+56912345678" className="text-[#eeff00] hover:text-[#d4d400] transition-colors">
-                                            +56 9 1234 5678
+                                        <a href="tel:+56974265019" className="text-[#eeff00] hover:text-[#d4d400] transition-colors">
+                                            +56 9 7426 5019
                                         </a>
                                     </div>
                                 </div>

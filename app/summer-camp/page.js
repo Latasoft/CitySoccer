@@ -1,6 +1,11 @@
 "use client";
 import HeroSection from "@/components/HeroSection";
+
 export default function SummerCamp() {
+  const campData = {
+    whatsapp: "+56974265019"
+  };
+
   const handleWhatsAppClick = () => {
     const message = encodeURIComponent("¡Hola! Me interesa inscribir a mi hijo/a en el Summer Camp 2026. ¿Podrían contarme más sobre precios, fechas disponibles y el proceso de inscripción?");
     window.open(`https://wa.me/${campData.whatsapp.replace('+', '')}?text=${message}`, '_blank');

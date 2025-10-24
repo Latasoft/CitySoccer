@@ -46,7 +46,7 @@ export default function AcademiaPickleball() {
       "Sábados: 8:00 - 18:00",
       "Domingos: 9:00 - 16:00"
     ],
-    whatsapp: "+56912345678"
+    whatsapp: "+56974265019"
   };
 
   const handleWhatsAppClick = () => {

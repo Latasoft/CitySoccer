@@ -1,12 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Configuración optimizada para Netlify con API routes
+  // Configuración para Netlify
+  output: 'export',
+  trailingSlash: true,
   images: {
     unoptimized: true
-  },
-  // No usar 'export' ya que tenemos API routes
-  experimental: {
-    esmExternals: true
   }
 };
 

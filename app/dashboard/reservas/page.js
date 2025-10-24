@@ -608,7 +608,7 @@ export default function ReservasPage() {
                     value={form.cliente_telefono}
                     onChange={(e) => setForm({ ...form, cliente_telefono: e.target.value })}
                     className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#ffee00]"
-                    placeholder="+56 9 1234 5678"
+                    placeholder="+56 9 7426 5019"
                   />
                 </div>
               </div>

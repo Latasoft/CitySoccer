@@ -6,7 +6,7 @@ import CTASection from '@/components/CTASection';
 
 export default function Eventos() {
   const eventData = {
-    whatsapp: "+56912345678",
+    whatsapp: "+56974265019",
     heroProps: {
       title: { first: "Eventos", second: "Deportivos" },
       subtitle: " ",

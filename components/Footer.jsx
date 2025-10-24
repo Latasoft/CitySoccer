@@ -63,6 +63,23 @@ export default function Footer() {
                   </svg>
                   Reservas online 24/7
                 </li>
+                <li className="flex items-center gap-2">
+                  <a
+                    href="https://maps.google.com/?q=Tiltil+2569,+Macul,+Chile"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-yellow-100 hover:text-white transition-colors duration-300"
+                  >
+                    <svg
+                      className="w-4 h-4 text-yellow-200"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
+                    </svg>
+                    Ubicación - Tiltil 2569, Macul
+                  </a>
+                </li>
               </ul>
 
               <ul className="mt-8 flex gap-6">
@@ -235,16 +252,6 @@ export default function Footer() {
                     >
                       <span className="w-2 h-2 bg-yellow-300 rounded-full"></span>
                       Testimonios
-                    </a>
-                  </li>
-
-                  <li>
-                    <a
-                      href="#"
-                      className="text-yellow-100 hover:text-white transition-colors duration-300 font-medium flex items-center gap-2"
-                    >
-                      <span className="w-2 h-2 bg-yellow-300 rounded-full"></span>
-                      Ubicación
                     </a>
                   </li>
                 </ul>

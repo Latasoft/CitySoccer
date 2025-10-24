@@ -51,7 +51,7 @@ export default function Contacto() {
                                     </div>
                                     <div>
                                         <p className="text-white font-medium">Dirección:</p>
-                                        <p className="text-gray-300 text-sm">Santiago, Chile</p>
+                                        <p className="text-gray-300 text-sm">Tiltil 2569, Macul</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4">

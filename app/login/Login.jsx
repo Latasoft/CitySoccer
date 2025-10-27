@@ -17,6 +17,7 @@ export default function Login() {
     'benja@gmail.com',
     'admin@citysoccer.com',
     'administrador@citysoccer.com',
+    'tiare.latasoft@gmail.com',
     // Agrega aquí los emails de administradores autorizados
   ];
 

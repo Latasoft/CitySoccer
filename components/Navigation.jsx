@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { AdminModeToggle } from "@/contexts/AdminModeContext";
 
 const navItems = [
     { linkText: "Inicio", href: "/" },
@@ -180,6 +181,9 @@ export default function Navigation() {
                                 )}
                             </div>
                         </div>
+                        
+                        {/* Admin Mode Toggle */}
+                        <AdminModeToggle />
                     </div>
                 </div>
             )}
@@ -361,6 +365,13 @@ export default function Navigation() {
                                     </li>
                                 ))}
                             </ul>
+                        </div>
+                    )}
+                    
+                    {/* Admin Mode Toggle - Desktop */}
+                    {menuOpen && (
+                        <div className="p-4 border-t border-white/20">
+                            <AdminModeToggle />
                         </div>
                     )}
                 </nav>

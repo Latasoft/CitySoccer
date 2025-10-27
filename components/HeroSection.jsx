@@ -1,4 +1,6 @@
 import React from 'react';
+import EditableImage from './EditableImage';
+import { useDynamicImages } from '@/lib/dynamicImageService';
 
 const HeroSection = ({ 
   title,
@@ -8,8 +10,20 @@ const HeroSection = ({
   buttonText = "Más Información",
   buttonLink = "#",
   images = { img1, img2, img3 },
-  backgroundGradient
+  backgroundGradient,
+  imageCategory = "summer-camp" // Nueva prop para categoría de imágenes
 }) => {
+  
+  // Cargar imágenes dinámicas según la categoría
+  const { images: dynamicImages } = useDynamicImages(imageCategory);
+  
+  // Función helper para obtener imagen dinámica o fallback
+  const getImageUrl = (index, fallback) => {
+    if (dynamicImages[index]) {
+      return dynamicImages[index].url;
+    }
+    return fallback;
+  };
   
   const handleButtonClick = () => {
     if (buttonLink.startsWith('/')) {
@@ -62,21 +76,27 @@ const HeroSection = ({
           <div className="flex justify-center items-center">
             <div className="grid grid-cols-2 gap-8 w-full max-w-2xl">
               {/* Primera imagen - ocupa 2 columnas en la parte superior */}
-              <img 
-                src={images.img1} 
+              <EditableImage
+                src={getImageUrl(0, images.img1)}
                 alt="Experiencia 1" 
-                className="col-span-2 w-full h-[300px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl" 
+                categoria={imageCategory}
+                className="col-span-2 w-full h-[300px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
+                fallbackSrc={images.img1}
               />
               {/* Segunda y tercera imagen - lado a lado en la parte inferior */}
-              <img 
-                src={images.img2} 
+              <EditableImage
+                src={getImageUrl(1, images.img2)}
                 alt="Experiencia 2" 
-                className="w-full h-[250px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl" 
+                categoria={imageCategory}
+                className="w-full h-[250px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
+                fallbackSrc={images.img2}
               />
-              <img 
-                src={images.img3} 
+              <EditableImage
+                src={getImageUrl(2, images.img3)}
                 alt="Experiencia 3" 
-                className="w-full h-[250px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl" 
+                categoria={imageCategory}
+                className="w-full h-[250px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
+                fallbackSrc={images.img3}
               />
             </div>
           </div>

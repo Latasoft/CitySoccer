@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
+import { AdminModeProvider } from "../contexts/AdminModeContext";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -23,10 +24,12 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Navigation />
-        
-        {children}
-        <Footer />
+        <AdminModeProvider>
+          <Navigation />
+          
+          {children}
+          <Footer />
+        </AdminModeProvider>
       </body>
     </html>
   );

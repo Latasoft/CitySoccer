@@ -1,7 +1,23 @@
 import React from 'react';
+import EditableImage from './EditableImage';
+import { useDynamicImages } from '@/lib/dynamicImageService';
 
 
 const QuienessomosComponent = () => {
+  // Cargar imágenes dinámicas
+  const { images: quienesSomosImages } = useDynamicImages('quienes-somos');
+  const { images: generalImages } = useDynamicImages('general');
+
+  // Función helper para obtener imagen dinámica o fallback
+  const getImageUrl = (category, index, fallback) => {
+    if (category === 'quienes-somos' && quienesSomosImages[index]) {
+      return quienesSomosImages[index].url;
+    }
+    if (category === 'general' && generalImages[index]) {
+      return generalImages[index].url;
+    }
+    return fallback;
+  };
 
   const partnerships = [
     {
@@ -67,23 +83,29 @@ const QuienessomosComponent = () => {
               <div className="grid grid-cols-2 gap-8 w-full max-w-2xl">
                 {/* Primera imagen - ocupa toda la fila superior */}
                 <div className="col-span-2">
-                  <img
-                    src="/Cancha1.jpeg"
+                  <EditableImage
+                    src={getImageUrl('quienes-somos', 0, '/Cancha1.jpeg')}
                     alt="Instalaciones City Soccer"
+                    categoria="quienes-somos"
                     className="w-full h-[300px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
+                    fallbackSrc="/Cancha1.jpeg"
                   />
                 </div>
                 
                 {/* Segunda y tercera imagen - lado a lado en la fila inferior */}
-                <img
-                  src="/Pelota.jpg"
+                <EditableImage
+                  src={getImageUrl('general', 0, '/Pelota.jpg')}
                   alt="Pasión por el fútbol"
+                  categoria="general"
                   className="w-full h-[300px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
+                  fallbackSrc="/Pelota.jpg"
                 />
-                <img
-                  src="/Entrenamiento4.jpeg"
+                <EditableImage
+                  src={getImageUrl('general', 1, '/Entrenamiento4.jpeg')}
                   alt="Entrenamiento profesional"
+                  categoria="general"
                   className="w-full h-[300px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
+                  fallbackSrc="/Entrenamiento4.jpeg"
                 />
               </div>
             </div>

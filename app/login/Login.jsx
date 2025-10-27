@@ -1,54 +1,94 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const { user, loading, isAdmin } = useAuth();
+
+  // Redirigir si ya está logueado
+  useEffect(() => {
+    if (!loading && user && isAdmin) {
+      router.push('/dashboard');
+    }
+  }, [loading, user, isAdmin, router]);
 
   // Lista de emails de administradores autorizados
   const adminEmails = [
     'benja@gmail.com',
     'admin@citysoccer.com',
     'administrador@citysoccer.com',
-    // Agrega aquí los emails de administradores autorizados
+    'tiare.latasoft@gmail.com',
+    'ti.caamano@duocuc.cl',
+    // Agrega aquí más emails de administradores autorizados
   ];
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setLoginLoading(true);
     setError('');
 
     try {
       // Verificar si el email es de administrador antes de autenticar
       if (!adminEmails.includes(email.toLowerCase())) {
         setError('No tienes permisos de administrador.');
-        setLoading(false);
+        setLoginLoading(false);
         return;
       }
 
       // Usar la autenticación de Supabase
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
+      let { data, error: authError } = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
       });
+
+      // Si el usuario no existe, intentar crearlo automáticamente
+      if (authError && authError.message.includes('Invalid login credentials')) {
+        console.log('Usuario no existe, intentando crear cuenta admin...');
+        
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            emailRedirectTo: undefined // Evitar confirmación por email para admin
+          }
+        });
+
+        if (signUpError) {
+          setError('Error al crear cuenta de administrador. Contacta soporte.');
+          console.error('Error de registro:', signUpError);
+          return;
+        } else {
+          // Intentar login nuevamente después del registro
+          const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password,
+          });
+          
+          if (loginError) {
+            setError('Cuenta creada, pero error al iniciar sesión. Intenta nuevamente.');
+            return;
+          } else {
+            data = loginData;
+            authError = null;
+          }
+        }
+      }
 
       if (authError) {
         setError('Credenciales incorrectas. Verifica tu correo y contraseña.');
         console.error('Error de autenticación:', authError);
       } else {
-        // Guardar información del administrador en localStorage
-        localStorage.setItem('admin', JSON.stringify({
-          correo: email,
-          rol: 'admin',
-          userId: data.user.id
-        }));
+        // La sesión se sincronizará automáticamente por el hook useAuth
+        // No necesitamos guardar manualmente en localStorage
         
         // Redirigir al dashboard
         router.push('/dashboard');
@@ -57,9 +97,21 @@ export default function Login() {
       setError('Error inesperado. Intenta nuevamente.');
       console.error('Error de login:', err);
     } finally {
-      setLoading(false);
+      setLoginLoading(false);
     }
   };
+
+  // Mostrar loading mientras se verifica la autenticación
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-[#ffee00] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white text-lg">Verificando sesión...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <section className="min-h-screen py-20 bg-gradient-to-br from-black via-gray-900 to-gray-950 overflow-hidden flex items-center justify-center">
@@ -138,13 +190,13 @@ export default function Login() {
             {/* Login Button */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={loginLoading}
               className="group w-full mt-8 bg-gradient-to-br from-[#ffee00] to-[#e6d000] rounded-lg p-4 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border-2 border-transparent hover:border-white/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               <div className="flex items-center justify-center gap-3">
                 <LogIn className="w-5 h-5 text-gray-900 group-hover:scale-110 transition-transform duration-300" />
                 <span className="text-lg font-bold text-gray-900 group-hover:text-black transition-colors">
-                  {loading ? 'Verificando...' : 'Acceder al Panel'}
+                  {loginLoading ? 'Verificando...' : 'Acceder al Panel'}
                 </span>
               </div>
             </button>
@@ -152,8 +204,11 @@ export default function Login() {
 
           {/* Admin Info */}
           <div className="mt-6 p-4 bg-gray-700/50 rounded-lg border border-gray-600">
-            <p className="text-gray-300 text-sm text-center">
+            <p className="text-gray-300 text-sm text-center mb-2">
               <span className="text-[#ffee00] font-semibold">Nota:</span> Solo administradores autorizados pueden acceder
+            </p>
+            <p className="text-gray-400 text-xs text-center">
+              Si es tu primera vez, se creará automáticamente tu cuenta de administrador
             </p>
           </div>
         </div>

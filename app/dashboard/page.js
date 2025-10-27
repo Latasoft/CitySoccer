@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+import { useAdminMode } from '@/contexts/AdminModeContext';
 import { 
   Users, 
   Calendar, 
@@ -11,11 +12,21 @@ import {
   Activity,
   DollarSign,
   Clock,
-  TrendingUp
+  TrendingUp,
+  Settings,
+  Images,
+  FileText
 } from 'lucide-react';
 
+// Importar componentes de administración
+import PricesAdmin from './components/PricesAdmin';
+import ConfigAdmin from './components/ConfigAdmin';
+import ImageAdmin from './components/ImageAdmin';
+import ContentAdmin from './components/ContentAdmin';
+
 export default function Dashboard() {
-  const [admin, setAdmin] = useState(null);
+  const { isAdmin } = useAdminMode();
+  const [user, setUser] = useState(null);
   const [stats, setStats] = useState({
     totalClientes: 0,
     totalReservas: 0,
@@ -28,17 +39,29 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  // Verificar autenticación y cargar datos
   useEffect(() => {
-    // Verificar autenticación
-    const adminData = localStorage.getItem('admin');
-    if (!adminData) {
-      router.push('/login');
-      return;
-    }
+    const checkAuthAndLoadData = async () => {
+      // Verificar autenticación con localStorage (para compatibilidad)
+      const adminData = localStorage.getItem('admin');
+      
+      // También verificar sesión de Supabase
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!adminData && !session?.user) {
+        router.push('/login');
+        return;
+      }
+      
+      if (session?.user) {
+        setUser(session.user);
+      }
+      
+      loadDashboardData();
+    };
     
-    setAdmin(JSON.parse(adminData));
-    loadDashboardData();
-  }, [router]);
+    checkAuthAndLoadData();
+  }, [router, isAdmin]);
 
   const loadDashboardData = async () => {
     try {
@@ -162,9 +185,16 @@ export default function Dashboard() {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    localStorage.removeItem('admin');
-    router.push('/login');
+    try {
+      await supabase.auth.signOut();
+      localStorage.removeItem('admin');
+      router.push('/login');
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+      // Forzar limpieza local y redirigir
+      localStorage.removeItem('admin');
+      router.push('/login');
+    }
   };
 
   if (loading) {
@@ -187,8 +217,8 @@ export default function Dashboard() {
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <p className="text-white font-semibold">{admin?.correo}</p>
-                <p className="text-gray-400 text-sm capitalize">{admin?.rol}</p>
+                <p className="text-white font-semibold">{user?.email}</p>
+                <p className="text-gray-400 text-sm capitalize">Administrador</p>
               </div>
               <button
                 onClick={handleLogout}
@@ -212,7 +242,10 @@ export default function Dashboard() {
                 { id: 'clientes', label: 'Clientes', icon: Users },
                 { id: 'reservas', label: 'Reservas', icon: Calendar },
                 { id: 'canchas', label: 'Canchas', icon: MapPin },
-                { id: 'tarifas', label: 'Tarifas', icon: DollarSign },              
+                { id: 'precios', label: 'Precios', icon: DollarSign },
+                { id: 'configuracion', label: 'Configuración', icon: Settings },
+                { id: 'imagenes', label: 'Imágenes', icon: Images },
+                { id: 'contenido', label: 'Contenido', icon: FileText },
               ].map((item) => (
                 <button
                   key={item.id}
@@ -389,8 +422,14 @@ export default function Dashboard() {
               </div>
             )}
 
+            {/* Pestañas de administración */}
+            {activeTab === 'precios' && <PricesAdmin />}
+            {activeTab === 'configuracion' && <ConfigAdmin />}
+            {activeTab === 'imagenes' && <ImageAdmin />}
+            {activeTab === 'contenido' && <ContentAdmin />}
+
             {/* Otras pestañas */}
-            {activeTab !== 'overview' && (
+            {!['overview', 'precios', 'configuracion', 'imagenes', 'contenido'].includes(activeTab) && (
               <div className="bg-gray-800/50 rounded-xl p-8 border border-gray-700 text-center">
                 <div className="text-[#ffee00] text-6xl mb-4">🚧</div>
                 <h2 className="text-2xl font-bold text-white mb-4">

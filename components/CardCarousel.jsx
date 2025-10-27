@@ -1,17 +1,34 @@
 "use client";
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useDynamicImages } from '@/lib/dynamicImageService';
+import EditableImage from './EditableImage';
 
 const CardCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  
+  // Cargar imágenes dinámicas de canchas desde admin
+  const { images: imagenesCanchas, loading: loadingCanchas } = useDynamicImages('canchas');
+  const { images: imagenesEventos, loading: loadingEventos } = useDynamicImages('eventos');
+
+  // Función helper para obtener imagen dinámica o fallback
+  const getImageUrl = (categoria, fallback, index = 0) => {
+    if (categoria === 'canchas' && imagenesCanchas.length > index) {
+      return imagenesCanchas[index].url;
+    }
+    if (categoria === 'eventos' && imagenesEventos.length > index) {
+      return imagenesEventos[index].url;
+    }
+    return fallback;
+  };
 
   const cardsData = [
     {
       id: 1,
       title: "Arrienda Cancha Fútbol",
       description: "Canchas profesionales con césped sintético de última generación. Reserva online las 24 horas.",
-      image: "/Cancha1.jpeg",
+      image: getImageUrl('canchas', '/Cancha1.jpeg', 0),
       ctaText: "RESERVAR FÚTBOL",
       ctaLink: "/arrendarcancha/futbol7"
     },
@@ -19,7 +36,7 @@ const CardCarousel = () => {
       id: 2,
       title: "Arrienda Cancha Pickleball",
       description: "Canchas de Pickleball con superficies profesionales. El deporte que está revolucionando el mundo.",
-      image: "/Pickleball2.jpeg",
+      image: getImageUrl('canchas', '/Pickleball2.jpeg', 1),
       ctaText: "RESERVAR PICKLEBALL",
       ctaLink: "/arrendarcancha/pickleball"
     },
@@ -27,7 +44,7 @@ const CardCarousel = () => {
       id: 3,
       title: "Clases Particulares",
       description: "Entrenamiento personalizado con profesionales certificados. Mejora tu técnica individual.",
-      image: "/Entrenamiento4.jpeg",
+      image: getImageUrl('eventos', '/Entrenamiento4.jpeg', 0),
       ctaText: "VER CLASES",
       ctaLink: "/clasesparticularesfutbol"
     },
@@ -35,7 +52,7 @@ const CardCarousel = () => {
       id: 4,
       title: "Academia Deportiva",
       description: "Programas de formación deportiva para niños y jóvenes. Desarrollo técnico y valores.",
-      image: "/Entrenamiento2.jpeg",
+      image: getImageUrl('eventos', '/Entrenamiento2.jpeg', 1),
       ctaText: "CONOCER MÁS",
       ctaLink: "/academiadefutbol"
     },
@@ -43,7 +60,7 @@ const CardCarousel = () => {
       id: 5,
       title: "Summer Camp 2026",
       description: "La experiencia deportiva más completa del verano. Diversión y aprendizaje garantizados.",
-      image: "/Entrenamiento5.jpeg",
+      image: getImageUrl('eventos', '/Entrenamiento5.jpeg', 2),
       ctaText: "INSCRIBIR",
       ctaLink: "/summer-camp"
     },

@@ -9,10 +9,10 @@ export const supabase = createClient(supabaseUrl, supabaseKey);
 export const obtenerTarifasPorTipo = async (tipoCancha) => {
   try {
     const { data, error } = await supabase
-      .from('tarifas')
+      .from('precios')
       .select('*')
       .eq('tipo_cancha', tipoCancha)
-      .order('hora_inicio');
+      .order('hora');
 
     if (error) throw error;
     
@@ -23,17 +23,17 @@ export const obtenerTarifasPorTipo = async (tipoCancha) => {
       sunday: {}
     };
 
-    data.forEach(tarifa => {
-      const hora = tarifa.hora_inicio.substring(0, 5); // "09:00"
-      const diaSemana = tarifa.dia_semana;
+    data.forEach(precio => {
+      const hora = precio.hora.substring(0, 5); // "09:00"
+      const diaSemana = precio.dia_semana;
       
-      const tarifaData = { price: tarifa.precio };
+      const tarifaData = { price: precio.precio };
       
-      if (diaSemana >= 1 && diaSemana <= 5) { // Lunes a Viernes
+      if (diaSemana === 'weekdays') { // Lunes a Viernes
         tarifasOrganizadas.weekdays[hora] = tarifaData;
-      } else if (diaSemana === 6) { // Sábado
+      } else if (diaSemana === 'saturday') { // Sábado
         tarifasOrganizadas.saturday[hora] = tarifaData;
-      } else if (diaSemana === 7) { // Domingo
+      } else if (diaSemana === 'sunday') { // Domingo
         tarifasOrganizadas.sunday[hora] = tarifaData;
       }
     });

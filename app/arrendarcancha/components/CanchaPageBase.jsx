@@ -21,6 +21,8 @@ const CanchaPageBase = ({
       'f7': 'futbol7', // Según tu BD, usas 'futbol7' no 'f7'
       'f9': 'futbol9', // Probablemente necesites 'futbol9' en tu BD
       'pickleball': 'pickleball',
+      'pickleball-individual': 'pickleball',
+      'pickleball-dobles': 'pickleball-dobles',
       'futbol7': 'futbol7',
       'futbol9': 'futbol9'
     };

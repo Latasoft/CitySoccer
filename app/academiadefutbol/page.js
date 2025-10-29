@@ -8,7 +8,7 @@ import CTASection from '@/components/CTASection';
 import { useWhatsApp } from '@/hooks/useWhatsApp';
 
 export default function AcademiaFutbol() {
-  const { openWhatsApp } = useWhatsApp();
+  const { openWhatsApp, getWhatsAppNumber } = useWhatsApp();
 
   const academyData = {
     title: "Academia de Fútbol",

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
@@ -69,7 +69,7 @@ export default function ReservasPage() {
 
   useEffect(() => {
     fetchReservas();
-  }, [page, fecha, estado, canchaId]); // búsqueda se filtra en cliente para evitar OR complicadas
+  }, [page, fecha, estado, canchaId, fetchReservas]); // búsqueda se filtra en cliente para evitar OR complicadas
 
   const loadCanchas = async () => {
     try {
@@ -88,7 +88,7 @@ export default function ReservasPage() {
     }
   };
 
-  const fetchReservas = async () => {
+  const fetchReservas = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -127,7 +127,7 @@ export default function ReservasPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, estado, fecha, canchaId]);
 
   const filteredBySearch = useMemo(() => {
     if (!search.trim()) return reservas;

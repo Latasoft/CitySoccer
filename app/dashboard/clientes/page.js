@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
@@ -54,7 +54,7 @@ export default function ClientesPage() {
 
   useEffect(() => {
     fetchClientes();
-  }, [page, canchaId, orderBy]);
+  }, [page, canchaId, orderBy, fetchClientes]);
 
   const loadCanchas = async () => {
     try {
@@ -73,7 +73,7 @@ export default function ClientesPage() {
     }
   };
 
-  const fetchClientes = async () => {
+  const fetchClientes = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -157,7 +157,7 @@ export default function ClientesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, canchaId, orderBy]);
 
   const filteredBySearch = useMemo(() => {
     if (!search.trim()) return clientes;

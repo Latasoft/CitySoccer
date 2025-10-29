@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import { useAdminMode } from '@/contexts/AdminModeContext';
@@ -61,9 +61,9 @@ export default function Dashboard() {
     };
     
     checkAuthAndLoadData();
-  }, [router, isAdmin]);
+  }, [router, isAdmin, loadDashboardData]);
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     try {
       // Cargar estadísticas
       await Promise.all([
@@ -76,7 +76,7 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const loadGeneralStats = async () => {
     try {

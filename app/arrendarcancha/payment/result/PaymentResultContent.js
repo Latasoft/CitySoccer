@@ -153,7 +153,7 @@ export default function PaymentResultContent() {
         clearTimeout(timeoutRef.current)
       }
     }
-  }, [orderId, maxAttempts])
+  }, [orderId, maxAttempts, searchParams])
 
   const getStatusColor = (status) => {
     switch (status) {

@@ -1,18 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Configuración para hosting tradicional (iHost)
-  output: 'export',
-  trailingSlash: true,
+  // Configuración básica (sin export estático para mantener APIs)
   images: {
     unoptimized: true
   },
-  // Configuración específica para export estático
+  // Configuración específica
   experimental: {
     esmExternals: true
-  },
-  // Configurar rutas estáticas
-  async generateStaticParams() {
-    return [];
   }
 };
 

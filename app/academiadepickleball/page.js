@@ -2,8 +2,11 @@
 import React from 'react';
 import HeroSection from '@/components/HeroSection';
 import CTASection from '@/components/CTASection';
+import { useWhatsApp } from '@/hooks/useWhatsApp';
 
 export default function AcademiaPickleball() {
+  const { openWhatsApp, getWhatsAppNumber } = useWhatsApp();
+
   const academyData = {
     title: "Academia de Pickleball",
     description: "Formación integral en el deporte de más rápido crecimiento. Desarrolla tu técnica en un ambiente profesional",
@@ -45,13 +48,12 @@ export default function AcademiaPickleball() {
       "Lunes a Viernes: 15:00 - 21:00",
       "Sábados: 8:00 - 18:00",
       "Domingos: 9:00 - 16:00"
-    ],
-    whatsapp: "+56974265019"
+    ]
   };
 
   const handleWhatsAppClick = () => {
-    const message = encodeURIComponent("Hola! Me interesa información sobre la Academia de Pickleball. ¿Podrían contarme más detalles sobre las categorías, precios y horarios disponibles?");
-    window.open(`https://wa.me/${academyData.whatsapp.replace('+', '')}?text=${message}`, '_blank');
+    const message = "Hola! Me interesa información sobre la Academia de Pickleball. ¿Podrían contarme más detalles sobre las categorías, precios y horarios disponibles?";
+    openWhatsApp(message);
   };
 
   const heroProps = {

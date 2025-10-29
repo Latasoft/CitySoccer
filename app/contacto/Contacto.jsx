@@ -2,11 +2,21 @@
 
 import React, { useState, useEffect } from "react";
 import { MapPin, Phone, Mail, Instagram, MessageCircle } from "lucide-react";
+import { useContactInfo } from "@/hooks/useContactInfo";
 
 export default function Contacto() {
     const [isVisible, setIsVisible] = useState(false);
     const [nombre, setNombre] = useState('');
     const [error, setError] = useState('');
+    const { 
+        loading, 
+        openWhatsApp, 
+        getInstagramUsername, 
+        getInstagramUrl,
+        getEmailAddress,
+        getPhoneNumber,
+        getAddress
+    } = useContactInfo();
 
     useEffect(() => {
         setIsVisible(true);
@@ -28,11 +38,17 @@ export default function Contacto() {
         }
 
         const mensajePredefinido = `Hola! Mi nombre es ${nombre.trim()}. Me gustaría obtener más información sobre los servicios de CitySoccer. ¡Gracias!`;
-        const whatsappUrl = `https://wa.me/56974265019?text=${encodeURIComponent(mensajePredefinido)}`;
-        
-        window.open(whatsappUrl, '_blank');
+        openWhatsApp(mensajePredefinido);
         setNombre(''); // Limpiar el campo después de enviar
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-950 py-12 px-4 flex items-center justify-center">
+                <div className="text-white text-xl">Cargando información de contacto...</div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-950 py-12 px-4">
@@ -51,7 +67,7 @@ export default function Contacto() {
                                     </div>
                                     <div>
                                         <p className="text-white font-medium">Dirección:</p>
-                                        <p className="text-gray-300 text-sm">Tiltil 2569, Macul</p>
+                                        <p className="text-gray-300 text-sm">{getAddress()}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4">
@@ -60,8 +76,8 @@ export default function Contacto() {
                                     </div>
                                     <div>
                                         <p className="text-white font-medium">Teléfono:</p>
-                                        <a href="tel:+56974265019" className="text-[#eeff00] hover:text-[#d4d400] transition-colors">
-                                            +56 9 7426 5019
+                                        <a href={`tel:${getPhoneNumber()}`} className="text-[#eeff00] hover:text-[#d4d400] transition-colors">
+                                            {getPhoneNumber()}
                                         </a>
                                     </div>
                                 </div>
@@ -71,8 +87,8 @@ export default function Contacto() {
                                     </div>
                                     <div>
                                         <p className="text-white font-medium">Email:</p>
-                                        <a href="mailto:contacto@citysoccer.cl" className="text-[#eeff00] hover:text-[#d4d400] transition-colors">
-                                            contacto@citysoccer.cl
+                                        <a href={`mailto:${getEmailAddress()}`} className="text-[#eeff00] hover:text-[#d4d400] transition-colors">
+                                            {getEmailAddress()}
                                         </a>
                                     </div>
                                 </div>
@@ -82,8 +98,8 @@ export default function Contacto() {
                                     </div>
                                     <div>
                                         <p className="text-white font-medium">Instagram:</p>
-                                        <a href="https://www.instagram.com/citysoccersantiago" target="_blank" rel="noopener noreferrer" className="text-[#eeff00] hover:text-[#d4d400] transition-colors">
-                                            @citysoccersantiago
+                                        <a href={getInstagramUrl()} target="_blank" rel="noopener noreferrer" className="text-[#eeff00] hover:text-[#d4d400] transition-colors">
+                                            @{getInstagramUsername()}
                                         </a>
                                     </div>
                                 </div>

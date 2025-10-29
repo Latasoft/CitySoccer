@@ -9,6 +9,7 @@ const HeroSection = ({
   description,
   buttonText = "Más Información",
   buttonLink = "#",
+  buttonAction, // Nueva prop para funciones personalizadas
   images = { img1, img2, img3 },
   backgroundGradient,
   imageCategory = "summer-camp" // Nueva prop para categoría de imágenes
@@ -26,6 +27,12 @@ const HeroSection = ({
   };
   
   const handleButtonClick = () => {
+    // Si hay una función personalizada, usarla en lugar de la navegación
+    if (buttonAction) {
+      buttonAction();
+      return;
+    }
+    
     if (buttonLink.startsWith('/')) {
       // Navegación interna (usar tu router)
       window.location.href = buttonLink;
@@ -72,30 +79,31 @@ const HeroSection = ({
             </button>
           </div>
           
-          {/* Grid de 3 Imágenes */}
+          {/* Grid de 3 Imágenes - Sin gaps para móvil */}
           <div className="flex justify-center items-center">
-            <div className="grid grid-cols-2 gap-8 w-full max-w-2xl">
-              {/* Primera imagen - ocupa 2 columnas en la parte superior */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 sm:gap-1 lg:gap-2 w-full max-w-2xl">
+              {/* Primera imagen - ocupa toda la fila superior */}
               <EditableImage
                 src={getImageUrl(0, images.img1)}
                 alt="Experiencia 1" 
                 categoria={imageCategory}
-                className="col-span-2 w-full h-[300px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
+                className="col-span-1 sm:col-span-2 w-full h-[250px] sm:h-[280px] lg:h-[300px] object-cover rounded-t-lg sm:rounded-t-xl rounded-b-none sm:rounded-b-lg shadow-lg sm:shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
                 fallbackSrc={images.img1}
               />
-              {/* Segunda y tercera imagen - lado a lado en la parte inferior */}
+              {/* Segunda imagen */}
               <EditableImage
                 src={getImageUrl(1, images.img2)}
                 alt="Experiencia 2" 
                 categoria={imageCategory}
-                className="w-full h-[250px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
+                className="w-full h-[200px] sm:h-[220px] lg:h-[250px] object-cover rounded-bl-lg sm:rounded-l-xl rounded-br-none sm:rounded-br-none shadow-lg sm:shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
                 fallbackSrc={images.img2}
               />
+              {/* Tercera imagen */}
               <EditableImage
                 src={getImageUrl(2, images.img3)}
                 alt="Experiencia 3" 
                 categoria={imageCategory}
-                className="w-full h-[250px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
+                className="w-full h-[200px] sm:h-[220px] lg:h-[250px] object-cover rounded-br-lg sm:rounded-r-xl rounded-bl-none sm:rounded-bl-none shadow-lg sm:shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
                 fallbackSrc={images.img3}
               />
             </div>

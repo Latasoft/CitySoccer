@@ -1,12 +1,14 @@
 import React from 'react';
 import EditableImage from './EditableImage';
 import { useDynamicImages } from '@/lib/dynamicImageService';
+import { useConfig } from "@/lib/dynamicConfigService";
 
 
 const QuienessomosComponent = () => {
   // Cargar imágenes dinámicas
   const { images: quienesSomosImages } = useDynamicImages('quienes-somos');
   const { images: generalImages } = useDynamicImages('general');
+  const { config, loading } = useConfig();
 
   // Función helper para obtener imagen dinámica o fallback
   const getImageUrl = (category, index, fallback) => {
@@ -46,24 +48,26 @@ const QuienessomosComponent = () => {
 
   const handleWhatsAppClick = () => {
     const message = encodeURIComponent("Hola! Me gustaría conocer más sobre City Soccer y sus servicios.");
-    window.open(`https://wa.me/56974265019?text=${message}`, '_blank');
+    const whatsappNumber = config.whatsapp || '56974265020';
+    const cleanNumber = whatsappNumber.replace(/[^0-9]/g, '');
+    window.open(`https://wa.me/${cleanNumber}?text=${message}`, '_blank');
   };
 
   return (
     <div className="min-h-screen bg-gray-900">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-900 via-green-900 to-emerald-800 min-h-screen flex items-center pb-16">
-        <div className="max-w-7xl mx-auto px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <section className="bg-gradient-to-br from-blue-900 via-green-900 to-emerald-800 min-h-screen flex items-center py-8 sm:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             {/* Texto del Hero */}
-            <div className="flex flex-col gap-8">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight text-white uppercase">
+            <div className="flex flex-col gap-6 sm:gap-8 text-center lg:text-left">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-tight text-white uppercase">
                 <span className="text-green-400">Sobre </span>
                 <span className="text-blue-400">City Soccer</span>
               </h1>
 
-              <div className="flex flex-col gap-6 text-gray-300">
-                <p className="text-xl leading-relaxed">
+              <div className="flex flex-col gap-4 sm:gap-6 text-gray-300">
+                <p className="text-lg sm:text-xl leading-relaxed">
                   Más que un centro deportivo, somos una familia unida por la pasión del fútbol.
                   En City Soccer creamos espacios donde el deporte se vive con profesionalismo,
                   diversión y valores que trascienden las canchas.
@@ -72,39 +76,39 @@ const QuienessomosComponent = () => {
 
               <button
                 onClick={handleWhatsAppClick}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-4 px-8 rounded-full text-base uppercase tracking-wide transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-500/40 self-start"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 sm:py-4 sm:px-8 rounded-full text-sm sm:text-base uppercase tracking-wide transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-500/40 self-center lg:self-start"
               >
                 Contáctanos
               </button>
             </div>
 
-            {/* Grid de Imágenes - Cambiado a 3 imágenes */}
+            {/* Grid de Imágenes - Responsive */}
             <div className="flex justify-center items-center">
-              <div className="grid grid-cols-2 gap-8 w-full max-w-2xl">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8 w-full max-w-2xl">
                 {/* Primera imagen - ocupa toda la fila superior */}
-                <div className="col-span-2">
+                <div className="col-span-1 sm:col-span-2">
                   <EditableImage
                     src={getImageUrl('quienes-somos', 0, '/Cancha1.jpeg')}
                     alt="Instalaciones City Soccer"
                     categoria="quienes-somos"
-                    className="w-full h-[300px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
+                    className="w-full h-[250px] sm:h-[300px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
                     fallbackSrc="/Cancha1.jpeg"
                   />
                 </div>
                 
-                {/* Segunda y tercera imagen - lado a lado en la fila inferior */}
+                {/* Segunda y tercera imagen - apiladas en móvil, lado a lado en desktop */}
                 <EditableImage
                   src={getImageUrl('general', 0, '/Pelota.jpg')}
                   alt="Pasión por el fútbol"
                   categoria="general"
-                  className="w-full h-[300px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
+                  className="w-full h-[200px] sm:h-[300px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
                   fallbackSrc="/Pelota.jpg"
                 />
                 <EditableImage
                   src={getImageUrl('general', 1, '/Entrenamiento4.jpeg')}
                   alt="Entrenamiento profesional"
                   categoria="general"
-                  className="w-full h-[300px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
+                  className="w-full h-[200px] sm:h-[300px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
                   fallbackSrc="/Entrenamiento4.jpeg"
                 />
               </div>

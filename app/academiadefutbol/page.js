@@ -5,8 +5,11 @@ import ProgramsSection from '@/components/ProgramsSection';
 import BenefitsSection from '@/components/BenefitsSection';
 import SchedulePricingSection from '@/components/SchedulePricingSection';
 import CTASection from '@/components/CTASection';
+import { useWhatsApp } from '@/hooks/useWhatsApp';
 
 export default function AcademiaFutbol() {
+  const { openWhatsApp } = useWhatsApp();
+
   const academyData = {
     title: "Academia de Fútbol",
     description: "Formación integral para futbolistas de todas las edades. Desarrolla tu talento en un ambiente profesional",
@@ -46,13 +49,12 @@ export default function AcademiaFutbol() {
       "Lunes a Viernes: 16:00 - 20:00",
       "Sábados: 9:00 - 17:00",
       "Domingos: 9:00 - 15:00"
-    ],
-    whatsapp: "+56912345678"
+    ]
   };
 
   const handleWhatsAppClick = () => {
-    const message = encodeURIComponent("Hola! Me interesa información sobre la Academia de Fútbol. ¿Podrían contarme más detalles sobre las categorías, precios y horarios disponibles?");
-    window.open(`https://wa.me/${academyData.whatsapp.replace('+', '')}?text=${message}`, '_blank');
+    const message = "Hola! Me interesa información sobre la Academia de Fútbol. ¿Podrían contarme más detalles sobre las categorías, precios y horarios disponibles?";
+    openWhatsApp(message);
   };
 
   const heroProps = {
@@ -77,7 +79,8 @@ export default function AcademiaFutbol() {
       <ProgramsSection 
         title="Nuestros Programas"
         programs={academyData.categories}
-        whatsappNumber={academyData.whatsapp}
+        whatsappNumber={getWhatsAppNumber()}
+        onWhatsAppClick={openWhatsApp}
       />
       
       <BenefitsSection 
@@ -91,7 +94,7 @@ export default function AcademiaFutbol() {
           { day: "Sábados", time: "9:00 - 17:00" },
           { day: "Domingos", time: "9:00 - 15:00" }
         ]}
-        whatsappNumber={academyData.whatsapp}
+        whatsappNumber={getWhatsAppNumber()}
       />
       
       <CTASection 
@@ -100,14 +103,16 @@ export default function AcademiaFutbol() {
         primaryButton={{
           text: "Inscríbete Ahora",
           type: "whatsapp",
-          message: "Hola! Quiero inscribirme en la Academia de Fútbol"
+          message: "Hola! Quiero inscribirme en la Academia de Fútbol",
+          action: () => openWhatsApp("Hola! Quiero inscribirme en la Academia de Fútbol")
         }}
         secondaryButton={{
           text: "Más Información",
           type: "whatsapp", 
-          message: "Hola! Necesito más información sobre la Academia"
+          message: "Hola! Necesito más información sobre la Academia",
+          action: () => openWhatsApp("Hola! Necesito más información sobre la Academia")
         }}
-        whatsappNumber={academyData.whatsapp}
+        whatsappNumber={getWhatsAppNumber()}
       />
     </div>
   );

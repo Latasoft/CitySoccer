@@ -4,10 +4,12 @@ import HeroSection from '@/components/HeroSection';
 import BenefitsSection from '@/components/BenefitsSection';
 import SchedulePricingSection from '@/components/SchedulePricingSection';
 import CTASection from '@/components/CTASection';
+import { useWhatsApp } from '@/hooks/useWhatsApp';
 
 export default function ClasesParticulareFutbol() {
+  const { openWhatsApp, getWhatsAppNumber } = useWhatsApp();
+
   const classData = {
-    whatsapp: "+56974265019",
     heroProps: {
       title: { first: "Clases", second: "Particulares" },
       subtitle: "de Fútbol",
@@ -48,7 +50,7 @@ export default function ClasesParticulareFutbol() {
       
       <SchedulePricingSection 
         schedules={classData.schedules}
-        whatsappNumber={classData.whatsapp}
+        whatsappNumber={getWhatsAppNumber()}
       />
       
       <CTASection 
@@ -57,7 +59,8 @@ export default function ClasesParticulareFutbol() {
         primaryButton={{
           text: "Agendar Primera Clase",
           type: "whatsapp",
-          message: "Hola! Me interesa agendar mi primera clase particular de fútbol. ¿Podrían contarme sobre disponibilidad y precios?"
+          message: "Hola! Me interesa agendar mi primera clase particular de fútbol. ¿Podrían contarme sobre disponibilidad y precios?",
+          action: () => openWhatsApp("Hola! Me interesa agendar mi primera clase particular de fútbol. ¿Podrían contarme sobre disponibilidad y precios?")
         }}
         secondaryButton={{
           text: "Consultar Precios",

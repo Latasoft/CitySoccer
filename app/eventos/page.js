@@ -3,17 +3,24 @@
 import HeroSection from '@/components/HeroSection';
 import ProgramsSection from '@/components/ProgramsSection';
 import CTASection from '@/components/CTASection';
+import { useWhatsApp } from '@/hooks/useWhatsApp';
 
 export default function Eventos() {
+  const { openWhatsApp, getWhatsAppNumber } = useWhatsApp();
+
+  const handleWhatsAppClick = () => {
+    const message = "¡Hola! Me interesa organizar un evento deportivo. ¿Podrían contarme más sobre los servicios disponibles y precios?";
+    openWhatsApp(message);
+  };
+
   const eventData = {
-    whatsapp: "+56974265019",
     heroProps: {
       title: { first: "Eventos", second: "Deportivos" },
       subtitle: " ",
       titleColors: { first: "text-purple-400", second: "text-yellow-400" },
       description: "Nuestras canchas y espacios están disponibles para cumpleaños, campeonatos, clínicas deportivas, actividades empresariales y más.",
       buttonText: "Ver Nuestros Eventos",
-      buttonLink: "#eventos",
+      buttonAction: () => handleWhatsAppClick(),
       images: {
         img1: "/Birthday.jpeg",
         img2: "/Pelota.jpg",
@@ -68,7 +75,8 @@ export default function Eventos() {
       <ProgramsSection 
         title="Tipos de Eventos"
         programs={eventData.categories}
-        whatsappNumber={eventData.whatsapp}
+        whatsappNumber={getWhatsAppNumber()}
+        onWhatsAppClick={openWhatsApp}
       />
       
       

@@ -1,9 +1,14 @@
 import React from 'react';
 
-const ProgramsSection = ({ title, programs, whatsappNumber }) => {
+const ProgramsSection = ({ title, programs, whatsappNumber, onWhatsAppClick }) => {
   const handleWhatsAppClick = (programName) => {
-    const message = encodeURIComponent(`Hola! Me interesa información sobre ${programName}. ¿Podrían contarme más detalles?`);
-    window.open(`https://wa.me/${whatsappNumber.replace('+', '')}?text=${message}`, '_blank');
+    const message = `Hola! Me interesa información sobre ${programName}. ¿Podrían contarme más detalles?`;
+    if (onWhatsAppClick) {
+      onWhatsAppClick(message);
+    } else {
+      // Fallback si no se proporciona la función
+      window.open(`https://wa.me/${whatsappNumber?.replace('+', '')}?text=${encodeURIComponent(message)}`, '_blank');
+    }
   };
 
   return (

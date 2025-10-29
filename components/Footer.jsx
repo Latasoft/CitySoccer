@@ -1,7 +1,24 @@
 "use client";
 import React from "react";
+import { useContactInfo } from "@/hooks/useContactInfo";
 
 export default function Footer() {
+  const { 
+    loading, 
+    getPhoneNumber, 
+    getSchedule, 
+    getAddress,
+    getInstagramUrl 
+  } = useContactInfo();
+
+  if (loading) {
+    return (
+      <footer className="bg-[#23262C] h-96 flex items-center justify-center">
+        <div className="text-white">Cargando...</div>
+      </footer>
+    );
+  }
+
   return (
     <>
       <footer className="bg-[#23262C] lg:grid lg:grid-cols-5 relative overflow-hidden">
@@ -25,10 +42,10 @@ export default function Footer() {
                 </span>
 
                 <a
-                  href="tel:+56974265019"
+                  href={`tel:${getPhoneNumber()}`}
                   className="block text-2xl font-bold text-white hover:text-yellow-100 sm:text-3xl transition-colors duration-300 drop-shadow-lg"
                 >
-                  +569 7426 5019
+                  {getPhoneNumber()}
                 </a>
               </p>
 
@@ -41,7 +58,7 @@ export default function Footer() {
                   >
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                   </svg>
-                  Lunes a Viernes: 10am - 10pm
+                  {getSchedule('weekdays')}
                 </li>
                 <li className="flex items-center gap-2">
                   <svg
@@ -51,7 +68,7 @@ export default function Footer() {
                   >
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                   </svg>
-                  Fin de semana: 8am - 10pm
+                  {getSchedule('saturday')}
                 </li>
                 <li className="flex items-center gap-2">
                   <svg
@@ -77,7 +94,7 @@ export default function Footer() {
                     >
                       <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
                     </svg>
-                    Ubicación - Tiltil 2569, Macul
+                    Ubicación - {getAddress()}
                   </a>
                 </li>
               </ul>

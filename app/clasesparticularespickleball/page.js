@@ -3,10 +3,12 @@
 import HeroSection from '@/components/HeroSection';
 import SchedulePricingSection from '@/components/SchedulePricingSection';
 import CTASection from '@/components/CTASection';
+import { useWhatsApp } from '@/hooks/useWhatsApp';
 
 export default function ClasesParticularePickleball() {
+  const { openWhatsApp, getWhatsAppNumber } = useWhatsApp();
+
   const classData = {
-    whatsapp: "+56974265019",
     heroProps: {
       title: { first: "Clases", second: "Particulares" },
       subtitle: "de Pickleball",
@@ -50,7 +52,7 @@ export default function ClasesParticularePickleball() {
       
       <SchedulePricingSection 
         schedules={classData.schedules}
-        whatsappNumber={classData.whatsapp}
+        whatsappNumber={getWhatsAppNumber()}
       />
       
       <CTASection 
@@ -64,9 +66,10 @@ export default function ClasesParticularePickleball() {
         secondaryButton={{
           text: "Más Información",
           type: "whatsapp", 
-          message: "Hola! Soy principiante en pickleball y quisiera saber más sobre las clases particulares"
+          message: "Hola! Soy principiante en pickleball y quisiera saber más sobre las clases particulares",
+          action: () => openWhatsApp("Hola! Soy principiante en pickleball y quisiera saber más sobre las clases particulares")
         }}
-        whatsappNumber={classData.whatsapp}
+        whatsappNumber={getWhatsAppNumber()}
         backgroundImage="./Pickleball2.jpeg"
       />
     </div>

@@ -39,6 +39,22 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  // Función para cargar datos del dashboard
+  const loadDashboardData = useCallback(async () => {
+    try {
+      // Cargar estadísticas
+      await Promise.all([
+        loadGeneralStats(),
+        loadTopClientes(),
+        loadReservasRecientes()
+      ]);
+    } catch (error) {
+      console.error('Error cargando datos:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   // Verificar autenticación y cargar datos
   useEffect(() => {
     const checkAuthAndLoadData = async () => {
@@ -62,21 +78,6 @@ export default function Dashboard() {
     
     checkAuthAndLoadData();
   }, [router, isAdmin, loadDashboardData]);
-
-  const loadDashboardData = useCallback(async () => {
-    try {
-      // Cargar estadísticas
-      await Promise.all([
-        loadGeneralStats(),
-        loadTopClientes(),
-        loadReservasRecientes()
-      ]);
-    } catch (error) {
-      console.error('Error cargando datos:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
 
   const loadGeneralStats = async () => {
     try {

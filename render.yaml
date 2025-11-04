@@ -1,0 +1,26 @@
+# Render Build Configuration
+# This file tells Render how to build and deploy your Next.js app
+
+# Build Command
+buildCommand: npm run build
+
+# Start Command  
+startCommand: npm run start
+
+# Node.js Version
+node: 18
+
+# Environment
+envVars:
+  - key: NODE_ENV
+    value: production
+  - key: NEXT_PUBLIC_SUPABASE_URL
+    sync: false
+  - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+    sync: false
+
+# Auto-Deploy
+autoDeploy: true
+
+# Health Check
+healthCheckPath: /

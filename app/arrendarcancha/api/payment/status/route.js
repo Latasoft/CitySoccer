@@ -1,6 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
+// Configuración para export estático
+export const dynamic = 'force-static'
+export const revalidate = false
+
 let supabase;
 
 try {

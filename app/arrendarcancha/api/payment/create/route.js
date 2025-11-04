@@ -3,6 +3,10 @@ import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import axios from 'axios'
 
+// Configuración para export estático
+export const dynamic = 'force-static'
+export const revalidate = false
+
 let supabase;
 
 try {

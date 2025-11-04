@@ -15,7 +15,6 @@ const nextConfig = {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
-    NODE_VERSION: process.env.NODE_VERSION,
   },
   // Configuración adicional para variables de entorno - DOBLE SEGURIDAD
   publicRuntimeConfig: {

@@ -1,9 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
-// Configuración para export estático
-export const dynamic = 'force-static'
-export const revalidate = false
+// Configuración para rutas dinámicas
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 let supabase;
 

@@ -1,9 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
-// Configuración para export estático
-export const dynamic = 'force-static'
-export const revalidate = false
+// Configuración para rutas
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -220,10 +220,12 @@ export async function GET(request) {
   console.log('URL:', request.url)
   console.log('Headers:', Object.fromEntries(request.headers.entries()))
   
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://citysoccer.onrender.com'
+  
   return NextResponse.json({ 
     message: 'CitySoccer Webhook endpoint is working',
     timestamp: new Date().toISOString(),
-    url: 'https://0kt1mzhf-3000.brs.devtunnels.ms/arrendarcancha/api/payment/webhook',
+    url: `${baseUrl}/arrendarcancha/api/payment/webhook`,
     methods: ['GET', 'POST'],
     status: 'OK'
   })

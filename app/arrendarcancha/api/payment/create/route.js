@@ -3,9 +3,9 @@ import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import axios from 'axios'
 
-// Configuración para export estático
-export const dynamic = 'force-static'
-export const revalidate = false
+// Configuración para rutas
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 let supabase;
 
@@ -18,10 +18,10 @@ try {
   console.error('Error initializing Supabase client:', error);
 }
 
-// Getnet credentials
-const ENDPOINT_URL = 'https://checkout.test.getnet.cl'
-const LOGIN = '7ffbb7bf1f7361b1200b2e8d74e1d76f'
-const SECRET_KEY = 'SnZP3D63n3I9dH9O'
+// Getnet credentials - Preferencia a variables de entorno
+const ENDPOINT_URL = process.env.GETNET_ENDPOINT_URL || 'https://checkout.test.getnet.cl'
+const LOGIN = process.env.GETNET_LOGIN || '7ffbb7bf1f7361b1200b2e8d74e1d76f'
+const SECRET_KEY = process.env.GETNET_SECRET_KEY || 'SnZP3D63n3I9dH9O'
 
 function generateAuth() {
   const seed = new Date().toISOString()
@@ -123,8 +123,7 @@ export async function POST(request) {
     const expiration = expirationDate.toISOString()
 
     const auth = generateAuth()
-    // Usar la URL del túnel
-    const baseUrl = 'https://0kt1mzhf-3000.brs.devtunnels.ms'
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://citysoccer.onrender.com'
 
     const paymentData = {
       auth: auth,

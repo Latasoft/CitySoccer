@@ -2,7 +2,7 @@
 const nextConfig = {
   // Configuración para Render (SSR habilitado)
   // output: 'export', // Comentado para permitir SSR en Render
-  trailingSlash: true,
+  // trailingSlash: true, // deshabilitado
   images: {
     unoptimized: true
   },

@@ -135,7 +135,7 @@ export async function POST(request) {
         email: buyerEmail,
         document: "11111111-9",
         documentType: "CLRUT",
-        mobile: 3006108300
+        mobile: "+56912345678"
       },
       payment: {
         reference: orderId,

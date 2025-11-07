@@ -148,6 +148,7 @@ export async function POST(request) {
       ipAddress: "127.0.0.1",
       returnUrl: `${baseUrl}/arrendarcancha/payment/result?orderId=${orderId}`,
       cancelUrl: `${baseUrl}/arrendarcancha/payment/cancel?orderId=${orderId}`,
+      notificationUrl: `${baseUrl}/arrendarcancha/api/payment/webhook`,
       userAgent: "CitySoccer/1.0"
     }
 

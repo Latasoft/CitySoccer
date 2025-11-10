@@ -376,17 +376,6 @@ export default function Navigation() {
                     )}
                 </nav>
             )}
-
-            {/* Spacer for content - Different behavior for mobile vs desktop */}
-            <div
-                className={`${
-                    isMobile
-                        ? "pt-[72px]" // Fixed top padding for mobile
-                        : `transition-all ease-in-out duration-[382ms] ${
-                            menuOpen ? "ml-80" : "ml-20"
-                        }` // Dynamic left margin for desktop
-                }`}
-            ></div>
         </>
     );
 }

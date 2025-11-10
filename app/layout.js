@@ -27,7 +27,12 @@ export default function RootLayout({ children }) {
         <AdminModeProvider>
           <Navigation />
           
-          {children}
+          {/* Main content with responsive padding for navigation */}
+          {/* Mobile: top padding | Desktop: left padding */}
+          <main className="pt-[72px] md:pt-0 md:pl-20 transition-all duration-[382ms]">
+            {children}
+          </main>
+          
           <Footer />
         </AdminModeProvider>
       </body>

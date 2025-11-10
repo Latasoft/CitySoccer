@@ -2,6 +2,20 @@ import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import axios from 'axios'
+import {
+  ORDER_ID_PREFIX,
+  PAYMENT_EXPIRATION_MINUTES,
+  DEFAULT_IP,
+  DEFAULT_SURNAME,
+  DEFAULT_RUT,
+  DEFAULT_PHONE,
+  DOCUMENT_TYPE,
+  USER_AGENT,
+  GETNET_TIMEOUT_MS,
+  getDefaultPaymentDescription,
+  TRANSACTION_STATUS,
+  ERROR_MESSAGES
+} from '@/lib/constants'
 
 // Configuración para rutas
 export const dynamic = 'force-dynamic'
@@ -18,10 +32,14 @@ try {
   console.error('Error initializing Supabase client:', error);
 }
 
-// Getnet credentials - Preferencia a variables de entorno
-const ENDPOINT_URL = process.env.GETNET_ENDPOINT_URL || 'https://checkout.test.getnet.cl'
-const LOGIN = process.env.GETNET_LOGIN || '7ffbb7bf1f7361b1200b2e8d74e1d76f'
-const SECRET_KEY = process.env.GETNET_SECRET_KEY || 'SnZP3D63n3I9dH9O'
+// Getnet credentials desde variables de entorno
+const ENDPOINT_URL = process.env.GETNET_ENDPOINT_URL
+const LOGIN = process.env.GETNET_LOGIN
+const SECRET_KEY = process.env.GETNET_SECRET_KEY
+
+if (!ENDPOINT_URL || !LOGIN || !SECRET_KEY) {
+  console.error('Missing GetNet credentials in environment variables')
+}
 
 function generateAuth() {
   const seed = new Date().toISOString()
@@ -83,7 +101,7 @@ export async function POST(request) {
     }
 
     // Crear transacción pendiente en Supabase
-    const orderId = `CS-${Date.now()}`
+    const orderId = `${ORDER_ID_PREFIX}${Date.now()}`
     console.log('Creating transaction with orderId:', orderId)
 
     const { data: transaction, error: dbError } = await supabase
@@ -94,11 +112,13 @@ export async function POST(request) {
         currency: currency.toUpperCase(),
         buyer_email: buyerEmail,
         buyer_name: buyerName,
-        description: description || `Pago CitySoccer - ${orderId}`,
+        buyer_phone: null,
+        buyer_rut: null,
+        description: description || getDefaultPaymentDescription(orderId),
         fecha: fecha || null,
         hora: hora || null,
         cancha_id: cancha_id || null,
-        status: 'PENDING',
+        status: TRANSACTION_STATUS.PENDING,
         created_at: new Date().toISOString()
       })
       .select()
@@ -108,7 +128,7 @@ export async function POST(request) {
       console.error('Database insert error:', dbError)
       return NextResponse.json(
         { 
-          error: 'Error creando transacción',
+          error: ERROR_MESSAGES.DATABASE,
           details: dbError.message
         },
         { status: 500 }
@@ -119,37 +139,52 @@ export async function POST(request) {
 
     // Crear sesión en Getnet
     const expirationDate = new Date()
-    expirationDate.setMinutes(expirationDate.getMinutes() + 15)
+    expirationDate.setMinutes(expirationDate.getMinutes() + PAYMENT_EXPIRATION_MINUTES)
     const expiration = expirationDate.toISOString()
 
     const auth = generateAuth()
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://citysoccer.onrender.com'
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+
+    if (!baseUrl) {
+      console.error('NEXT_PUBLIC_BASE_URL not set in environment variables')
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      )
+    }
+
+    // Obtener IP del cliente (requerido por GetNet)
+    const clientIpAddress = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+                            || request.headers.get('x-real-ip')
+                            || DEFAULT_IP
+    
+    console.log('Client IP Address:', clientIpAddress)
 
     const paymentData = {
       auth: auth,
       locale: "es_CL",
       buyer: {
         name: buyerName,
-        surname: "Usuario",
+        surname: DEFAULT_SURNAME,
         email: buyerEmail,
-        document: "11111111-9",
-        documentType: "CLRUT",
-        mobile: "+56912345678"
+        document: buyerRut || DEFAULT_RUT,
+        documentType: DOCUMENT_TYPE,
+        mobile: buyerPhone || DEFAULT_PHONE
       },
       payment: {
         reference: orderId,
-        description: description || `Pago CitySoccer - ${orderId}`,
+        description: description || getDefaultPaymentDescription(orderId),
         amount: {
           currency: currency.toUpperCase(),
           total: parseInt(amount)
         }
       },
       expiration: expiration,
-      ipAddress: "127.0.0.1",
+      ipAddress: clientIpAddress,
       returnUrl: `${baseUrl}/arrendarcancha/payment/result?orderId=${orderId}`,
       cancelUrl: `${baseUrl}/arrendarcancha/payment/cancel?orderId=${orderId}`,
       notificationUrl: `${baseUrl}/arrendarcancha/api/payment/webhook`,
-      userAgent: "CitySoccer/1.0"
+      userAgent: USER_AGENT
     }
 
     console.log('Sending to Getnet:', JSON.stringify(paymentData, null, 2))
@@ -160,7 +195,7 @@ export async function POST(request) {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-      timeout: 30000
+      timeout: GETNET_TIMEOUT_MS
     })
 
     console.log('Getnet response:', response.data)
@@ -189,7 +224,7 @@ export async function POST(request) {
       console.error('Getnet API error response:', error.response.data)
       return NextResponse.json(
         { 
-          error: 'Error del procesador de pagos',
+          error: ERROR_MESSAGES.GETNET_ERROR,
           details: error.response.data
         },
         { status: error.response.status }
@@ -198,7 +233,7 @@ export async function POST(request) {
     
     return NextResponse.json(
       { 
-        error: 'Error interno del servidor',
+        error: ERROR_MESSAGES.INTERNAL_ERROR,
         details: error.message
       },
       { status: 500 }

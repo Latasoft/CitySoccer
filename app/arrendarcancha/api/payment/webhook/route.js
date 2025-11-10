@@ -1,5 +1,15 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { buscarOCrearCliente } from '@/lib/clienteService'
+import {
+  TRANSACTION_STATUS,
+  GETNET_STATUS_MAP,
+  DEFAULT_TRANSACTION_STATUS,
+  RESERVATION_STATUS,
+  DEFAULT_RESERVATION_STATUS,
+  calculateEndTime,
+  ERROR_MESSAGES
+} from '@/lib/constants'
 
 // Configuración para rutas
 export const dynamic = 'force-dynamic'
@@ -63,22 +73,13 @@ export async function POST(request) {
     }
 
     // Mapear estados de Getnet a nuestros estados
-    let transactionStatus = 'PENDING'
-    switch (status?.status) {
-      case 'APPROVED':
-        transactionStatus = 'APPROVED'
-        break
-      case 'REJECTED':
-        transactionStatus = 'REJECTED'
-        break
-      case 'PENDING':
-        transactionStatus = 'PENDING'
-        break
-      default:
-        transactionStatus = 'FAILED'
-    }
+    const getnetStatus = status?.status
+    const transactionStatus = GETNET_STATUS_MAP[getnetStatus] || DEFAULT_TRANSACTION_STATUS
 
-    console.log('Mapped transaction status:', transactionStatus)
+    console.log('Mapped transaction status:', { 
+      getnetStatus, 
+      mappedStatus: transactionStatus 
+    })
 
     // Verificar si la transacción existe
     const { data: existingTransaction, error: findError } = await supabase
@@ -141,26 +142,56 @@ export async function POST(request) {
     console.log('Transaction updated successfully:', data)
 
     // Si el pago fue aprobado, crear la reserva
-    if (transactionStatus === 'APPROVED' && existingTransaction.cancha_id) {
+    if (transactionStatus === TRANSACTION_STATUS.APPROVED && existingTransaction.cancha_id) {
       console.log('Creating reservation for approved payment...')
       
       try {
-        // Crear la reserva en la tabla reservas
+        // 1. Buscar o crear cliente con los datos de la transacción
+        console.log('Buscando o creando cliente...')
+        const resultadoCliente = await buscarOCrearCliente({
+          email: existingTransaction.buyer_email,
+          nombre: existingTransaction.buyer_name,
+          telefono: existingTransaction.buyer_phone,
+          rut: existingTransaction.buyer_rut
+        })
+
+        if (!resultadoCliente.success) {
+          console.error('Error gestionando cliente:', resultadoCliente.error)
+          return NextResponse.json({ 
+            received: true,
+            status: transactionStatus,
+            orderId: reference,
+            message: 'Webhook processed but client creation failed',
+            error: resultadoCliente.error
+          })
+        }
+
+        const cliente = resultadoCliente.cliente
+        console.log('Cliente obtenido/creado:', cliente.id)
+
+        // 2. Calcular hora_fin usando helper function
+        const horaInicio = existingTransaction.hora
+        const horaFin = calculateEndTime(horaInicio)
+        
+        console.log('Horarios:', { hora_inicio: horaInicio, hora_fin: horaFin })
+
+        // 3. Crear la reserva con el cliente_id
         const { data: reservaData, error: reservaError } = await supabase
           .from('reservas')
           .insert({
-            cliente_id: 1, // Siempre cliente ID 1 como especificaste
+            cliente_id: cliente.id,
             cancha_id: existingTransaction.cancha_id,
             fecha: existingTransaction.fecha,
-            hora_inicio: existingTransaction.hora,
-            estado: 'confirmada' // Siempre confirmada
+            hora_inicio: horaInicio,
+            hora_fin: horaFin,
+            transaction_id: reference,
+            estado: DEFAULT_RESERVATION_STATUS
           })
           .select()
           .single()
 
         if (reservaError) {
           console.error('Error creating reservation:', reservaError)
-          // No falla el webhook, solo loguea el error
           return NextResponse.json({ 
             received: true,
             status: transactionStatus,
@@ -177,6 +208,11 @@ export async function POST(request) {
           status: transactionStatus,
           orderId: reference,
           message: 'Webhook processed successfully and reservation created',
+          cliente: {
+            id: cliente.id,
+            nombre: cliente.nombre,
+            email: cliente.email
+          },
           reservation: {
             id: reservaData.id,
             cancha_id: reservaData.cancha_id,
@@ -220,7 +256,13 @@ export async function GET(request) {
   console.log('URL:', request.url)
   console.log('Headers:', Object.fromEntries(request.headers.entries()))
   
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://citysoccer.onrender.com'
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+  
+  if (!baseUrl) {
+    return NextResponse.json({ 
+      error: 'Server configuration error: NEXT_PUBLIC_BASE_URL not set'
+    }, { status: 500 })
+  }
   
   return NextResponse.json({ 
     message: 'CitySoccer Webhook endpoint is working',

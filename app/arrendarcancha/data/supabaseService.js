@@ -94,11 +94,6 @@ export const verificarDisponibilidad = async (fecha, horaInicio, canchaId) => {
     if (error) throw error;
 
     const estaDisponible = data.length === 0;
-    
-    // Log para debugging
-    if (!estaDisponible && canchaInfo.tipo === 'pickleball') {
-      console.log(`Cancha pickleball ${canchaId} ocupada en ${horaInicio} el ${fecha}:`, data);
-    }
 
     return estaDisponible;
   } catch (error) {

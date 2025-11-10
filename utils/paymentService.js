@@ -24,8 +24,6 @@ export const createPayment = async ({
     cancha_id
   }
 
-  console.log('Sending payment data:', formData)
-
   try {
     const response = await fetch('/arrendarcancha/api/payment/create', {
       method: 'POST',
@@ -34,11 +32,8 @@ export const createPayment = async ({
       },
       body: JSON.stringify(formData)
     })
-
-    console.log('Response status:', response.status)
     
     const data = await response.json()
-    console.log('Response data:', data)
 
     // Manejar error 409 - Conflicto de disponibilidad
     if (response.status === 409) {
@@ -52,7 +47,6 @@ export const createPayment = async ({
     }
 
     if (data.success) {
-      console.log('Redirecting to:', data.checkoutUrl)
       window.location.href = data.checkoutUrl
       return { success: true, checkoutUrl: data.checkoutUrl }
     } else {

@@ -70,7 +70,6 @@ const ArrendamientoBase = ({
         
         if (tarifas && Object.keys(tarifas.weekdays || {}).length > 0) {
           setTarifasReales(tarifas);
-          console.log('✅ Tarifas cargadas desde BD:', tarifas);
         } else {
           console.error('❌ No se encontraron tarifas en la BD para:', tipoBD);
           setTarifasReales(null);
@@ -92,7 +91,6 @@ const ArrendamientoBase = ({
         const canchas = await obtenerCanchasPorTipo(tipoBD);
         
         setAvailableCourts(canchas);
-        console.log(`Canchas cargadas para ${tipoBD}:`, canchas);
         
         // Si solo hay una cancha (futbol9), seleccionarla automáticamente
         if (!requiereSeleccionCancha && canchas.length === 1) {
@@ -199,7 +197,6 @@ const ArrendamientoBase = ({
         })
       );
 
-      console.log('Horarios con disponibilidad:', horariosFormateados);
       setAvailableTimes(horariosFormateados);
     } catch (error) {
       console.error('Error cargando horarios:', error);
@@ -214,8 +211,6 @@ const ArrendamientoBase = ({
     if (!selectedDate || !horarioSeleccionado || availableCourts.length === 0) {
       return;
     }
-
-    console.log(`Verificando disponibilidad para ${horarioSeleccionado} en fecha ${selectedDate}`);
 
     try {
       let canchasConDisponibilidad;
@@ -236,24 +231,7 @@ const ArrendamientoBase = ({
         );
       }
 
-      console.log('Disponibilidad de canchas en horario seleccionado:', canchasConDisponibilidad);
       setCanchasDisponiblesEnHorario(canchasConDisponibilidad);
-      
-      // Contar cuántas canchas están disponibles
-      const canchasLibres = canchasConDisponibilidad.filter(c => c.disponible);
-      const canchasOcupadas = canchasConDisponibilidad.filter(c => !c.disponible);
-      
-      console.log(`Horario ${horarioSeleccionado}: ${canchasLibres.length} canchas disponibles, ${canchasOcupadas.length} ocupadas`);
-      
-      if (canchasOcupadas.length > 0) {
-        console.log('Canchas ocupadas:', canchasOcupadas.map(c => c.nombre));
-        
-        // Para pickleball, mostrar información adicional sobre el conflicto
-        if (esPickleball(tipoCancha)) {
-          console.log('⚠️  PICKLEBALL: Las canchas ocupadas no están disponibles para ninguna modalidad (individual/dobles)');
-        }
-      }
-
     } catch (error) {
       console.error('Error verificando disponibilidad en horario:', error);
       setCanchasDisponiblesEnHorario([]);
@@ -383,7 +361,6 @@ const ArrendamientoBase = ({
       const result = await createPayment(paymentData);
 
       if (result.success) {
-        console.log('Redirigiendo al pago...');
         // El createPayment ya redirige automáticamente
       } else {
         // Manejar error de conflicto específicamente

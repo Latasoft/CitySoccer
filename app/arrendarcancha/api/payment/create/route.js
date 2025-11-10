@@ -64,13 +64,10 @@ function generateAuth() {
 
 export async function POST(request) {
   try {
-    console.log('=== Payment Create API Called ===')
-    
     // Verificar que el body existe
     let body
     try {
       body = await request.json()
-      console.log('Received body:', JSON.stringify(body, null, 2))
     } catch (parseError) {
       console.error('JSON parse error:', parseError)
       return NextResponse.json(
@@ -85,11 +82,8 @@ export async function POST(request) {
     const buyerRut = body.buyerRut || null
     const buyerPhone = body.buyerPhone || null
 
-    console.log('Extracted fields:', { amount, currency, buyerEmail, buyerName, buyerRut, buyerPhone, description, fecha, hora, cancha_id })
-
     // Validar datos requeridos
     if (!amount || !currency || !buyerEmail || !buyerName) {
-      console.log('Missing required fields')
       return NextResponse.json(
         { 
           error: 'Faltan datos requeridos',
@@ -106,8 +100,6 @@ export async function POST(request) {
 
     // VERIFICAR DISPONIBILIDAD ANTES DE CREAR TRANSACCIÓN
     if (cancha_id && fecha && hora) {
-      console.log('Verificando disponibilidad de cancha antes de crear transacción...')
-      
       const { data: conflicto, error: checkError } = await supabase
         .from('reservas')
         .select('id, cliente_id, estado')
@@ -129,7 +121,6 @@ export async function POST(request) {
       }
 
       if (conflicto) {
-        console.log('⚠️ Cancha ya reservada:', conflicto)
         return NextResponse.json(
           { 
             error: 'Esta cancha ya está reservada para ese horario',
@@ -143,13 +134,10 @@ export async function POST(request) {
           { status: 409 } // 409 Conflict
         )
       }
-
-      console.log('✅ Cancha disponible, procediendo con la transacción...')
     }
 
     // Crear transacción pendiente en Supabase
     const orderId = `${ORDER_ID_PREFIX}${Date.now()}`
-    console.log('Creating transaction with orderId:', orderId)
 
     const { data: transaction, error: dbError } = await supabase
       .from('transactions')
@@ -182,8 +170,6 @@ export async function POST(request) {
       )
     }
 
-    console.log('Transaction created:', transaction)
-
     // Crear sesión en Getnet
     const expirationDate = new Date()
     expirationDate.setMinutes(expirationDate.getMinutes() + PAYMENT_EXPIRATION_MINUTES)
@@ -204,8 +190,6 @@ export async function POST(request) {
     const clientIpAddress = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
                             || request.headers.get('x-real-ip')
                             || DEFAULT_IP
-    
-    console.log('Client IP Address:', clientIpAddress)
 
     const paymentData = {
       auth: auth,
@@ -234,9 +218,6 @@ export async function POST(request) {
       userAgent: USER_AGENT
     }
 
-    console.log('Sending to Getnet:', JSON.stringify(paymentData, null, 2))
-    console.log('Webhook will be sent to:', `${baseUrl}/arrendarcancha/api/payment/webhook`)
-
     const response = await axios.post(`${ENDPOINT_URL}/api/session/`, paymentData, {
       headers: {
         'Content-Type': 'application/json',
@@ -244,8 +225,6 @@ export async function POST(request) {
       },
       timeout: GETNET_TIMEOUT_MS
     })
-
-    console.log('Getnet response:', response.data)
 
     // Actualizar transacción con datos de Getnet
     await supabase

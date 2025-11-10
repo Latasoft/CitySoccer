@@ -10,10 +10,10 @@
 -- =====================================================
 
 INSERT INTO canchas (id, nombre, tipo, activo) VALUES
-(1, 'f7_1', 'f7', true),
-(2, 'f7_2', 'f7', true),
-(3, 'f7_3', 'f7', true),
-(4, 'f9', 'f9', true),
+(1, 'f7_1', 'futbol7', true),
+(2, 'f7_2', 'futbol7', true),
+(3, 'f7_3', 'futbol7', true),
+(4, 'f9', 'futbol9', true),
 (5, 'pickleball_1', 'pickleball', true),
 (6, 'pickeball_2', 'pickleball', true),
 (7, 'pickeball_3', 'pickleball', true)

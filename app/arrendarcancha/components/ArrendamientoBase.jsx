@@ -35,11 +35,12 @@ const ArrendamientoBase = ({
   // Mapeo de nombres de tipos de cancha para la BD
   const mapTipoCancha = (tipo) => {
     const mapping = {
-      'f7': 'f7',
-      'f9': 'f9', 
+      'f7': 'futbol7',
+      'f9': 'futbol9', 
       'pickleball': 'pickleball',
-      'futbol7': 'f7',
-      'futbol9': 'f9'
+      'pickleball-dobles': 'pickleball-dobles',
+      'futbol7': 'futbol7',
+      'futbol9': 'futbol9'
     };
     return mapping[tipo] || tipo;
   };

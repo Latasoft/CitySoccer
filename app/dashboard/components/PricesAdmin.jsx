@@ -3,7 +3,11 @@
 import { useState, useEffect } from 'react';
 import { pricesService } from '@/lib/adminService';
 import { DollarSign, Save, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { CURRENCY } from '@/lib/constants';
 
+/**
+ * Componente para administrar precios de canchas
+ */
 const PricesAdmin = () => {
   const [precios, setPrecios] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -80,7 +84,7 @@ const PricesAdmin = () => {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('es-CL', {
       style: 'currency',
-      currency: 'CLP'
+      currency: CURRENCY
     }).format(amount);
   };
 

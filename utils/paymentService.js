@@ -2,6 +2,7 @@
  * Servicio de pagos para CitySoccer
  * Maneja la creación de pagos y comunicación con la API
  */
+import { CURRENCY } from '@/lib/constants'
 
 export const createPayment = async ({
   amount,
@@ -14,7 +15,7 @@ export const createPayment = async ({
 }) => {
   const formData = {
     amount,
-    currency: 'CLP',
+    currency: CURRENCY,
     buyerName,
     buyerEmail,
     description,
@@ -81,7 +82,7 @@ export const checkPaymentStatus = async (paymentId) => {
 export const formatPrice = (price) => {
   return new Intl.NumberFormat('es-CL', {
     style: 'currency',
-    currency: 'CLP',
+    currency: CURRENCY,
     minimumFractionDigits: 0
   }).format(price)
 }

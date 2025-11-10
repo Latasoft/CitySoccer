@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { TRANSACTION_STATUS } from '@/lib/constants'
 
 export default function PaymentResultContent() {
   const [transaction, setTransaction] = useState(null)
@@ -31,7 +32,7 @@ export default function PaymentResultContent() {
         requestID: allParams.requestId || 'return-' + Date.now(),
         reference: orderId,
         status: {
-          status: 'APPROVED', // Asumir aprobado al llegar a returnUrl
+          status: TRANSACTION_STATUS.APPROVED,
           reason: '00',
           message: 'Payment approved via return URL',
           authorization: allParams.authorization || 'AUTH-' + Date.now(),
@@ -85,9 +86,9 @@ export default function PaymentResultContent() {
         // Crear transacción manual si no existe
         const finalTransaction = {
           orderId: orderId,
-          status: 'APPROVED',
+          status: TRANSACTION_STATUS.APPROVED,
           amount: 1000,
-          currency: 'CLP',
+          currency: 'CLP', // Mantener para Intl.NumberFormat
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           authorizationCode: 'MANUAL-' + Date.now(),
@@ -110,7 +111,7 @@ export default function PaymentResultContent() {
           setAttempts(attemptNumber)
           
           // Si el estado no es PENDING o hemos recibido webhook, parar
-          if (data.status !== 'PENDING' || data.webhookReceived) {
+          if (data.status !== TRANSACTION_STATUS.PENDING || data.webhookReceived) {
             console.log('Final status received:', data.status)
             setLoading(false)
           } else {
@@ -157,11 +158,11 @@ export default function PaymentResultContent() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'APPROVED':
+      case TRANSACTION_STATUS.APPROVED:
         return 'text-green-600 bg-green-100'
-      case 'REJECTED':
+      case TRANSACTION_STATUS.REJECTED:
         return 'text-red-600 bg-red-100'
-      case 'PENDING':
+      case TRANSACTION_STATUS.PENDING:
         return 'text-yellow-600 bg-yellow-100'
       default:
         return 'text-gray-600 bg-gray-100'
@@ -170,11 +171,11 @@ export default function PaymentResultContent() {
 
   const getStatusText = (status) => {
     switch (status) {
-      case 'APPROVED':
+      case TRANSACTION_STATUS.APPROVED:
         return '✅ Pago Aprobado'
-      case 'REJECTED':
+      case TRANSACTION_STATUS.REJECTED:
         return '❌ Pago Rechazado'
-      case 'PENDING':
+      case TRANSACTION_STATUS.PENDING:
         return '⏳ Pago Pendiente'
       default:
         return '❓ Estado Desconocido'

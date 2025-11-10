@@ -210,33 +210,34 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-950">
       {/* Header */}
       <header className="bg-gray-800/50 border-b border-gray-700 backdrop-blur-sm">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+        <div className="max-w-full px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-[#ffee00]">CitySoccer Admin</h1>
-              <p className="text-gray-300">Panel de Administración</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-[#ffee00]">CitySoccer Admin</h1>
+              <p className="text-sm sm:text-base text-gray-300">Panel de Administración</p>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <p className="text-white font-semibold">{user?.email}</p>
-                <p className="text-gray-400 text-sm capitalize">Administrador</p>
+            <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+              <div className="text-left sm:text-right flex-1 sm:flex-initial">
+                <p className="text-white font-semibold text-sm sm:text-base truncate">{user?.email}</p>
+                <p className="text-gray-400 text-xs sm:text-sm capitalize">Administrador</p>
               </div>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white transition-colors"
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white transition-colors text-sm sm:text-base whitespace-nowrap"
               >
                 <LogOut className="w-4 h-4" />
-                Cerrar Sesión
+                <span className="hidden sm:inline">Cerrar Sesión</span>
+                <span className="sm:hidden">Salir</span>
               </button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-6 py-8">
-        <div className="flex gap-8">
+      <div className="max-w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
           {/* Sidebar */}
-          <aside className="w-64 bg-gray-800/50 rounded-xl p-6 h-fit">
+          <aside className="w-full lg:w-64 bg-gray-800/50 rounded-xl p-4 sm:p-6 h-fit">
             <nav className="space-y-2">
               {[
                 { id: 'overview', label: 'Resumen', icon: Activity },
@@ -273,9 +274,9 @@ export default function Dashboard() {
           </aside>
 
           {/* Main Content */}
-          <main className="flex-1">
+          <main className="flex-1 min-w-0">
             {activeTab === 'overview' && (
-              <div className="space-y-8">
+              <div className="space-y-6 sm:space-y-8">
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {[

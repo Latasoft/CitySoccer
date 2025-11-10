@@ -212,75 +212,83 @@ export default function ClientesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-950">
       <header className="bg-gray-800/50 border-b border-gray-700 backdrop-blur-sm">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-[#ffee00]">Clientes</h1>
-            <p className="text-gray-300">Ranking de clientes por reservas confirmadas</p>
+        <div className="max-w-full px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-[#ffee00]">Clientes</h1>
+              <p className="text-sm sm:text-base text-gray-300">Ranking de clientes por reservas confirmadas</p>
+            </div>
+            <Link
+              href="/dashboard"
+              className="px-4 py-2 rounded-lg border border-gray-700 text-gray-200 hover:bg-gray-700/50 transition whitespace-nowrap"
+            >
+              Volver al Dashboard
+            </Link>
           </div>
-          <Link
-            href="/dashboard"
-            className="px-4 py-2 rounded-lg border border-gray-700 text-gray-200 hover:bg-gray-700/50 transition"
-          >
-            Volver al Dashboard
-          </Link>
         </div>
       </header>
 
-      <div className="container mx-auto px-6 py-8">
+      <div className="max-w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Filtros */}
-        <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700 mb-6">
-          <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-end">
-            <div className="flex-1">
-              <label className="text-sm text-gray-300 mb-1 block">Buscar cliente</label>
+        <div className="bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-700 mb-4 sm:mb-6">
+          <div className="flex flex-col gap-3">
+            {/* Búsqueda */}
+            <div className="w-full">
+              <label className="text-xs sm:text-sm text-gray-300 mb-1 block">Buscar cliente</label>
               <div className="relative">
                 <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Nombre, correo o teléfono..."
-                  className="w-full bg-gray-900 border border-gray-700 rounded-lg pl-9 pr-3 py-2 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#ffee00]"
+                  className="w-full bg-gray-900 border border-gray-700 rounded-lg pl-9 pr-3 py-2 text-sm sm:text-base text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#ffee00]"
                 />
               </div>
             </div>
-            <div>
-              <label className="text-sm text-gray-300 mb-1 block">Filtrar por cancha</label>
-              <select
-                value={canchaId}
-                onChange={(e) => { setCanchaId(e.target.value); setPage(1); }}
-                className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#ffee00]"
-              >
-                <option value="todas">Todas las canchas</option>
-                {loadingCanchas ? (
-                  <option disabled>Cargando...</option>
-                ) : (
-                  canchas.map(c => (
-                    <option key={c.id} value={c.id}>
-                      {formatNombreCancha(c)}
-                    </option>
-                  ))
-                )}
-              </select>
-            </div>
-            <div>
-              <label className="text-sm text-gray-300 mb-1 block">Ordenar por</label>
-              <select
-                value={orderBy}
-                onChange={(e) => { setOrderBy(e.target.value); setPage(1); }}
-                className="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#ffee00]"
-              >
-                <option value="reservas_desc">Más reservas</option>
-                <option value="reservas_asc">Menos reservas</option>
-                <option value="nombre_asc">Nombre A-Z</option>
-                <option value="nombre_desc">Nombre Z-A</option>
-              </select>
-            </div>
-            <div className="lg:ml-auto">
-              <button
-                onClick={resetFiltros}
-                className="flex items-center gap-2 px-4 py-2 border border-gray-700 text-gray-200 rounded-lg hover:bg-gray-700/50 transition"
-              >
-                <Filter className="w-4 h-4" /> Limpiar
-              </button>
+            
+            {/* Filtros en grid responsive */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div>
+                <label className="text-xs sm:text-sm text-gray-300 mb-1 block">Filtrar por cancha</label>
+                <select
+                  value={canchaId}
+                  onChange={(e) => { setCanchaId(e.target.value); setPage(1); }}
+                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm sm:text-base text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#ffee00]"
+                >
+                  <option value="todas">Todas las canchas</option>
+                  {loadingCanchas ? (
+                    <option disabled>Cargando...</option>
+                  ) : (
+                    canchas.map(c => (
+                      <option key={c.id} value={c.id}>
+                        {formatNombreCancha(c)}
+                      </option>
+                    ))
+                  )}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs sm:text-sm text-gray-300 mb-1 block">Ordenar por</label>
+                <select
+                  value={orderBy}
+                  onChange={(e) => { setOrderBy(e.target.value); setPage(1); }}
+                  className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm sm:text-base text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#ffee00]"
+                >
+                  <option value="reservas_desc">Más reservas</option>
+                  <option value="reservas_asc">Menos reservas</option>
+                  <option value="nombre_asc">Nombre A-Z</option>
+                  <option value="nombre_desc">Nombre Z-A</option>
+                </select>
+              </div>
+              <div className="sm:col-span-2 lg:col-span-1">
+                <label className="text-xs sm:text-sm text-gray-300 mb-1 block invisible">Acción</label>
+                <button
+                  onClick={resetFiltros}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-gray-700 text-gray-200 rounded-lg hover:bg-gray-700/50 transition"
+                >
+                  <Filter className="w-4 h-4" /> Limpiar filtros
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -294,14 +302,14 @@ export default function ClientesPage() {
         {/* Tabla de Clientes */}
         <div className="bg-gray-800/50 rounded-xl border border-gray-700 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full">
+            <table className="w-full min-w-[640px]">
               <thead className="bg-gray-800/70">
                 <tr>
-                  <th className="text-left text-gray-300 text-sm font-semibold px-4 py-3">#</th>
-                  <th className="text-left text-gray-300 text-sm font-semibold px-4 py-3">Cliente</th>
-                  <th className="text-left text-gray-300 text-sm font-semibold px-4 py-3">Contacto</th>
-                  <th className="text-center text-gray-300 text-sm font-semibold px-4 py-3">Reservas Confirmadas</th>
-                  <th className="text-left text-gray-300 text-sm font-semibold px-4 py-3">Cliente desde</th>
+                  <th className="text-left text-gray-300 text-xs sm:text-sm font-semibold px-2 sm:px-4 py-3">#</th>
+                  <th className="text-left text-gray-300 text-xs sm:text-sm font-semibold px-2 sm:px-4 py-3">Cliente</th>
+                  <th className="text-left text-gray-300 text-xs sm:text-sm font-semibold px-2 sm:px-4 py-3">Contacto</th>
+                  <th className="text-center text-gray-300 text-xs sm:text-sm font-semibold px-2 sm:px-4 py-3">Reservas</th>
+                  <th className="text-left text-gray-300 text-xs sm:text-sm font-semibold px-2 sm:px-4 py-3">Desde</th>
                 </tr>
               </thead>
               <tbody>
@@ -320,56 +328,56 @@ export default function ClientesPage() {
                 ) : (
                   filteredBySearch.map((cliente, index) => (
                     <tr key={cliente.id} className="border-t border-gray-700/70 hover:bg-gray-700/20 transition-colors">
-                      <td className="px-4 py-4">
-                        <div className="flex items-center gap-2">
+                      <td className="px-2 sm:px-4 py-3 sm:py-4">
+                        <div className="flex items-center gap-1 sm:gap-2">
                           {orderBy.includes('reservas') && (
-                            <div className="w-8 h-8 bg-[#ffee00] text-black rounded-full flex items-center justify-center font-bold text-sm">
+                            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-[#ffee00] text-black rounded-full flex items-center justify-center font-bold text-xs sm:text-sm">
                               {(page - 1) * pageSize + index + 1}
                             </div>
                           )}
                           {orderBy.includes('reservas') && cliente.reservas_confirmadas >= 10 && (
-                            <Trophy className="w-5 h-5 text-yellow-500" title="Cliente VIP (10+ reservas)" />
+                            <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500" title="Cliente VIP (10+ reservas)" />
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                            <User className="w-5 h-5 text-white" />
+                      <td className="px-2 sm:px-4 py-3 sm:py-4">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                           </div>
-                          <div>
-                            <p className="text-white font-semibold">{cliente.nombre}</p>
+                          <div className="min-w-0">
+                            <p className="text-white font-semibold text-xs sm:text-base truncate">{cliente.nombre}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-4">
+                      <td className="px-2 sm:px-4 py-3 sm:py-4">
                         <div className="space-y-1">
                           {cliente.correo && (
-                            <div className="flex items-center gap-2 text-gray-300 text-sm">
-                              <Mail className="w-4 h-4 text-gray-400" />
-                              {cliente.correo}
+                            <div className="flex items-center gap-1 sm:gap-2 text-gray-300 text-xs sm:text-sm">
+                              <Mail className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
+                              <span className="truncate max-w-[150px] sm:max-w-none">{cliente.correo}</span>
                             </div>
                           )}
                           {cliente.telefono && (
-                            <div className="flex items-center gap-2 text-gray-300 text-sm">
-                              <Phone className="w-4 h-4 text-gray-400" />
-                              {cliente.telefono}
+                            <div className="flex items-center gap-1 sm:gap-2 text-gray-300 text-xs sm:text-sm">
+                              <Phone className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
+                              <span>{cliente.telefono}</span>
                             </div>
                           )}
                           {!cliente.correo && !cliente.telefono && (
-                            <span className="text-gray-500 text-sm">Sin contacto</span>
+                            <span className="text-gray-500 text-xs sm:text-sm">Sin contacto</span>
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-4 text-center">
-                        <span className="bg-[#ffee00] text-black px-3 py-1 rounded-full text-sm font-bold">
+                      <td className="px-2 sm:px-4 py-3 sm:py-4 text-center">
+                        <span className="bg-[#ffee00] text-black px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap">
                           {cliente.reservas_confirmadas}
                         </span>
                       </td>
-                      <td className="px-4 py-4">
-                        <div className="flex items-center gap-2 text-gray-300 text-sm">
-                          <Calendar className="w-4 h-4 text-gray-400" />
-                          {new Date(cliente.creado_en).toLocaleDateString()}
+                      <td className="px-2 sm:px-4 py-3 sm:py-4">
+                        <div className="flex items-center gap-1 sm:gap-2 text-gray-300 text-xs sm:text-sm">
+                          <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
+                          <span className="whitespace-nowrap">{new Date(cliente.creado_en).toLocaleDateString()}</span>
                         </div>
                       </td>
                     </tr>
@@ -381,8 +389,8 @@ export default function ClientesPage() {
 
           {/* Paginación */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-700">
-              <div className="text-gray-400 text-sm">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-3 sm:px-4 py-3 border-t border-gray-700">
+              <div className="text-gray-400 text-xs sm:text-sm text-center sm:text-left">
                 Página {page} de {totalPages} • {total} clientes
               </div>
               <div className="flex items-center gap-2">
@@ -406,8 +414,8 @@ export default function ClientesPage() {
         </div>
 
         {/* Estadísticas resumen */}
-        <div className="mt-6 bg-gray-800/50 rounded-xl p-4 border border-gray-700">
-          <div className="text-center text-gray-300">
+        <div className="mt-4 sm:mt-6 bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-700">
+          <div className="text-center text-gray-300 text-xs sm:text-base">
             <p>
               Mostrando <span className="text-[#ffee00] font-semibold">{filteredBySearch.length}</span> clientes
               {canchaId !== 'todas' && (

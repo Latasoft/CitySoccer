@@ -1,23 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-// Validación de variables de entorno
-if (!supabaseUrl || !supabaseKey) {
-  console.error('Supabase configuration missing:', {
-    url: !!supabaseUrl,
-    key: !!supabaseKey,
-    env: process.env.NODE_ENV
-  });
-}
-
-export const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-  },
-});
+import { supabase } from '@/lib/supabaseClient';
 
 // Obtener tarifas reales de la base de datos
 export const obtenerTarifasPorTipo = async (tipoCancha) => {

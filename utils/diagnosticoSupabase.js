@@ -48,9 +48,9 @@ export const diagnosticoSupabase = async () => {
   
   // Test 2: Consulta a tabla precios
   try {
-    const { data, error } = await supabase
+    const { data, error, count } = await supabase
       .from('precios')
-      .select('tipo_cancha, COUNT(*)')
+      .select('tipo_cancha', { count: 'exact' })
       .limit(1);
     
     if (error) {
@@ -59,6 +59,7 @@ export const diagnosticoSupabase = async () => {
     } else {
       console.log('- Consulta precios: ✅ Éxito');
       console.log('- Datos recibidos:', data);
+      console.log('- Total registros:', count);
     }
   } catch (error) {
     console.log('- Consulta precios: ❌ Excepción:', error.message);

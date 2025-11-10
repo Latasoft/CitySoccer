@@ -21,78 +21,49 @@ export default function Login() {
     }
   }, [loading, user, isAdmin, router]);
 
-  // Lista de emails de administradores autorizados
-  const adminEmails = [
-    'benja@gmail.com',
-    'admin@citysoccer.com',
-    'administrador@citysoccer.com',
-    'tiare.latasoft@gmail.com',
-    'ti.caamano@duocuc.cl',
-    // Agrega aquí más emails de administradores autorizados
-  ];
-
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoginLoading(true);
     setError('');
 
     try {
-      // Verificar si el email es de administrador antes de autenticar
-      if (!adminEmails.includes(email.toLowerCase())) {
-        setError('No tienes permisos de administrador.');
-        setLoginLoading(false);
-        return;
-      }
-
-      // Usar la autenticación de Supabase
-      let { data, error: authError } = await supabase.auth.signInWithPassword({
+      // Intentar login en Supabase Auth
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
       });
 
-      // Si el usuario no existe, intentar crearlo automáticamente
-      if (authError && authError.message.includes('Invalid login credentials')) {
-        console.log('Usuario no existe, intentando crear cuenta admin...');
-        
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-          email: email,
-          password: password,
-          options: {
-            emailRedirectTo: undefined // Evitar confirmación por email para admin
-          }
-        });
-
-        if (signUpError) {
-          setError('Error al crear cuenta de administrador. Contacta soporte.');
-          console.error('Error de registro:', signUpError);
-          return;
-        } else {
-          // Intentar login nuevamente después del registro
-          const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: password,
-          });
-          
-          if (loginError) {
-            setError('Cuenta creada, pero error al iniciar sesión. Intenta nuevamente.');
-            return;
-          } else {
-            data = loginData;
-            authError = null;
-          }
-        }
-      }
-
       if (authError) {
         setError('Credenciales incorrectas. Verifica tu correo y contraseña.');
         console.error('Error de autenticación:', authError);
-      } else {
-        // La sesión se sincronizará automáticamente por el hook useAuth
-        // No necesitamos guardar manualmente en localStorage
-        
-        // Redirigir al dashboard
-        router.push('/dashboard');
+        setLoginLoading(false);
+        return;
       }
+
+      // Verificar si el usuario tiene permisos de administrador
+      const { data: adminData, error: adminError } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('user_id', data.user.id)
+        .eq('activo', true)
+        .single();
+
+      if (adminError || !adminData) {
+        // Usuario autenticado pero NO es admin
+        await supabase.auth.signOut();
+        setError('No tienes permisos de administrador para acceder al sistema.');
+        console.error('Usuario sin permisos admin:', email);
+        setLoginLoading(false);
+        return;
+      }
+
+      // Usuario es admin válido
+      console.log('Login exitoso como admin:', adminData.email);
+      
+      // La sesión se sincronizará automáticamente por el hook useAuth
+      // Redirigir al dashboard
+      router.push('/dashboard');
+      
     } catch (err) {
       setError('Error inesperado. Intenta nuevamente.');
       console.error('Error de login:', err);

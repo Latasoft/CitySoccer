@@ -9,14 +9,6 @@ export const useAuth = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
 
-  // Emails autorizados como administradores
-  const adminEmails = [
-    'benja@gmail.com',
-    'admin@citysoccer.com',
-    'administrador@citysoccer.com',
-    'tiare.latasoft@gmail.com',
-  ];
-
   useEffect(() => {
     // Verificar sesión existente
     const checkSession = async () => {
@@ -31,19 +23,28 @@ export const useAuth = () => {
         }
 
         if (session?.user) {
-          const userEmail = session.user.email;
-          const isUserAdmin = adminEmails.includes(userEmail.toLowerCase());
+          // Verificar si es admin en la tabla admin_users
+          const { data: adminData, error: adminError } = await supabase
+            .from('admin_users')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .eq('activo', true)
+            .single();
+          
+          const userIsAdmin = !adminError && !!adminData;
           
           setUser(session.user);
-          setIsAdmin(isUserAdmin);
+          setIsAdmin(userIsAdmin);
           
           // Sincronizar con localStorage
-          if (isUserAdmin) {
+          if (userIsAdmin) {
             localStorage.setItem('admin', JSON.stringify({
-              correo: userEmail,
+              correo: session.user.email,
               rol: 'admin',
               userId: session.user.id
             }));
+          } else {
+            localStorage.removeItem('admin');
           }
         } else {
           // No hay sesión activa, limpiar datos locales
@@ -65,19 +66,28 @@ export const useAuth = () => {
         console.log('Auth state changed:', event, session?.user?.email);
         
         if (session?.user) {
-          const userEmail = session.user.email;
-          const isUserAdmin = adminEmails.includes(userEmail.toLowerCase());
+          // Verificar si es admin en la tabla admin_users
+          const { data: adminData, error: adminError } = await supabase
+            .from('admin_users')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .eq('activo', true)
+            .single();
+          
+          const userIsAdmin = !adminError && !!adminData;
           
           setUser(session.user);
-          setIsAdmin(isUserAdmin);
+          setIsAdmin(userIsAdmin);
           
           // Sincronizar con localStorage
-          if (isUserAdmin) {
+          if (userIsAdmin) {
             localStorage.setItem('admin', JSON.stringify({
-              correo: userEmail,
+              correo: session.user.email,
               rol: 'admin',
               userId: session.user.id
             }));
+          } else {
+            localStorage.removeItem('admin');
           }
         } else {
           // Usuario desconectado

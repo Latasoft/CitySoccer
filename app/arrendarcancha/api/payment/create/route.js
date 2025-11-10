@@ -80,8 +80,12 @@ export async function POST(request) {
     }
 
     const { amount, currency, buyerEmail, buyerName, description, fecha, hora, cancha_id } = body
+    
+    // Campos opcionales - GetNet los requiere pero el frontend no los pide
+    const buyerRut = body.buyerRut || null
+    const buyerPhone = body.buyerPhone || null
 
-    console.log('Extracted fields:', { amount, currency, buyerEmail, buyerName, description, fecha, hora, cancha_id })
+    console.log('Extracted fields:', { amount, currency, buyerEmail, buyerName, buyerRut, buyerPhone, description, fecha, hora, cancha_id })
 
     // Validar datos requeridos
     if (!amount || !currency || !buyerEmail || !buyerName) {

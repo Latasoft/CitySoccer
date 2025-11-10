@@ -63,14 +63,6 @@ export default function ReservasPage() {
     setAdmin(JSON.parse(adminData));
   }, [router]);
 
-  useEffect(() => {
-    loadCanchas();
-  }, []);
-
-  useEffect(() => {
-    fetchReservas();
-  }, [page, fecha, estado, canchaId, fetchReservas]); // búsqueda se filtra en cliente para evitar OR complicadas
-
   const loadCanchas = async () => {
     try {
       setLoadingCanchas(true);
@@ -128,6 +120,15 @@ export default function ReservasPage() {
       setLoading(false);
     }
   }, [page, estado, fecha, canchaId]);
+
+  // useEffect para cargar datos
+  useEffect(() => {
+    loadCanchas();
+  }, []);
+
+  useEffect(() => {
+    fetchReservas();
+  }, [page, fecha, estado, canchaId, fetchReservas]);
 
   const filteredBySearch = useMemo(() => {
     if (!search.trim()) return reservas;

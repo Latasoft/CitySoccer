@@ -52,27 +52,6 @@ export default function ClientesPage() {
     loadCanchas();
   }, []);
 
-  useEffect(() => {
-    fetchClientes();
-  }, [page, canchaId, orderBy, fetchClientes]);
-
-  const loadCanchas = async () => {
-    try {
-      setLoadingCanchas(true);
-      const { data, error } = await supabase
-        .from('canchas')
-        .select('id, nombre, tipo')
-        .order('nombre', { ascending: true });
-      if (error) throw error;
-      setCanchas(data || []);
-    } catch (e) {
-      console.error(e);
-      setError('No se pudieron cargar las canchas.');
-    } finally {
-      setLoadingCanchas(false);
-    }
-  };
-
   const fetchClientes = useCallback(async () => {
     try {
       setLoading(true);
@@ -158,6 +137,32 @@ export default function ClientesPage() {
       setLoading(false);
     }
   }, [page, canchaId, orderBy]);
+
+  const loadCanchas = async () => {
+    try {
+      setLoadingCanchas(true);
+      const { data, error } = await supabase
+        .from('canchas')
+        .select('id, nombre, tipo')
+        .order('nombre', { ascending: true });
+      if (error) throw error;
+      setCanchas(data || []);
+    } catch (e) {
+      console.error(e);
+      setError('No se pudieron cargar las canchas.');
+    } finally {
+      setLoadingCanchas(false);
+    }
+  };
+
+  // useEffect para cargar datos
+  useEffect(() => {
+    loadCanchas();
+  }, []);
+
+  useEffect(() => {
+    fetchClientes();
+  }, [page, canchaId, orderBy, fetchClientes]);
 
   const filteredBySearch = useMemo(() => {
     if (!search.trim()) return clientes;

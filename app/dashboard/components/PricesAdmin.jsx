@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { pricesService } from '@/lib/adminService';
+import { invalidatePricesCache } from '@/lib/dynamicConfigService';
 import { DollarSign, Save, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { CURRENCY } from '@/lib/constants';
 
@@ -60,6 +61,9 @@ const PricesAdmin = () => {
   const savePrecios = async () => {
     try {
       setSaving(true);
+      
+      // Invalidar cache antes de guardar
+      invalidatePricesCache();
       
       const { data, error } = await pricesService.updateBatch(precios);
       if (error) {

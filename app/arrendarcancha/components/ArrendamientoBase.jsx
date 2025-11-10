@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { pricesData } from "../data/pricesData";
 import { 
   obtenerCanchasPorTipo, 
   obtenerReservasPorFecha, 
@@ -9,7 +8,7 @@ import {
   obtenerTarifasPorTipo,
   obtenerDisponibilidadPickleball
 } from "../data/supabaseService";
-import { createPayment, validatePaymentData } from "../../../utils/paymentService"; // Nueva importación
+import { createPayment, validatePaymentData } from "../../../utils/paymentService";
 
 const ArrendamientoBase = ({ 
   onBack, 
@@ -45,22 +44,11 @@ const ArrendamientoBase = ({
     return mapping[tipo] || tipo;
   };
 
-  // Mapeo para pricesData (fallback)
-  const mapTipoCanchaPrecios = (tipo) => {
-    const mapping = {
-      'f7': 'futbol7',
-      'f9': 'futbol9',
-      'pickleball': 'pickleball',
-      'futbol7': 'futbol7',
-      'futbol9': 'futbol9'
-    };
-    return mapping[tipo] || tipo;
-  };
-
   // Verificar si es una modalidad de pickleball
   const esPickleball = (tipo) => {
     return tipo === 'pickleball';
   };
+
   // Validar formato de email
   const validarEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -79,18 +67,16 @@ const ArrendamientoBase = ({
         const tipoBD = mapTipoCancha(tipoCancha);
         const tarifas = await obtenerTarifasPorTipo(tipoBD);
         
-        if (tarifas && Object.keys(tarifas.weekdays).length > 0) {
+        if (tarifas && Object.keys(tarifas.weekdays || {}).length > 0) {
           setTarifasReales(tarifas);
-          console.log('Tarifas reales cargadas:', tarifas);
+          console.log('✅ Tarifas cargadas desde BD:', tarifas);
         } else {
-          // Fallback
-          const tipoPrecios = mapTipoCanchaPrecios(tipoCancha);
-          const sportData = pricesData[tipoPrecios];
-          setTarifasReales(sportData?.schedule || null);
-          console.log('Usando tarifas fallback');
+          console.error('❌ No se encontraron tarifas en la BD para:', tipoBD);
+          setTarifasReales(null);
         }
       } catch (error) {
-        console.error('Error cargando tarifas:', error);
+        console.error('❌ Error cargando tarifas:', error);
+        setTarifasReales(null);
       }
     };
 

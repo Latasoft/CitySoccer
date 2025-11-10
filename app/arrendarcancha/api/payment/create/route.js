@@ -100,6 +100,49 @@ export async function POST(request) {
       )
     }
 
+    // VERIFICAR DISPONIBILIDAD ANTES DE CREAR TRANSACCIÓN
+    if (cancha_id && fecha && hora) {
+      console.log('Verificando disponibilidad de cancha antes de crear transacción...')
+      
+      const { data: conflicto, error: checkError } = await supabase
+        .from('reservas')
+        .select('id, cliente_id, estado')
+        .eq('cancha_id', cancha_id)
+        .eq('fecha', fecha)
+        .eq('hora_inicio', hora)
+        .neq('estado', 'cancelada')
+        .maybeSingle()
+
+      if (checkError) {
+        console.error('Error verificando disponibilidad:', checkError)
+        return NextResponse.json(
+          { 
+            error: ERROR_MESSAGES.DATABASE,
+            details: 'Error al verificar disponibilidad de la cancha'
+          },
+          { status: 500 }
+        )
+      }
+
+      if (conflicto) {
+        console.log('⚠️ Cancha ya reservada:', conflicto)
+        return NextResponse.json(
+          { 
+            error: 'Esta cancha ya está reservada para ese horario',
+            code: 'SLOT_UNAVAILABLE',
+            details: {
+              cancha_id,
+              fecha,
+              hora
+            }
+          },
+          { status: 409 } // 409 Conflict
+        )
+      }
+
+      console.log('✅ Cancha disponible, procediendo con la transacción...')
+    }
+
     // Crear transacción pendiente en Supabase
     const orderId = `${ORDER_ID_PREFIX}${Date.now()}`
     console.log('Creating transaction with orderId:', orderId)

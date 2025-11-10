@@ -40,6 +40,17 @@ export const createPayment = async ({
     const data = await response.json()
     console.log('Response data:', data)
 
+    // Manejar error 409 - Conflicto de disponibilidad
+    if (response.status === 409) {
+      console.error('⚠️ Conflicto de disponibilidad:', data)
+      return { 
+        success: false, 
+        error: data.error || 'Esta cancha ya está reservada para ese horario',
+        code: 'SLOT_UNAVAILABLE',
+        shouldRefresh: true // Indicar que debe refrescar la disponibilidad
+      }
+    }
+
     if (data.success) {
       console.log('Redirecting to:', data.checkoutUrl)
       window.location.href = data.checkoutUrl

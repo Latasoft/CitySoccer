@@ -359,6 +359,12 @@ const ArrendamientoBase = ({
           : 'Lo sentimos, este horario ya no está disponible. Por favor selecciona otro horario.';
         
         alert(mensaje);
+        
+        // Refrescar disponibilidad
+        await fetchAvailableTimes();
+        setCurrentStep(2); // Volver a selección de horario
+        setSelectedTime("");
+        setSelectedCourt("");
         setLoading(false);
         return;
       }
@@ -393,11 +399,22 @@ const ArrendamientoBase = ({
         console.log('Redirigiendo al pago...');
         // El createPayment ya redirige automáticamente
       } else {
-        alert(`Error al procesar el pago: ${result.error}`);
+        // Manejar error de conflicto específicamente
+        if (result.code === 'SLOT_UNAVAILABLE' || result.shouldRefresh) {
+          alert(`⚠️ ${result.error}\n\nActualizando horarios disponibles...`);
+          
+          // Refrescar disponibilidad
+          await fetchAvailableTimes();
+          setCurrentStep(2); // Volver a selección de horario
+          setSelectedTime("");
+          setSelectedCourt("");
+        } else {
+          alert(`Error al procesar el pago: ${result.error}`);
+        }
       }
     } catch (error) {
       console.error('Error procesando el pago:', error);
-      alert('Error al procesar el pago');
+      alert('Error al procesar el pago. Por favor intenta nuevamente.');
     } finally {
       setLoading(false);
     }

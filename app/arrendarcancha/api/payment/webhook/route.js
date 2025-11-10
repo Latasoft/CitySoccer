@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { buscarOCrearCliente } from '@/lib/clienteService'
+import { crearReserva } from '@/app/arrendarcancha/data/supabaseService'
 import {
   TRANSACTION_STATUS,
   GETNET_STATUS_MAP,
@@ -175,32 +176,57 @@ export async function POST(request) {
         
         console.log('Horarios:', { hora_inicio: horaInicio, hora_fin: horaFin })
 
-        // 3. Crear la reserva con el cliente_id
-        const { data: reservaData, error: reservaError } = await supabase
-          .from('reservas')
-          .insert({
-            cliente_id: cliente.id,
-            cancha_id: existingTransaction.cancha_id,
-            fecha: existingTransaction.fecha,
-            hora_inicio: horaInicio,
-            hora_fin: horaFin,
-            transaction_id: reference,
-            estado: DEFAULT_RESERVATION_STATUS
-          })
-          .select()
-          .single()
+        // 3. Crear la reserva usando crearReserva con validación de disponibilidad
+        console.log('Intentando crear reserva con validación de disponibilidad...')
+        
+        const resultadoReserva = await crearReserva({
+          cliente_id: cliente.id,
+          cancha_id: existingTransaction.cancha_id,
+          fecha: existingTransaction.fecha,
+          hora_inicio: horaInicio,
+          hora_fin: horaFin,
+          transaction_id: reference,
+          estado: DEFAULT_RESERVATION_STATUS
+        })
 
-        if (reservaError) {
-          console.error('Error creating reservation:', reservaError)
+        if (!resultadoReserva.success) {
+          console.error('Error o conflicto al crear reserva:', resultadoReserva.error)
+          
+          // Si el error es de disponibilidad (otro usuario ya reservó)
+          if (resultadoReserva.error.includes('no está disponible')) {
+            console.warn('⚠️ CONFLICTO DE RESERVA: La cancha ya fue reservada por otro usuario')
+            console.warn('⚠️ ACCIÓN REQUERIDA: Reembolsar pago al usuario:', {
+              orderId: reference,
+              cliente: existingTransaction.buyer_email,
+              monto: existingTransaction.amount
+            })
+            
+            return NextResponse.json({ 
+              received: true,
+              status: transactionStatus,
+              orderId: reference,
+              warning: 'PAYMENT_CONFLICT',
+              message: 'Pago aprobado pero cancha ya reservada. Requiere reembolso manual.',
+              action_required: 'Contactar al cliente y procesar reembolso',
+              cliente: {
+                email: existingTransaction.buyer_email,
+                nombre: existingTransaction.buyer_name,
+                monto: existingTransaction.amount
+              }
+            })
+          }
+          
+          // Otro tipo de error
           return NextResponse.json({ 
             received: true,
             status: transactionStatus,
             orderId: reference,
-            message: 'Webhook processed successfully but reservation creation failed',
-            reservationError: reservaError.message
+            message: 'Webhook processed but reservation creation failed',
+            reservationError: resultadoReserva.error
           })
         }
 
+        const reservaData = resultadoReserva.data[0]
         console.log('Reservation created successfully:', reservaData)
 
         return NextResponse.json({ 

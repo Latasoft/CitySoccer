@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { configService } from '@/lib/adminService';
+import { invalidateConfigCache } from '@/lib/dynamicConfigService';
 import { Settings, Save, Loader2, AlertCircle, CheckCircle2, Phone, Mail, MapPin, Instagram, MessageCircle, Clock } from 'lucide-react';
 
 const ConfigAdmin = () => {
@@ -57,6 +58,9 @@ const ConfigAdmin = () => {
       setSaving(config.id);
       const { error } = await configService.update(config.id, config.valor);
       if (error) throw error;
+      
+      // Invalidar el caché para que los cambios se reflejen inmediatamente
+      invalidateConfigCache();
       
       setMessage({ type: 'success', text: `${config.descripcion} actualizada correctamente` });
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);

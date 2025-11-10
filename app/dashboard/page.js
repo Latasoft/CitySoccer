@@ -234,47 +234,87 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <div className="max-w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
-          {/* Sidebar */}
-          <aside className="w-full lg:w-64 bg-gray-800/50 rounded-xl p-4 sm:p-6 h-fit">
-            <nav className="space-y-2">
-              {[
-                { id: 'overview', label: 'Resumen', icon: Activity },
-                { id: 'clientes', label: 'Clientes', icon: Users },
-                { id: 'reservas', label: 'Reservas', icon: Calendar },
-                { id: 'canchas', label: 'Canchas', icon: MapPin },
-                { id: 'precios', label: 'Precios', icon: DollarSign },
-                { id: 'configuracion', label: 'Configuración', icon: Settings },
-                { id: 'imagenes', label: 'Imágenes', icon: Images },
-                { id: 'contenido', label: 'Contenido', icon: FileText },
-              ].map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    if (item.id === 'reservas') {
-                      router.push('/dashboard/reservas');
-                    } else if (item.id === 'clientes') {
-                      router.push('/dashboard/clientes');
-                    } else {
-                      setActiveTab(item.id);
-                    }
-                  }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                    activeTab === item.id
-                      ? 'bg-[#ffee00] text-black font-semibold'
-                      : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                  }`}
-                >
-                  <item.icon className="w-5 h-5" />
-                  {item.label}
-                </button>
-              ))}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+          {/* Sidebar - Horizontal en móvil, vertical en desktop */}
+          <aside className="w-full lg:w-64 flex-shrink-0 mb-6 lg:mb-0">
+            {/* Vista móvil - Tabs horizontales con scroll */}
+            <nav className="lg:hidden overflow-x-auto pb-2">
+              <div className="flex gap-2 min-w-max">
+                {[
+                  { id: 'overview', label: 'Resumen', icon: Activity },
+                  { id: 'clientes', label: 'Clientes', icon: Users },
+                  { id: 'reservas', label: 'Reservas', icon: Calendar },
+                  { id: 'canchas', label: 'Canchas', icon: MapPin },
+                  { id: 'precios', label: 'Precios', icon: DollarSign },
+                  { id: 'configuracion', label: 'Config', icon: Settings },
+                  { id: 'imagenes', label: 'Imágenes', icon: Images },
+                  { id: 'contenido', label: 'Contenido', icon: FileText },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      if (item.id === 'reservas') {
+                        router.push('/dashboard/reservas');
+                      } else if (item.id === 'clientes') {
+                        router.push('/dashboard/clientes');
+                      } else {
+                        setActiveTab(item.id);
+                      }
+                    }}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors whitespace-nowrap text-sm ${
+                      activeTab === item.id
+                        ? 'bg-[#ffee00] text-black font-semibold'
+                        : 'text-gray-300 bg-gray-800/50 hover:bg-gray-700 hover:text-white'
+                    }`}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </nav>
+
+            {/* Vista desktop - Sidebar vertical */}
+            <nav className="hidden lg:block bg-gray-800/50 rounded-xl p-6 h-fit sticky top-4">
+              <div className="space-y-2">
+                {[
+                  { id: 'overview', label: 'Resumen', icon: Activity },
+                  { id: 'clientes', label: 'Clientes', icon: Users },
+                  { id: 'reservas', label: 'Reservas', icon: Calendar },
+                  { id: 'canchas', label: 'Canchas', icon: MapPin },
+                  { id: 'precios', label: 'Precios', icon: DollarSign },
+                  { id: 'configuracion', label: 'Configuración', icon: Settings },
+                  { id: 'imagenes', label: 'Imágenes', icon: Images },
+                  { id: 'contenido', label: 'Contenido', icon: FileText },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      if (item.id === 'reservas') {
+                        router.push('/dashboard/reservas');
+                      } else if (item.id === 'clientes') {
+                        router.push('/dashboard/clientes');
+                      } else {
+                        setActiveTab(item.id);
+                      }
+                    }}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                      activeTab === item.id
+                        ? 'bg-[#ffee00] text-black font-semibold'
+                        : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                    }`}
+                  >
+                    <item.icon className="w-5 h-5" />
+                    {item.label}
+                  </button>
+                ))}
+              </div>
             </nav>
           </aside>
 
           {/* Main Content */}
-          <main className="flex-1 min-w-0">
+          <main className="flex-1 min-w-0 lg:max-w-none">
             {activeTab === 'overview' && (
               <div className="space-y-6 sm:space-y-8">
                 {/* Stats Cards */}

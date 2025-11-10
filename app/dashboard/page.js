@@ -234,10 +234,11 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-          {/* Sidebar - Horizontal en móvil, vertical en desktop */}
-          <aside className="w-full lg:w-64 flex-shrink-0 mb-6 lg:mb-0">
+      <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <div className="max-w-screen-2xl mx-auto">
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+            {/* Sidebar - Horizontal en móvil, vertical en desktop */}
+            <aside className="w-full lg:w-64 flex-shrink-0">
             {/* Vista móvil - Tabs horizontales con scroll */}
             <nav className="lg:hidden overflow-x-auto pb-2">
               <div className="flex gap-2 min-w-max">
@@ -276,7 +277,7 @@ export default function Dashboard() {
             </nav>
 
             {/* Vista desktop - Sidebar vertical */}
-            <nav className="hidden lg:block bg-gray-800/50 rounded-xl p-6 h-fit sticky top-4">
+            <nav className="hidden lg:block bg-gray-800/50 rounded-xl p-6">
               <div className="space-y-2">
                 {[
                   { id: 'overview', label: 'Resumen', icon: Activity },
@@ -314,7 +315,7 @@ export default function Dashboard() {
           </aside>
 
           {/* Main Content */}
-          <main className="flex-1 min-w-0 lg:max-w-none">
+          <main className="flex-1 min-w-0 w-full lg:w-auto overflow-x-hidden">
             {activeTab === 'overview' && (
               <div className="space-y-6 sm:space-y-8">
                 {/* Stats Cards */}
@@ -489,6 +490,7 @@ export default function Dashboard() {
               </div>
             )}
           </main>
+          </div>
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@
 import React from "react";
 import { useContactInfo } from "@/hooks/useContactInfo";
 import { useWhatsApp } from "@/hooks/useWhatsApp";
+import EditableContent from "./EditableContent";
 
 export default function Footer() {
   const { 
@@ -45,16 +46,24 @@ export default function Footer() {
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
             <div>
               <p>
-                <span className="text-xs tracking-wide text-yellow-100 uppercase font-bold">
-                  Llámanos
-                </span>
+                <EditableContent 
+                  pageKey="footer" 
+                  fieldKey="contact_label" 
+                  fieldType="text"
+                  defaultValue="Llámanos"
+                  as="span"
+                  className="text-xs tracking-wide text-yellow-100 uppercase font-bold"
+                />
 
-                <a
+                <EditableContent 
+                  pageKey="footer" 
+                  fieldKey="contact_phone" 
+                  fieldType="text"
+                  defaultValue={getPhoneNumber()}
+                  as="a"
                   href={`tel:${getPhoneNumber()}`}
                   className="block text-2xl font-bold text-white hover:text-yellow-100 sm:text-3xl transition-colors duration-300 drop-shadow-lg"
-                >
-                  {getPhoneNumber()}
-                </a>
+                />
               </p>
 
               <ul className="mt-8 space-y-2 text-sm text-yellow-50 font-medium">
@@ -66,7 +75,13 @@ export default function Footer() {
                   >
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                   </svg>
-                  {getSchedule('weekdays')}
+                  <EditableContent 
+                    pageKey="footer" 
+                    fieldKey="hours_weekdays" 
+                    fieldType="text"
+                    defaultValue={getSchedule('weekdays')}
+                    as="span"
+                  />
                 </li>
                 <li className="flex items-center gap-2">
                   <svg
@@ -76,7 +91,13 @@ export default function Footer() {
                   >
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                   </svg>
-                  {getSchedule('saturday')}
+                  <EditableContent 
+                    pageKey="footer" 
+                    fieldKey="hours_saturday" 
+                    fieldType="text"
+                    defaultValue={getSchedule('saturday')}
+                    as="span"
+                  />
                 </li>
                 <li className="flex items-center gap-2">
                   <svg
@@ -86,23 +107,35 @@ export default function Footer() {
                   >
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                   </svg>
-                  Reservas online 24/7
+                  <EditableContent 
+                    pageKey="footer" 
+                    fieldKey="hours_sunday" 
+                    fieldType="text"
+                    defaultValue="Reservas online 24/7"
+                    as="span"
+                  />
                 </li>
                 <li className="flex items-center gap-2">
+                  <svg
+                    className="w-4 h-4 text-yellow-200"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
+                  </svg>
                   <a
                     href="https://maps.google.com/?q=Tiltil+2569,+Macul,+Chile"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-yellow-100 hover:text-white transition-colors duration-300"
+                    className="text-yellow-100 hover:text-white transition-colors duration-300"
                   >
-                    <svg
-                      className="w-4 h-4 text-yellow-200"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
-                    </svg>
-                    Ubicación - {getAddress()}
+                    Ubicación - <EditableContent 
+                      pageKey="footer" 
+                      fieldKey="contact_address" 
+                      fieldType="text"
+                      defaultValue={getAddress()}
+                      as="span"
+                    />
                   </a>
                 </li>
               </ul>

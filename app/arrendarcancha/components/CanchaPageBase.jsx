@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { obtenerTarifasPorTipo } from "../data/supabaseService";
+import EditableContent from "@/components/EditableContent";
 
 const CanchaPageBase = ({ 
   tipoCancha, 
@@ -85,9 +86,25 @@ const CanchaPageBase = ({
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-950 py-12 px-4">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8 text-center" style={{ color: colorPrimario }}>
-          {titulo}
-        </h1>
+        <EditableContent 
+          pageKey={`arriendo_${tipoCancha}`}
+          fieldKey="page_title"
+          fieldType="text"
+          defaultValue={titulo}
+          as="h1"
+          className="text-4xl font-bold mb-8 text-center"
+          style={{ color: colorPrimario }}
+        />
+
+        {/* Descripción editable */}
+        <EditableContent 
+          pageKey={`arriendo_${tipoCancha}`}
+          fieldKey="page_description"
+          fieldType="textarea"
+          defaultValue="Reserva tu cancha de forma rápida y segura. Elige el horario que más te acomode."
+          as="p"
+          className="text-gray-300 text-center mb-8 max-w-2xl mx-auto"
+        />
 
         {/* Botón para ir a reservar */}
         <div className="mb-8 text-center">

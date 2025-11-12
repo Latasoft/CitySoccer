@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePrimaryImage, useDynamicImages } from "@/lib/dynamicImageService";
 import EditableImage from './EditableImage';
+import EditableContent from './EditableContent';
 
 const Hero = () => {
   const videoRef = useRef(null);
@@ -61,6 +62,26 @@ const Hero = () => {
           />
         )}
 
+        {/* Título editable */}
+        <EditableContent 
+          pageKey="home"
+          fieldKey="hero_title"
+          fieldType="text"
+          defaultValue="Bienvenido a City Soccer"
+          as="h1"
+          className="text-5xl font-bold mb-4 drop-shadow-lg"
+        />
+
+        {/* Subtítulo editable */}
+        <EditableContent 
+          pageKey="home"
+          fieldKey="hero_subtitle"
+          fieldType="textarea"
+          defaultValue="El mejor lugar para jugar fútbol y pickleball"
+          as="p"
+          className="text-xl mb-8 drop-shadow-md"
+        />
+
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
           <Link href="/arrendarcancha">
             <button
@@ -70,7 +91,13 @@ const Hero = () => {
                 fontFamily: "Arial Black, Arial, sans-serif",
               }}
             >
-              RESERVA HOY
+              <EditableContent 
+                pageKey="home"
+                fieldKey="hero_cta_text"
+                fieldType="text"
+                defaultValue="RESERVA HOY"
+                as="span"
+              />
             </button>
           </Link>
         </div>

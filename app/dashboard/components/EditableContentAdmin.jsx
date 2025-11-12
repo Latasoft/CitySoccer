@@ -36,8 +36,12 @@ const EditableContentAdmin = () => {
     'home': 'Página Principal (Home)',
     'arriendo_futbol7': 'Arriendo Fútbol 7',
     'arriendo_futbol9': 'Arriendo Fútbol 9',
-    'arriendo_pickleball_individual': 'Arriendo Pickleball Individual',
-    'arriendo_pickleball_dobles': 'Arriendo Pickleball Dobles'
+    'arriendo_pickleball-individual': 'Arriendo Pickleball Individual',
+    'arriendo_pickleball-dobles': 'Arriendo Pickleball Dobles',
+    'footer': 'Footer (Pie de página)',
+    'component_benefits': 'Componente: Beneficios',
+    'component_cta': 'Componente: Call to Action',
+    'component_programs': 'Componente: Programas'
   };
 
   const fieldTypeIcons = {

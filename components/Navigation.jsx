@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { AdminModeToggle } from "@/contexts/AdminModeContext";
 import { supabase } from "@/lib/supabaseClient";
+import { useAuth } from "@/hooks/useAuth";
 
 // Fallback estático (se usa si falla la carga desde BD)
 const fallbackNavItems = [
@@ -40,6 +41,7 @@ const remToPixels = (rem) => {
 
 export default function Navigation() {
     const pathname = usePathname();
+    const { user, isAdmin } = useAuth();
     const [activePath, setActivePath] = useState(pathname);
     const [subMenuOpening, setOpenSubMenu] = useState(null);
     const [menuOpen, setMenuOpen] = useState(false);
@@ -76,6 +78,24 @@ export default function Navigation() {
 
         loadMenuItems();
     }, []);
+
+    // Actualizar dinámicamente el último item del menú según autenticación
+    useEffect(() => {
+        setNavItems(prevItems => {
+            const newItems = [...prevItems];
+            const lastIndex = newItems.length - 1;
+            
+            // Si el usuario está autenticado, reemplazar Login con Dashboard
+            if (user && isAdmin) {
+                newItems[lastIndex] = { linkText: "Dashboard", href: "/dashboard" };
+            } else {
+                // Si no está autenticado, mostrar Login
+                newItems[lastIndex] = { linkText: "Login", href: "/login" };
+            }
+            
+            return newItems;
+        });
+    }, [user, isAdmin]);
 
     // Función para transformar datos de BD al formato esperado
     const transformMenuData = (menuData) => {

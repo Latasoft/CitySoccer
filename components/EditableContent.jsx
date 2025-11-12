@@ -44,9 +44,13 @@ const EditableContent = ({
         
         if (!isMounted) return;
         
-        if (error) throw error;
+        if (error) {
+          console.error(`Error loading ${pageKey}.${fieldKey}:`, error);
+          setLoading(false);
+          return;
+        }
         
-        if (data) {
+        if (data && Array.isArray(data)) {
           const field = data.find(f => f.field_key === fieldKey);
           if (field) {
             setValue(field.field_value || defaultValue);
@@ -170,10 +174,10 @@ const EditableContent = ({
   }
 
   // Vista admin con botón editar (SIEMPRE visible si modo admin está activo)
-  const displayValue = loaded ? value : (children || defaultValue);
+  const displayValue = loading ? (children || defaultValue) : value;
   
   return (
-    <div className="group relative inline-block">
+    <div className="group relative inline-block border-2 border-dashed border-yellow-400/30 hover:border-yellow-400/60 transition-all rounded px-1">
       {fieldType === 'image' && Component === 'img' ? (
         <Component src={displayValue} className={className} {...props} />
       ) : Component === 'a' ? (
@@ -188,7 +192,7 @@ const EditableContent = ({
       
       <button
         onClick={handleEdit}
-        className="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 transition-opacity bg-[#ffee00] text-black p-1 rounded-full shadow-lg hover:scale-110 z-10"
+        className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-[#ffee00] text-black p-1.5 rounded-full shadow-lg hover:scale-110 z-10"
         title="Editar"
       >
         <Edit2 className="w-3 h-3" />

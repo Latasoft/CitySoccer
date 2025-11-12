@@ -4,17 +4,17 @@ import EditableContent from './EditableContent';
 import { useDynamicImages } from '@/lib/dynamicImageService';
 
 const HeroSection = ({ 
-  title,
+  title = { first: "", second: "" },
   titleColors = { first: "text-green-400", second: "text-yellow-400" },
-  subtitle,
-  description,
+  subtitle = "",
+  description = "",
   buttonText = "Más Información",
   buttonLink = "#",
   buttonAction,
-  images = { img1, img2, img3 },
-  backgroundGradient,
+  images = { img1: "", img2: "", img3: "" },
+  backgroundGradient = "bg-gradient-to-br from-gray-900 to-black",
   imageCategory = "summer-camp",
-  pageKey = "default" // Nueva prop para identificar la página
+  pageKey = "default"
 }) => {
   
   // Cargar imágenes dinámicas según la categoría
@@ -22,10 +22,10 @@ const HeroSection = ({
   
   // Función helper para obtener imagen dinámica o fallback
   const getImageUrl = (index, fallback) => {
-    if (dynamicImages[index]) {
+    if (dynamicImages && dynamicImages[index]) {
       return dynamicImages[index].url;
     }
-    return fallback;
+    return fallback || "";
   };
   
   const handleButtonClick = () => {
@@ -61,7 +61,7 @@ const HeroSection = ({
                 pageKey={pageKey}
                 fieldKey="hero_title_first"
                 fieldType="text"
-                defaultValue={title.first}
+                defaultValue={title?.first || ""}
                 as="span"
                 className={titleColors.first}
               />
@@ -70,11 +70,11 @@ const HeroSection = ({
                 pageKey={pageKey}
                 fieldKey="hero_title_second"
                 fieldType="text"
-                defaultValue={title.second}
+                defaultValue={title?.second || ""}
                 as="span"
                 className={titleColors.second}
               />
-              {subtitle && (
+              {subtitle && subtitle.trim() && (
                 <>
                   <br />
                   <EditableContent 

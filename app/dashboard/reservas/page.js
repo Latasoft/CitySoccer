@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+import * as XLSX from 'xlsx';
 import {
   Calendar,
   Plus,
@@ -16,7 +17,8 @@ import {
   User,
   MapPin,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Download
 } from 'lucide-react';
 
 export default function ReservasPage() {
@@ -271,6 +273,83 @@ export default function ReservasPage() {
     }
   };
 
+  const exportarAExcel = async () => {
+    try {
+      // Obtener TODAS las reservas sin paginación y con los filtros aplicados
+      let query = supabase
+        .from('reservas')
+        .select(`
+          id,
+          fecha,
+          hora_inicio,
+          estado,
+          creado_en,
+          clientes ( nombre, correo, telefono ),
+          canchas ( nombre, tipo )
+        `)
+        .order('fecha', { ascending: false })
+        .order('hora_inicio', { ascending: false });
+
+      if (fecha) query = query.eq('fecha', fecha);
+      if (estado !== 'todas') query = query.eq('estado', estado);
+      if (canchaId !== 'todas') query = query.eq('cancha_id', Number(canchaId));
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        alert('No hay reservas para exportar con los filtros actuales');
+        return;
+      }
+
+      // Preparar datos para Excel
+      const excelData = data.map((reserva, index) => ({
+        'N°': index + 1,
+        'Fecha': reserva.fecha || '',
+        'Hora': reserva.hora_inicio || '',
+        'Cancha': formatNombreCancha(reserva.canchas),
+        'Cliente': reserva.clientes?.nombre || 'Sin nombre',
+        'Correo': reserva.clientes?.correo || '',
+        'Teléfono': reserva.clientes?.telefono || '',
+        'Estado': reserva.estado ? reserva.estado.charAt(0).toUpperCase() + reserva.estado.slice(1) : '',
+        'Fecha Reserva': reserva.creado_en ? new Date(reserva.creado_en).toLocaleString('es-CL') : ''
+      }));
+
+      // Crear libro de Excel
+      const worksheet = XLSX.utils.json_to_sheet(excelData);
+      
+      // Ajustar ancho de columnas
+      const columnWidths = [
+        { wch: 5 },  // N°
+        { wch: 12 }, // Fecha
+        { wch: 8 },  // Hora
+        { wch: 20 }, // Cancha
+        { wch: 25 }, // Cliente
+        { wch: 30 }, // Correo
+        { wch: 15 }, // Teléfono
+        { wch: 12 }, // Estado
+        { wch: 20 }  // Fecha Reserva
+      ];
+      worksheet['!cols'] = columnWidths;
+
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Reservas');
+
+      // Generar nombre de archivo con fecha actual
+      const fechaActual = new Date().toISOString().split('T')[0];
+      const nombreArchivo = `reservas_citysoccer_${fechaActual}.xlsx`;
+
+      // Descargar archivo
+      XLSX.writeFile(workbook, nombreArchivo);
+      
+      // Mostrar mensaje de éxito
+      alert(`✅ Se exportaron ${data.length} reserva(s) a Excel correctamente`);
+    } catch (e) {
+      console.error('Error exportando a Excel:', e);
+      alert('Error al exportar las reservas a Excel');
+    }
+  };
+
   // Función para formatear fecha
   const formatFecha = (fecha) => {
     if (!fecha) return '';
@@ -324,6 +403,14 @@ export default function ReservasPage() {
               <p className="text-sm sm:text-base text-gray-300">Gestión de reservas</p>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <button
+                onClick={exportarAExcel}
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border border-gray-700 text-gray-200 hover:bg-gray-700/50 transition text-sm sm:text-base whitespace-nowrap"
+                title="Exportar a Excel"
+              >
+                <Download className="w-4 h-4" />
+                <span className="hidden sm:inline">Excel</span>
+              </button>
               <Link
                 href="/dashboard"
                 className="px-3 sm:px-4 py-2 rounded-lg border border-gray-700 text-gray-200 hover:bg-gray-700/50 transition text-sm sm:text-base whitespace-nowrap"

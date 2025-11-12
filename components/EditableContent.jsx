@@ -41,13 +41,23 @@ const EditableContent = ({
     if (loaded) return;
     
     try {
-      const { data } = await editableContentService.getPageContent(pageKey);
+      console.log(`Cargando campo: ${pageKey}.${fieldKey}`);
+      const { data, error } = await editableContentService.getPageContent(pageKey);
+      
+      if (error) {
+        console.error('Error en getPageContent:', error);
+        throw error;
+      }
       
       if (data) {
+        console.log(`Datos recibidos para ${pageKey}:`, data);
         const field = data.find(f => f.field_key === fieldKey);
         if (field) {
+          console.log(`Campo encontrado:`, field);
           setValue(field.field_value || defaultValue);
           setFieldId(field.id);
+        } else {
+          console.warn(`Campo ${fieldKey} no encontrado en la respuesta`);
         }
       }
       setLoaded(true);
@@ -64,19 +74,29 @@ const EditableContent = ({
   };
 
   const handleSave = async () => {
-    if (!fieldId) return;
+    if (!fieldId) {
+      console.error('No hay fieldId para guardar');
+      alert('Error: No se pudo obtener el ID del campo. Recarga la página.');
+      return;
+    }
 
     try {
       setSaving(true);
-      const { error } = await editableContentService.updateField(fieldId, editedValue);
+      console.log('Guardando campo:', { fieldId, pageKey, fieldKey, editedValue });
       
-      if (error) throw error;
+      const { data, error } = await editableContentService.updateField(fieldId, editedValue);
       
+      if (error) {
+        console.error('Error de Supabase:', error);
+        throw error;
+      }
+      
+      console.log('Campo guardado exitosamente:', data);
       setValue(editedValue);
       setIsEditing(false);
     } catch (error) {
       console.error('Error guardando:', error);
-      alert('Error al guardar');
+      alert(`Error al guardar: ${error.message || 'Error desconocido'}`);
     } finally {
       setSaving(false);
     }

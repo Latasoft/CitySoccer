@@ -3,6 +3,7 @@ import React from "react";
 import { useContactInfo } from "@/hooks/useContactInfo";
 import { useWhatsApp } from "@/hooks/useWhatsApp";
 import EditableContent from "./EditableContent";
+import EditableImage from "./EditableImage";
 
 export default function Footer() {
   const { 
@@ -34,10 +35,14 @@ export default function Footer() {
         {/* Background decorativo */}
 
         <div className="relative block h-32 lg:col-span-2 lg:h-full">
-          <img
+          <EditableImage
+            pageKey="footer"
+            fieldKey="background_image"
+            categoria="footer"
             src="/Cancha3.jpeg"
             alt="Instalaciones City Soccer"
             className="absolute inset-0 h-full w-full object-cover opacity-80"
+            fallbackSrc="/Cancha3.jpeg"
           />
           {/* Sin gradiente overlay en la imagen */}
         </div>

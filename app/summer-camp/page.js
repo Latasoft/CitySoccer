@@ -1,5 +1,6 @@
 "use client";
 import HeroSection from "@/components/HeroSection";
+import EditableContent from "@/components/EditableContent";
 import { useWhatsApp } from '@/hooks/useWhatsApp';
 
 export default function SummerCamp() {

@@ -3,6 +3,7 @@
 import HeroSection from '@/components/HeroSection';
 import ProgramsSection from '@/components/ProgramsSection';
 import CTASection from '@/components/CTASection';
+import EditableContent from '@/components/EditableContent';
 import { useWhatsApp } from '@/hooks/useWhatsApp';
 
 export default function Eventos() {

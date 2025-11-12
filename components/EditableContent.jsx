@@ -67,6 +67,11 @@ const EditableContent = ({
     }
   };
 
+  // Cargar valor desde DB al montar el componente
+  useEffect(() => {
+    loadValue();
+  }, [pageKey, fieldKey]);
+
   const handleEdit = async () => {
     await loadValue();
     setEditedValue(value);

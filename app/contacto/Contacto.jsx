@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { MapPin, Phone, Mail, Instagram, MessageCircle } from "lucide-react";
 import { useContactInfo } from "@/hooks/useContactInfo";
+import EditableContent from "@/components/EditableContent";
 
 export default function Contacto() {
     const [isVisible, setIsVisible] = useState(false);
@@ -53,13 +54,27 @@ export default function Contacto() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-950 py-12 px-4">
             <div className={`max-w-6xl mx-auto transition-all duration-1000 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-                <h1 className="text-4xl md:text-5xl font-bold mb-12 text-[#eeff00] text-center">Contacto</h1>
+                <EditableContent 
+                    pageKey="contacto"
+                    fieldKey="page_title"
+                    fieldType="text"
+                    defaultValue="Contacto"
+                    as="h1"
+                    className="text-4xl md:text-5xl font-bold mb-12 text-[#eeff00] text-center"
+                />
                 
                 <div className="grid lg:grid-cols-3 gap-8">
                     {/* Información de contacto */}
                     <div className="lg:col-span-1">
                         <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-8 border border-gray-700 shadow-xl">
-                            <h2 className="text-2xl font-semibold mb-6 text-white">Información de contacto</h2>
+                            <EditableContent 
+                                pageKey="contacto"
+                                fieldKey="info_section_title"
+                                fieldType="text"
+                                defaultValue="Información de contacto"
+                                as="h2"
+                                className="text-2xl font-semibold mb-6 text-white"
+                            />
                             <div className="space-y-6">
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 bg-gradient-to-br from-[#eeff00] to-[#d4d400] rounded-full flex items-center justify-center">
@@ -114,8 +129,22 @@ export default function Contacto() {
                                 <div className="w-20 h-20 bg-gradient-to-br from-[#eeff00] to-[#d4d400] rounded-full flex items-center justify-center mx-auto mb-4">
                                     <MessageCircle className="w-10 h-10 text-black" />
                                 </div>
-                                <h2 className="text-2xl font-semibold text-white mb-2">Contáctanos por WhatsApp</h2>
-                                <p className="text-gray-300">Ingresa tu nombre y te conectaremos directamente</p>
+                                <EditableContent 
+                                    pageKey="contacto"
+                                    fieldKey="form_title"
+                                    fieldType="text"
+                                    defaultValue="Contáctanos por WhatsApp"
+                                    as="h2"
+                                    className="text-2xl font-semibold text-white mb-2"
+                                />
+                                <EditableContent 
+                                    pageKey="contacto"
+                                    fieldKey="form_description"
+                                    fieldType="text"
+                                    defaultValue="Ingresa tu nombre y te conectaremos directamente"
+                                    as="p"
+                                    className="text-gray-300"
+                                />
                             </div>
                             
                             <form onSubmit={handleWhatsAppSubmit} className="space-y-6">

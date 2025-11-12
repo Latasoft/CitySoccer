@@ -26,77 +26,67 @@ const EditableContent = ({
   children,
   ...props 
 }) => {
-  const { isAdminMode } = useAdminMode(); // Cambiar de isAdmin a isAdminMode
+  const { isAdminMode } = useAdminMode();
   const [value, setValue] = useState(defaultValue);
   const [editedValue, setEditedValue] = useState('');
   const [isEditing, setIsEditing] = useState(false);
-  const [loaded, setLoaded] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [fieldId, setFieldId] = useState(null);
 
-  // Debug temporal
-  console.log(`EditableContent [${pageKey}.${fieldKey}] - isAdminMode:`, isAdminMode);
-
-  const loadValue = async () => {
-    if (loaded) return;
-    
-    try {
-      console.log(`Cargando campo: ${pageKey}.${fieldKey}`);
-      const { data, error } = await editableContentService.getPageContent(pageKey);
-      
-      if (error) {
-        console.error('Error en getPageContent:', error);
-        throw error;
-      }
-      
-      if (data) {
-        console.log(`Datos recibidos para ${pageKey}:`, data);
-        const field = data.find(f => f.field_key === fieldKey);
-        if (field) {
-          console.log(`Campo encontrado:`, field);
-          setValue(field.field_value || defaultValue);
-          setFieldId(field.id);
-        } else {
-          console.warn(`Campo ${fieldKey} no encontrado en la respuesta`);
-        }
-      }
-      setLoaded(true);
-    } catch (error) {
-      console.error('Error cargando campo editable:', error);
-      setLoaded(true);
-    }
-  };
-
   // Cargar valor desde DB al montar el componente
   useEffect(() => {
-    loadValue();
-  }, [pageKey, fieldKey]);
+    let isMounted = true;
+    
+    const loadValue = async () => {
+      try {
+        const { data, error } = await editableContentService.getPageContent(pageKey);
+        
+        if (!isMounted) return;
+        
+        if (error) throw error;
+        
+        if (data) {
+          const field = data.find(f => f.field_key === fieldKey);
+          if (field) {
+            setValue(field.field_value || defaultValue);
+            setFieldId(field.id);
+          }
+        }
+      } catch (error) {
+        console.error(`Error cargando ${pageKey}.${fieldKey}:`, error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
 
-  const handleEdit = async () => {
-    await loadValue();
+    loadValue();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [pageKey, fieldKey, defaultValue]);
+
+  const handleEdit = () => {
     setEditedValue(value);
     setIsEditing(true);
   };
 
   const handleSave = async () => {
     if (!fieldId) {
-      console.error('No hay fieldId para guardar');
       alert('Error: No se pudo obtener el ID del campo. Recarga la página.');
       return;
     }
 
     try {
       setSaving(true);
-      console.log('Guardando campo:', { fieldId, pageKey, fieldKey, editedValue });
       
       const { data, error } = await editableContentService.updateField(fieldId, editedValue);
       
-      if (error) {
-        console.error('Error de Supabase:', error);
-        throw error;
-      }
+      if (error) throw error;
       
-      console.log('Campo guardado exitosamente:', data);
       setValue(editedValue);
       setIsEditing(false);
     } catch (error) {

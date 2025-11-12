@@ -46,7 +46,7 @@ export default function ClasesParticularePickleball() {
 
   return (
     <div className="min-h-screen">
-      <HeroSection {...classData.heroProps} />
+      <HeroSection {...classData.heroProps} pageKey="clasesparticularespickleball" />
       
       
       

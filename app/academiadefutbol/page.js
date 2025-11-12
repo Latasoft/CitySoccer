@@ -74,7 +74,7 @@ export default function AcademiaFutbol() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-950">
-      <HeroSection {...heroProps} />
+      <HeroSection {...heroProps} pageKey="academiadefutbol" />
       
       <ProgramsSection 
         title="Nuestros Programas"

@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import EditableContent from '@/components/EditableContent'
 
 export default function ArriendaCanchaSelector() {
   const router = useRouter()
@@ -50,12 +51,22 @@ export default function ArriendaCanchaSelector() {
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
-            Arrienda tu Cancha
-          </h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Elige el tipo de cancha que deseas reservar y disfruta de nuestras instalaciones de primer nivel
-          </p>
+          <EditableContent 
+            pageKey="arrendarcancha"
+            fieldKey="page_title"
+            fieldType="text"
+            defaultValue="Arrienda tu Cancha"
+            as="h1"
+            className="text-4xl md:text-6xl font-bold text-white mb-4"
+          />
+          <EditableContent 
+            pageKey="arrendarcancha"
+            fieldKey="page_description"
+            fieldType="textarea"
+            defaultValue="Elige el tipo de cancha que deseas reservar y disfruta de nuestras instalaciones de primer nivel"
+            as="p"
+            className="text-xl text-gray-300 max-w-3xl mx-auto"
+          />
         </div>
 
         {/* Cards Grid */}

@@ -15,6 +15,7 @@ export default function SummerCamp() {
     
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-white">
     <HeroSection
+        pageKey="summer-camp"
         title={{ first: "Summer", second: "Camp" }}
         subtitle="En City Soccer."
         description="Este verano vive la mejor experiencia deportiva en el Summer Camp CitySoccer. Un programa lleno de actividades para niños y jóvenes, donde se combinan entrenamientos de fútbol y pickleball con dinámicas recreativas, trabajo en equipo y valores de compañerismo."

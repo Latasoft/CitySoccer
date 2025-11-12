@@ -70,7 +70,7 @@ export default function Eventos() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <HeroSection {...eventData.heroProps} />
+      <HeroSection {...eventData.heroProps} pageKey="eventos" />
       
       {/* Tipos de Eventos */}
       <ProgramsSection 

@@ -1,5 +1,6 @@
 import React from 'react';
 import EditableImage from './EditableImage';
+import EditableContent from './EditableContent';
 import { useDynamicImages } from '@/lib/dynamicImageService';
 
 const HeroSection = ({ 
@@ -9,10 +10,11 @@ const HeroSection = ({
   description,
   buttonText = "Más Información",
   buttonLink = "#",
-  buttonAction, // Nueva prop para funciones personalizadas
+  buttonAction,
   images = { img1, img2, img3 },
   backgroundGradient,
-  imageCategory = "summer-camp" // Nueva prop para categoría de imágenes
+  imageCategory = "summer-camp",
+  pageKey = "default" // Nueva prop para identificar la página
 }) => {
   
   // Cargar imágenes dinámicas según la categoría
@@ -55,27 +57,60 @@ const HeroSection = ({
           {/* Texto del Hero */}
           <div className="flex flex-col gap-8">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight text-white uppercase">
-              <span className={titleColors.first}>{title.first} </span>
-              <span className={titleColors.second}>{title.second}</span>
+              <EditableContent 
+                pageKey={pageKey}
+                fieldKey="hero_title_first"
+                fieldType="text"
+                defaultValue={title.first}
+                as="span"
+                className={titleColors.first}
+              />
+              {' '}
+              <EditableContent 
+                pageKey={pageKey}
+                fieldKey="hero_title_second"
+                fieldType="text"
+                defaultValue={title.second}
+                as="span"
+                className={titleColors.second}
+              />
               {subtitle && (
                 <>
                   <br />
-                  {subtitle}
+                  <EditableContent 
+                    pageKey={pageKey}
+                    fieldKey="hero_subtitle"
+                    fieldType="text"
+                    defaultValue={subtitle}
+                    as="span"
+                    className="text-white"
+                  />
                 </>
               )}
             </h1>
             
             <div className="flex flex-col gap-6 text-gray-300">
-              <p className="text-xl leading-relaxed">
-                {description}
-              </p>
+              <EditableContent 
+                pageKey={pageKey}
+                fieldKey="hero_description"
+                fieldType="textarea"
+                defaultValue={description}
+                as="p"
+                className="text-xl leading-relaxed"
+              />
             </div>
             
             <button 
               onClick={handleButtonClick}
               className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-4 px-8 rounded-full text-base uppercase tracking-wide transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-500/40 self-start"
             >
-              {buttonText}
+              <EditableContent 
+                pageKey={pageKey}
+                fieldKey="hero_button_text"
+                fieldType="text"
+                defaultValue={buttonText}
+                as="span"
+              />
             </button>
           </div>
           

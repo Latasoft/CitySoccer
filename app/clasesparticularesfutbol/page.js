@@ -45,7 +45,7 @@ export default function ClasesParticulareFutbol() {
 
   return (
     <div className="min-h-screen">
-      <HeroSection {...classData.heroProps} />
+      <HeroSection {...classData.heroProps} pageKey="clasesparticularesfutbol" />
       
       
       <SchedulePricingSection 

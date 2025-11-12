@@ -66,36 +66,51 @@ export default function Navigation() {
                 if (data && data.length > 0) {
                     // Transformar datos de BD al formato del componente
                     const transformedItems = transformMenuData(data);
-                    setNavItems(transformedItems);
+                    
+                    // IMPORTANTE: Agregar siempre Login/Dashboard al final según autenticación
+                    const itemsWithAuth = [...transformedItems];
+                    
+                    // Asegurarse de que el último item sea Login o Dashboard
+                    if (user && isAdmin) {
+                        itemsWithAuth.push({ linkText: "Dashboard", href: "/dashboard" });
+                    } else {
+                        itemsWithAuth.push({ linkText: "Login", href: "/login" });
+                    }
+                    
+                    setNavItems(itemsWithAuth);
+                } else {
+                    // Si no hay datos en BD, usar fallback pero actualizar Login/Dashboard
+                    const itemsWithAuth = [...fallbackNavItems];
+                    const lastIndex = itemsWithAuth.length - 1;
+                    
+                    if (user && isAdmin) {
+                        itemsWithAuth[lastIndex] = { linkText: "Dashboard", href: "/dashboard" };
+                    } else {
+                        itemsWithAuth[lastIndex] = { linkText: "Login", href: "/login" };
+                    }
+                    
+                    setNavItems(itemsWithAuth);
                 }
             } catch (error) {
                 console.error('Error cargando menú desde BD:', error);
-                // Se mantiene fallbackNavItems por defecto
+                // Usar fallback con Login/Dashboard correcto
+                const itemsWithAuth = [...fallbackNavItems];
+                const lastIndex = itemsWithAuth.length - 1;
+                
+                if (user && isAdmin) {
+                    itemsWithAuth[lastIndex] = { linkText: "Dashboard", href: "/dashboard" };
+                } else {
+                    itemsWithAuth[lastIndex] = { linkText: "Login", href: "/login" };
+                }
+                
+                setNavItems(itemsWithAuth);
             } finally {
                 setLoadingNav(false);
             }
         };
 
         loadMenuItems();
-    }, []);
-
-    // Actualizar dinámicamente el último item del menú según autenticación
-    useEffect(() => {
-        setNavItems(prevItems => {
-            const newItems = [...prevItems];
-            const lastIndex = newItems.length - 1;
-            
-            // Si el usuario está autenticado, reemplazar Login con Dashboard
-            if (user && isAdmin) {
-                newItems[lastIndex] = { linkText: "Dashboard", href: "/dashboard" };
-            } else {
-                // Si no está autenticado, mostrar Login
-                newItems[lastIndex] = { linkText: "Login", href: "/login" };
-            }
-            
-            return newItems;
-        });
-    }, [user, isAdmin]);
+    }, [user, isAdmin]); // Agregar dependencias user e isAdmin
 
     // Función para transformar datos de BD al formato esperado
     const transformMenuData = (menuData) => {

@@ -26,7 +26,7 @@ const EditableContent = ({
   children,
   ...props 
 }) => {
-  const { isAdmin } = useAdminMode();
+  const { isAdminMode } = useAdminMode(); // Cambiar de isAdmin a isAdminMode
   const [value, setValue] = useState(defaultValue);
   const [editedValue, setEditedValue] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -84,20 +84,7 @@ const EditableContent = ({
     setIsEditing(false);
   };
 
-  // Modo normal (no admin o no cargado)
-  if (!isAdmin || !loaded) {
-    const displayValue = loaded ? value : (children || defaultValue);
-    
-    if (fieldType === 'image' && Component === 'img') {
-      return <Component src={displayValue} className={className} {...props} />;
-    }
-    if (Component === 'a') {
-      return <Component href={displayValue} className={className} {...props}>{children}</Component>;
-    }
-    return <Component className={className} {...props}>{displayValue}</Component>;
-  }
-
-  // Modo edición
+  // Modo edición activo
   if (isEditing) {
     return (
       <div className="relative inline-block w-full min-w-[200px]">
@@ -151,18 +138,35 @@ const EditableContent = ({
     );
   }
 
-  // Vista normal con botón editar (admin)
+  // Vista normal (usuario no admin O modo admin desactivado)
+  if (!isAdminMode) {
+    const displayValue = loaded ? value : (children || defaultValue);
+    
+    if (fieldType === 'image' && Component === 'img') {
+      return <Component src={displayValue} className={className} {...props} />;
+    }
+    if (Component === 'a') {
+      return <Component href={displayValue} className={className} {...props}>{children}</Component>;
+    }
+    return <Component className={className} {...props}>{displayValue}</Component>;
+  }
+
+  // Vista admin con botón editar (SIEMPRE visible si modo admin está activo)
+  const displayValue = loaded ? value : (children || defaultValue);
+  // Vista admin con botón editar (SIEMPRE visible si es admin)
+  const displayValue = loaded ? value : (children || defaultValue);
+  
   return (
     <div className="group relative inline-block">
       {fieldType === 'image' && Component === 'img' ? (
-        <Component src={value || defaultValue} className={className} {...props} />
+        <Component src={displayValue} className={className} {...props} />
       ) : Component === 'a' ? (
-        <Component href={value || defaultValue} className={className} {...props}>
+        <Component href={displayValue} className={className} {...props}>
           {children}
         </Component>
       ) : (
         <Component className={className} {...props}>
-          {value || children || defaultValue}
+          {displayValue}
         </Component>
       )}
       

@@ -23,6 +23,7 @@ import PricesAdmin from './components/PricesAdmin';
 import ConfigAdmin from './components/ConfigAdmin';
 import ImageAdmin from './components/ImageAdmin';
 import ContentAdmin from './components/ContentAdmin';
+import PagesAdmin from './components/PagesAdmin';
 
 export default function Dashboard() {
   const { isAdmin } = useAdminMode();
@@ -251,6 +252,7 @@ export default function Dashboard() {
                   { id: 'configuracion', label: 'Config', icon: Settings },
                   { id: 'imagenes', label: 'Imágenes', icon: Images },
                   { id: 'contenido', label: 'Contenido', icon: FileText },
+                  { id: 'paginas', label: 'Páginas CMS', icon: FileText },
                 ].map((item) => (
                   <button
                     key={item.id}
@@ -288,6 +290,7 @@ export default function Dashboard() {
                   { id: 'configuracion', label: 'Configuración', icon: Settings },
                   { id: 'imagenes', label: 'Imágenes', icon: Images },
                   { id: 'contenido', label: 'Contenido', icon: FileText },
+                  { id: 'paginas', label: 'Páginas CMS', icon: FileText },
                 ].map((item) => (
                   <button
                     key={item.id}
@@ -470,9 +473,10 @@ export default function Dashboard() {
             {activeTab === 'configuracion' && <ConfigAdmin />}
             {activeTab === 'imagenes' && <ImageAdmin />}
             {activeTab === 'contenido' && <ContentAdmin />}
+            {activeTab === 'paginas' && <PagesAdmin />}
 
             {/* Otras pestañas */}
-            {!['overview', 'precios', 'configuracion', 'imagenes', 'contenido'].includes(activeTab) && (
+            {!['overview', 'precios', 'configuracion', 'imagenes', 'contenido', 'paginas'].includes(activeTab) && (
               <div className="bg-gray-800/50 rounded-xl p-8 border border-gray-700 text-center">
                 <div className="text-[#ffee00] text-6xl mb-4">🚧</div>
                 <h2 className="text-2xl font-bold text-white mb-4">

@@ -153,8 +153,6 @@ const EditableContent = ({
 
   // Vista admin con botón editar (SIEMPRE visible si modo admin está activo)
   const displayValue = loaded ? value : (children || defaultValue);
-  // Vista admin con botón editar (SIEMPRE visible si es admin)
-  const displayValue = loaded ? value : (children || defaultValue);
   
   return (
     <div className="group relative inline-block">

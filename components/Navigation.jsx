@@ -4,8 +4,10 @@ import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { AdminModeToggle } from "@/contexts/AdminModeContext";
+import { supabase } from "@/lib/supabaseClient";
 
-const navItems = [
+// Fallback estático (se usa si falla la carga desde BD)
+const fallbackNavItems = [
     { linkText: "Inicio", href: "/" },
     { linkText: "Quienes somos", href: "/quienessomos" },
     {
@@ -30,7 +32,6 @@ const navItems = [
     { linkText: "Eventos", href: "/eventos" },
     { linkText: "Contacto", href: "/contacto" },
     { linkText: "Login", href: "/login" },
-    
 ];
 
 const remToPixels = (rem) => {
@@ -43,8 +44,64 @@ export default function Navigation() {
     const [subMenuOpening, setOpenSubMenu] = useState(null);
     const [menuOpen, setMenuOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
+    const [navItems, setNavItems] = useState(fallbackNavItems);
+    const [loadingNav, setLoadingNav] = useState(true);
 
     const subMenuRefs = useRef([]);
+
+    // Cargar items del menú desde la base de datos
+    useEffect(() => {
+        const loadMenuItems = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('menu_items')
+                    .select('*')
+                    .eq('activo', true)
+                    .order('orden', { ascending: true });
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    // Transformar datos de BD al formato del componente
+                    const transformedItems = transformMenuData(data);
+                    setNavItems(transformedItems);
+                }
+            } catch (error) {
+                console.error('Error cargando menú desde BD:', error);
+                // Se mantiene fallbackNavItems por defecto
+            } finally {
+                setLoadingNav(false);
+            }
+        };
+
+        loadMenuItems();
+    }, []);
+
+    // Función para transformar datos de BD al formato esperado
+    const transformMenuData = (menuData) => {
+        const rootItems = menuData.filter(item => !item.parent_id);
+        
+        return rootItems.map(parent => {
+            const children = menuData.filter(item => item.parent_id === parent.id);
+            
+            if (children.length > 0) {
+                return {
+                    linkText: parent.label,
+                    subTitulos: children.map(child => ({
+                        linkText: child.label,
+                        href: child.url,
+                        externo: child.externo
+                    }))
+                };
+            } else {
+                return {
+                    linkText: parent.label,
+                    href: parent.url,
+                    externo: parent.externo
+                };
+            }
+        });
+    };
 
     useEffect(() => {
         setActivePath(pathname);

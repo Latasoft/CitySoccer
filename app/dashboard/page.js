@@ -15,16 +15,19 @@ import {
   TrendingUp,
   Settings,
   Images,
-  FileText
+  FileText,
+  Menu
 } from 'lucide-react';
 
 // Importar componentes de administración
-import PricesAdmin from './components/PricesAdmin';
+import PricesAdmin from './components/PricesAdminGrid';
 import ConfigAdmin from './components/ConfigAdmin';
 import ImageAdmin from './components/ImageAdmin';
 import ContentAdmin from './components/ContentAdmin';
 import PagesAdmin from './components/PagesAdmin';
 import HorariosAdmin from './components/HorariosAdmin';
+import NavigationAdmin from './components/NavigationAdmin';
+import EditableContentAdmin from './components/EditableContentAdmin';
 
 export default function Dashboard() {
   const { isAdmin } = useAdminMode();
@@ -251,10 +254,12 @@ export default function Dashboard() {
                   { id: 'canchas', label: 'Canchas', icon: MapPin },
                   { id: 'precios', label: 'Precios', icon: DollarSign },
                   { id: 'horarios', label: 'Horarios', icon: Clock },
+                  { id: 'navegacion', label: 'Menú', icon: Menu },
+                  { id: 'editable', label: 'Páginas', icon: FileText },
                   { id: 'configuracion', label: 'Config', icon: Settings },
                   { id: 'imagenes', label: 'Imágenes', icon: Images },
                   { id: 'contenido', label: 'Contenido', icon: FileText },
-                  { id: 'paginas', label: 'Páginas CMS', icon: FileText },
+                  { id: 'paginas', label: 'CMS', icon: FileText },
                 ].map((item) => (
                   <button
                     key={item.id}
@@ -290,6 +295,8 @@ export default function Dashboard() {
                   { id: 'canchas', label: 'Canchas', icon: MapPin },
                   { id: 'precios', label: 'Precios', icon: DollarSign },
                   { id: 'horarios', label: 'Config Horarios', icon: Clock },
+                  { id: 'navegacion', label: 'Navegación', icon: Menu },
+                  { id: 'editable', label: 'Contenido Páginas', icon: FileText },
                   { id: 'configuracion', label: 'Configuración', icon: Settings },
                   { id: 'imagenes', label: 'Imágenes', icon: Images },
                   { id: 'contenido', label: 'Contenido', icon: FileText },
@@ -474,13 +481,15 @@ export default function Dashboard() {
             {/* Pestañas de administración */}
             {activeTab === 'precios' && <PricesAdmin />}
             {activeTab === 'horarios' && <HorariosAdmin />}
+            {activeTab === 'navegacion' && <NavigationAdmin />}
+            {activeTab === 'editable' && <EditableContentAdmin />}
             {activeTab === 'configuracion' && <ConfigAdmin />}
             {activeTab === 'imagenes' && <ImageAdmin />}
             {activeTab === 'contenido' && <ContentAdmin />}
             {activeTab === 'paginas' && <PagesAdmin />}
 
             {/* Otras pestañas */}
-            {!['overview', 'precios', 'horarios', 'configuracion', 'imagenes', 'contenido', 'paginas'].includes(activeTab) && (
+            {!['overview', 'precios', 'horarios', 'navegacion', 'editable', 'configuracion', 'imagenes', 'contenido', 'paginas'].includes(activeTab) && (
               <div className="bg-gray-800/50 rounded-xl p-8 border border-gray-700 text-center">
                 <div className="text-[#ffee00] text-6xl mb-4">🚧</div>
                 <h2 className="text-2xl font-bold text-white mb-4">

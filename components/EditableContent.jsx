@@ -162,7 +162,7 @@ const EditableContent = ({
 
   // Vista normal (usuario no admin O modo admin desactivado)
   if (!isAdminMode) {
-    const displayValue = loaded ? value : (children || defaultValue);
+    const displayValue = loading ? (children || defaultValue) : value;
     
     if (fieldType === 'image' && Component === 'img') {
       return <Component src={displayValue} className={className} {...props} />;

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useDynamicImages } from '@/lib/dynamicImageService';
 import EditableImage from './EditableImage';
+import EditableContent from './EditableContent';
 
 const CardCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -104,12 +105,23 @@ const CardCarousel = () => {
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-6xl font-bold text-white mb-4">
-            Descubre City Soccer
-          </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Experiencias deportivas únicas que transforman tu forma de jugar y vivir el deporte
-          </p>
+          <EditableContent 
+            pageKey="home"
+            fieldKey="carousel_title"
+            fieldType="text"
+            defaultValue="Descubre City Soccer"
+            as="h2"
+            className="text-4xl md:text-6xl font-bold text-white mb-4"
+          />
+          
+          <EditableContent 
+            pageKey="home"
+            fieldKey="carousel_subtitle"
+            fieldType="textarea"
+            defaultValue="Experiencias deportivas únicas que transforman tu forma de jugar y vivir el deporte"
+            as="p"
+            className="text-xl text-gray-300 max-w-3xl mx-auto"
+          />
         </div>
 
         {/* Carousel Container */}

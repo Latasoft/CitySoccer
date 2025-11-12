@@ -34,6 +34,9 @@ const EditableContent = ({
   const [saving, setSaving] = useState(false);
   const [fieldId, setFieldId] = useState(null);
 
+  // Debug temporal
+  console.log(`EditableContent [${pageKey}.${fieldKey}] - isAdminMode:`, isAdminMode);
+
   const loadValue = async () => {
     if (loaded) return;
     

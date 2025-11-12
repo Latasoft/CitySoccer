@@ -17,13 +17,28 @@ export const AdminModeProvider = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [user, setUser] = useState(null);
 
-  // Emails autorizados como administradores
-  const adminEmails = [
-    'benja@gmail.com',
-    'admin@citysoccer.com',
-    'administrador@citysoccer.com',
-    'tiare.latasoft@gmail.com',
-  ];
+  // Función para verificar si el usuario es admin consultando la tabla admin_users
+  const checkIfUserIsAdmin = async (userId) => {
+    try {
+      const { data, error } = await supabase
+        .from('admin_users')
+        .select('id, activo')
+        .eq('user_id', userId)
+        .eq('activo', true)
+        .single();
+
+      if (error) {
+        // Si no encuentra el registro, no es admin
+        console.log('Usuario no encontrado en admin_users o no activo');
+        return false;
+      }
+
+      return data ? true : false;
+    } catch (error) {
+      console.error('Error verificando permisos de admin:', error);
+      return false;
+    }
+  };
 
   useEffect(() => {
     // Verificar sesión existente
@@ -32,19 +47,28 @@ export const AdminModeProvider = ({ children }) => {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (session?.user) {
+          const userId = session.user.id;
           const userEmail = session.user.email;
-          const isUserAdmin = adminEmails.includes(userEmail.toLowerCase());
+          const isUserAdmin = await checkIfUserIsAdmin(userId);
           
           setUser(session.user);
           setIsAdmin(isUserAdmin);
+          
+          console.log('Sesión detectada:', {
+            email: userEmail,
+            userId: userId,
+            isAdmin: isUserAdmin
+          });
           
           // Sincronizar con localStorage para el dashboard
           if (isUserAdmin) {
             localStorage.setItem('admin', JSON.stringify({
               correo: userEmail,
               rol: 'admin',
-              userId: session.user.id
+              userId: userId
             }));
+          } else {
+            localStorage.removeItem('admin');
           }
         } else {
           // No hay sesión activa, limpiar datos locales
@@ -68,19 +92,28 @@ export const AdminModeProvider = ({ children }) => {
         console.log('Auth state changed:', event, session?.user?.email);
         
         if (session?.user) {
+          const userId = session.user.id;
           const userEmail = session.user.email;
-          const isUserAdmin = adminEmails.includes(userEmail.toLowerCase());
+          const isUserAdmin = await checkIfUserIsAdmin(userId);
           
           setUser(session.user);
           setIsAdmin(isUserAdmin);
+          
+          console.log('Estado de autenticación actualizado:', {
+            email: userEmail,
+            userId: userId,
+            isAdmin: isUserAdmin
+          });
           
           // Sincronizar con localStorage
           if (isUserAdmin) {
             localStorage.setItem('admin', JSON.stringify({
               correo: userEmail,
               rol: 'admin',
-              userId: session.user.id
+              userId: userId
             }));
+          } else {
+            localStorage.removeItem('admin');
           }
         } else {
           // Usuario desconectado

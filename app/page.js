@@ -1,23 +1,29 @@
 import { pagesService, pageSectionsService } from '@/lib/adminService';
 import HomePageClient from '@/components/HomePageClient';
-import { notFound } from 'next/navigation';
 
 export const revalidate = 3600; // Revalidar cada hora
 
 export default async function HomePage() {
-  // Intentar cargar desde CMS
-  const { data: page } = await pagesService.getBySlug('home');
-  
   let sections = [];
+  let page = null;
   
-  // Si existe en CMS y está publicada, cargar secciones
-  if (page && page.publicada) {
-    const { data: sectionsData } = await pageSectionsService.getByPageId(page.id);
-    sections = (sectionsData || [])
-      .filter(s => s.activa)
-      .sort((a, b) => a.orden - b.orden);
+  try {
+    // Intentar cargar desde CMS
+    const pageResult = await pagesService.getBySlug('home');
+    
+    // Si existe en CMS y está publicada, cargar secciones
+    if (pageResult.data && pageResult.data.publicada) {
+      page = pageResult.data;
+      const sectionsResult = await pageSectionsService.getByPageId(page.id);
+      sections = (sectionsResult.data || [])
+        .filter(s => s.activa)
+        .sort((a, b) => a.orden - b.orden);
+    }
+  } catch (error) {
+    // Si hay error (ej: página no existe), continuar con fallback
+    console.log('[HOME] Página no encontrada en CMS, usando versión estática');
   }
 
-  // Pasar todo al componente cliente
+  // Pasar todo al componente cliente (puede ser vacío si no hay contenido en CMS)
   return <HomePageClient initialPage={page} initialSections={sections} />;
 }

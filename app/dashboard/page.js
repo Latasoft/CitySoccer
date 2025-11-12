@@ -24,6 +24,7 @@ import ConfigAdmin from './components/ConfigAdmin';
 import ImageAdmin from './components/ImageAdmin';
 import ContentAdmin from './components/ContentAdmin';
 import PagesAdmin from './components/PagesAdmin';
+import HorariosAdmin from './components/HorariosAdmin';
 
 export default function Dashboard() {
   const { isAdmin } = useAdminMode();
@@ -249,6 +250,7 @@ export default function Dashboard() {
                   { id: 'reservas', label: 'Reservas', icon: Calendar },
                   { id: 'canchas', label: 'Canchas', icon: MapPin },
                   { id: 'precios', label: 'Precios', icon: DollarSign },
+                  { id: 'horarios', label: 'Horarios', icon: Clock },
                   { id: 'configuracion', label: 'Config', icon: Settings },
                   { id: 'imagenes', label: 'Imágenes', icon: Images },
                   { id: 'contenido', label: 'Contenido', icon: FileText },
@@ -287,6 +289,7 @@ export default function Dashboard() {
                   { id: 'reservas', label: 'Reservas', icon: Calendar },
                   { id: 'canchas', label: 'Canchas', icon: MapPin },
                   { id: 'precios', label: 'Precios', icon: DollarSign },
+                  { id: 'horarios', label: 'Config Horarios', icon: Clock },
                   { id: 'configuracion', label: 'Configuración', icon: Settings },
                   { id: 'imagenes', label: 'Imágenes', icon: Images },
                   { id: 'contenido', label: 'Contenido', icon: FileText },
@@ -470,13 +473,14 @@ export default function Dashboard() {
 
             {/* Pestañas de administración */}
             {activeTab === 'precios' && <PricesAdmin />}
+            {activeTab === 'horarios' && <HorariosAdmin />}
             {activeTab === 'configuracion' && <ConfigAdmin />}
             {activeTab === 'imagenes' && <ImageAdmin />}
             {activeTab === 'contenido' && <ContentAdmin />}
             {activeTab === 'paginas' && <PagesAdmin />}
 
             {/* Otras pestañas */}
-            {!['overview', 'precios', 'configuracion', 'imagenes', 'contenido', 'paginas'].includes(activeTab) && (
+            {!['overview', 'precios', 'horarios', 'configuracion', 'imagenes', 'contenido', 'paginas'].includes(activeTab) && (
               <div className="bg-gray-800/50 rounded-xl p-8 border border-gray-700 text-center">
                 <div className="text-[#ffee00] text-6xl mb-4">🚧</div>
                 <h2 className="text-2xl font-bold text-white mb-4">

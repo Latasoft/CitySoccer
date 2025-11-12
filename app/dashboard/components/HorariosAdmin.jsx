@@ -3,9 +3,12 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { diasBloqueadosService } from '@/lib/adminService';
+import { notifyScheduleChange } from '@/lib/notificationService';
+import { useAuth } from '@/hooks/useAuth';
 import { Calendar, Clock, Ban, Trash2, Plus, Save, AlertCircle } from 'lucide-react';
 
 export default function HorariosAdmin() {
+  const { user } = useAuth();
   const [horarioInicio, setHorarioInicio] = useState('09:00');
   const [horarioFin, setHorarioFin] = useState('23:00');
   const [intervaloMinutos, setIntervaloMinutos] = useState(60);
@@ -16,6 +19,14 @@ export default function HorariosAdmin() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  
+  // Estados originales para detectar cambios
+  const [estadoOriginal, setEstadoOriginal] = useState({
+    horarioInicio: '09:00',
+    horarioFin: '23:00',
+    intervaloMinutos: 60,
+    diasActivos: []
+  });
 
   const diasSemana = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
 
@@ -33,18 +44,35 @@ export default function HorariosAdmin() {
         .in('clave', ['horario_inicio', 'horario_fin', 'intervalo_reserva_minutos', 'dias_semana_activos']);
 
       if (configs) {
+        const newState = { ...estadoOriginal };
+        
         configs.forEach(config => {
-          if (config.clave === 'horario_inicio') setHorarioInicio(config.valor);
-          if (config.clave === 'horario_fin') setHorarioFin(config.valor);
-          if (config.clave === 'intervalo_reserva_minutos') setIntervaloMinutos(parseInt(config.valor));
+          if (config.clave === 'horario_inicio') {
+            setHorarioInicio(config.valor);
+            newState.horarioInicio = config.valor;
+          }
+          if (config.clave === 'horario_fin') {
+            setHorarioFin(config.valor);
+            newState.horarioFin = config.valor;
+          }
+          if (config.clave === 'intervalo_reserva_minutos') {
+            const intervalo = parseInt(config.valor);
+            setIntervaloMinutos(intervalo);
+            newState.intervaloMinutos = intervalo;
+          }
           if (config.clave === 'dias_semana_activos') {
             try {
-              setDiasActivos(JSON.parse(config.valor));
+              const dias = JSON.parse(config.valor);
+              setDiasActivos(dias);
+              newState.diasActivos = [...dias];
             } catch (e) {
               setDiasActivos(diasSemana);
+              newState.diasActivos = [...diasSemana];
             }
           }
         });
+        
+        setEstadoOriginal(newState);
       }
 
       // Cargar días bloqueados
@@ -85,13 +113,61 @@ export default function HorariosAdmin() {
         .update({ valor: JSON.stringify(diasActivos), actualizado_en: new Date().toISOString() })
         .eq('clave', 'dias_semana_activos');
 
+      // Detectar cambios y enviar notificación
+      const cambios = detectarCambiosHorarios();
+      if (cambios.length > 0) {
+        await notifyScheduleChange({
+          adminNombre: user?.email || 'Administrador',
+          cambiosRealizados: cambios
+        });
+      }
+
       showMessage('success', 'Horarios actualizados correctamente');
+      
+      // Actualizar estado original
+      setEstadoOriginal({
+        horarioInicio,
+        horarioFin,
+        intervaloMinutos,
+        diasActivos: [...diasActivos]
+      });
     } catch (error) {
       console.error('Error guardando horarios:', error);
       showMessage('error', 'Error al guardar horarios');
     } finally {
       setSaving(false);
     }
+  };
+
+  // Detectar qué cambios se realizaron en horarios
+  const detectarCambiosHorarios = () => {
+    const cambios = [];
+    
+    if (estadoOriginal.horarioInicio !== horarioInicio) {
+      cambios.push(`Horario de inicio: ${estadoOriginal.horarioInicio} → ${horarioInicio}`);
+    }
+    
+    if (estadoOriginal.horarioFin !== horarioFin) {
+      cambios.push(`Horario de fin: ${estadoOriginal.horarioFin} → ${horarioFin}`);
+    }
+    
+    if (estadoOriginal.intervaloMinutos !== intervaloMinutos) {
+      cambios.push(`Intervalo de reserva: ${estadoOriginal.intervaloMinutos} min → ${intervaloMinutos} min`);
+    }
+    
+    // Comparar días activos
+    const diasAgregados = diasActivos.filter(d => !estadoOriginal.diasActivos.includes(d));
+    const diasEliminados = estadoOriginal.diasActivos.filter(d => !diasActivos.includes(d));
+    
+    if (diasAgregados.length > 0) {
+      cambios.push(`Días activados: ${diasAgregados.join(', ')}`);
+    }
+    
+    if (diasEliminados.length > 0) {
+      cambios.push(`Días desactivados: ${diasEliminados.join(', ')}`);
+    }
+    
+    return cambios;
   };
 
   const handleBloquearDia = async () => {
@@ -108,6 +184,22 @@ export default function HorariosAdmin() {
       
       if (error) throw error;
 
+      // Enviar notificación de bloqueo
+      const fechaFormateada = new Date(nuevaFecha).toLocaleDateString('es-CL', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      
+      await notifyScheduleChange({
+        adminNombre: user?.email || 'Administrador',
+        cambiosRealizados: [
+          `Día bloqueado: ${fechaFormateada}`,
+          nuevoMotivo ? `Motivo: ${nuevoMotivo}` : 'Sin motivo especificado'
+        ]
+      });
+
       showMessage('success', 'Día bloqueado correctamente');
       setNuevaFecha('');
       setNuevoMotivo('');
@@ -122,8 +214,26 @@ export default function HorariosAdmin() {
     if (!confirm('¿Está seguro de desbloquear este día?')) return;
 
     try {
+      const diaADesbloquear = diasBloqueados.find(d => d.id === id);
+      
       const { error } = await diasBloqueadosService.delete(id);
+      
       if (error) throw error;
+
+      // Enviar notificación de desbloqueo
+      if (diaADesbloquear) {
+        const fechaFormateada = new Date(diaADesbloquear.fecha).toLocaleDateString('es-CL', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+        
+        await notifyScheduleChange({
+          adminNombre: user?.email || 'Administrador',
+          cambiosRealizados: [`Día desbloqueado: ${fechaFormateada}`]
+        });
+      }
 
       showMessage('success', 'Día desbloqueado correctamente');
       loadData();
@@ -133,7 +243,7 @@ export default function HorariosAdmin() {
     }
   };
 
-  const toggleDiaSemana = (dia) => {
+  const toggleDiaActivo = (dia) => {
     if (diasActivos.includes(dia)) {
       setDiasActivos(diasActivos.filter(d => d !== dia));
     } else {

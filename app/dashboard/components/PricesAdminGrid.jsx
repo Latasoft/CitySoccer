@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { pricesService } from '@/lib/adminService';
 import { invalidatePricesCache } from '@/lib/dynamicConfigService';
+import { notifyPriceChange } from '@/lib/notificationService';
+import { useAuth } from '@/hooks/useAuth';
 import { DollarSign, Save, Loader2, AlertCircle, CheckCircle2, Plus, X, Trash2 } from 'lucide-react';
 import { CURRENCY } from '@/lib/constants';
 
@@ -14,7 +16,9 @@ import { CURRENCY } from '@/lib/constants';
  * - Toggle activo/inactivo
  */
 const PricesAdminGrid = () => {
+  const { user } = useAuth();
   const [precios, setPrecios] = useState([]);
+  const [preciosOriginales, setPreciosOriginales] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
@@ -51,6 +55,7 @@ const PricesAdminGrid = () => {
       const { data, error } = await pricesService.getAll();
       if (error) throw error;
       setPrecios(data || []);
+      setPreciosOriginales(JSON.parse(JSON.stringify(data || []))); // Copia profunda
     } catch (error) {
       console.error('Error cargando precios:', error);
       setMessage({ type: 'error', text: 'Error al cargar los precios' });
@@ -141,6 +146,16 @@ const PricesAdminGrid = () => {
       const { error } = await pricesService.updateBatch(precios);
       if (error) throw error;
       
+      // Detectar cambios y enviar notificación
+      const cambios = detectarCambios();
+      if (cambios.length > 0) {
+        await notifyPriceChange({
+          adminNombre: user?.email || 'Administrador',
+          tipoCancha: tiposCanchas.find(t => t.id === activeTab)?.name || activeTab,
+          cambiosRealizados: cambios
+        });
+      }
+      
       setMessage({ type: 'success', text: 'Precios actualizados correctamente' });
       await loadPrecios();
       
@@ -151,6 +166,26 @@ const PricesAdminGrid = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  // Detectar qué cambios se realizaron
+  const detectarCambios = () => {
+    const cambios = [];
+    const preciosActuales = precios.filter(p => p.tipo_cancha === activeTab);
+    const preciosOriginalesTab = preciosOriginales.filter(p => p.tipo_cancha === activeTab);
+
+    preciosActuales.forEach(precioActual => {
+      const precioOriginal = preciosOriginalesTab.find(p => p.id === precioActual.id);
+      
+      if (precioOriginal && precioOriginal.precio !== precioActual.precio) {
+        const diaLabel = diasSemana.find(d => d.id === precioActual.dia_semana)?.name || precioActual.dia_semana;
+        cambios.push(
+          `${diaLabel} ${precioActual.hora}: $${precioOriginal.precio.toLocaleString('es-CL')} → $${precioActual.precio.toLocaleString('es-CL')}`
+        );
+      }
+    });
+
+    return cambios;
   };
 
   const formatCurrency = (amount) => {

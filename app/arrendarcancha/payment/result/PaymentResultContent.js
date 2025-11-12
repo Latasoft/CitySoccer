@@ -7,7 +7,9 @@ import { TRANSACTION_STATUS } from '@/lib/constants'
 
 export default function PaymentResultContent() {
   const [transaction, setTransaction] = useState(null)
+  const [reserva, setReserva] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [downloadingPDF, setDownloadingPDF] = useState(false)
   const [error, setError] = useState('')
   const [attempts, setAttempts] = useState(0)
   const maxAttempts = 8
@@ -110,6 +112,11 @@ export default function PaymentResultContent() {
           setTransaction(data)
           setAttempts(attemptNumber)
           
+          // Si el pago fue aprobado, obtener la reserva asociada
+          if (data.status === TRANSACTION_STATUS.APPROVED && data.orderId) {
+            fetchReservation(data.orderId)
+          }
+          
           // Si el estado no es PENDING o hemos recibido webhook, parar
           if (data.status !== TRANSACTION_STATUS.PENDING || data.webhookReceived) {
             console.log('Final status received:', data.status)
@@ -155,6 +162,48 @@ export default function PaymentResultContent() {
       }
     }
   }, [orderId, maxAttempts, searchParams])
+
+  // Función para obtener la reserva asociada
+  const fetchReservation = async (orderId) => {
+    try {
+      const response = await fetch(`/api/reserva/info?orderId=${orderId}`)
+      if (response.ok) {
+        const data = await response.json()
+        setReserva(data.reserva)
+      }
+    } catch (error) {
+      console.error('Error fetching reservation:', error)
+    }
+  }
+
+  // Función para descargar el PDF
+  const handleDownloadPDF = async () => {
+    if (!reserva?.id) return
+
+    setDownloadingPDF(true)
+    try {
+      const response = await fetch(`/api/reserva/pdf?id=${reserva.id}`)
+      
+      if (!response.ok) {
+        throw new Error('Error descargando PDF')
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `Comprobante_Reserva_${reserva.id}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    } catch (error) {
+      console.error('Error descargando PDF:', error)
+      alert('Error al descargar el comprobante. Por favor intenta nuevamente.')
+    } finally {
+      setDownloadingPDF(false)
+    }
+  }
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -272,7 +321,26 @@ export default function PaymentResultContent() {
           >
             Volver al Inicio
           </Link>
-                 
+          
+          {/* Botón de descarga de PDF - solo visible si el pago fue aprobado */}
+          {transaction?.status === TRANSACTION_STATUS.APPROVED && reserva?.id && (
+            <button
+              onClick={handleDownloadPDF}
+              disabled={downloadingPDF}
+              className="ml-4 bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed inline-flex items-center gap-2"
+            >
+              {downloadingPDF ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Descargando...
+                </>
+              ) : (
+                <>
+                  📄 Descargar Comprobante
+                </>
+              )}
+            </button>
+          )}
         </div>          
       </div>
     </div>

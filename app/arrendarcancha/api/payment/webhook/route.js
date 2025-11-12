@@ -11,6 +11,8 @@ import {
   calculateEndTime,
   ERROR_MESSAGES
 } from '@/lib/constants'
+import { sendReservationConfirmation, sendAdminReservationNotification } from '@/lib/emailService'
+import { generateReservationPDF } from '@/lib/pdfService'
 
 // Configuración para rutas
 export const dynamic = 'force-dynamic'
@@ -228,6 +230,105 @@ export async function POST(request) {
 
         const reservaData = resultadoReserva.data[0]
         console.log('Reservation created successfully:', reservaData)
+
+        // ============================================
+        // ENVIAR EMAILS CON PDF ADJUNTO
+        // ============================================
+        try {
+          console.log('📧 Generando PDF y enviando correos...')
+
+          // Obtener información de la cancha
+          const { data: canchaData } = await supabase
+            .from('canchas')
+            .select('nombre')
+            .eq('id', reservaData.cancha_id)
+            .single()
+
+          const canchaInfo = canchaData?.nombre || `Cancha #${reservaData.cancha_id}`
+
+          // 1. Generar PDF del comprobante
+          const pdfResult = await generateReservationPDF({
+            reservaId: reservaData.id,
+            orderId: reference,
+            clienteNombre: cliente.nombre,
+            clienteEmail: cliente.email,
+            clienteTelefono: cliente.telefono,
+            canchaInfo: canchaInfo,
+            fecha: new Date(reservaData.fecha).toLocaleDateString('es-CL', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }),
+            horaInicio: reservaData.hora_inicio,
+            horaFin: reservaData.hora_fin || horaFin,
+            monto: existingTransaction.amount,
+            metodoPago: status?.paymentMethod || 'Tarjeta de Crédito/Débito',
+            fechaPago: new Date().toLocaleDateString('es-CL'),
+            autorizacion: status?.authorization
+          })
+
+          const pdfBuffer = pdfResult.success ? pdfResult.buffer : null
+
+          if (!pdfResult.success) {
+            console.error('⚠️ Error generando PDF:', pdfResult.error)
+          }
+
+          // 2. Enviar email de confirmación al cliente (con PDF adjunto)
+          const emailClienteResult = await sendReservationConfirmation({
+            clienteEmail: cliente.email,
+            clienteNombre: cliente.nombre,
+            canchaInfo: canchaInfo,
+            fecha: new Date(reservaData.fecha).toLocaleDateString('es-CL', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }),
+            horaInicio: reservaData.hora_inicio,
+            horaFin: reservaData.hora_fin || horaFin,
+            monto: existingTransaction.amount,
+            reservaId: reservaData.id,
+            orderId: reference,
+            pdfBuffer: pdfBuffer
+          })
+
+          if (emailClienteResult.success) {
+            console.log('✅ Email de confirmación enviado al cliente:', cliente.email)
+          } else {
+            console.error('⚠️ No se pudo enviar email al cliente:', emailClienteResult.error)
+          }
+
+          // 3. Enviar notificación al administrador
+          const emailAdminResult = await sendAdminReservationNotification({
+            clienteNombre: cliente.nombre,
+            clienteEmail: cliente.email,
+            clienteTelefono: cliente.telefono,
+            canchaInfo: canchaInfo,
+            fecha: new Date(reservaData.fecha).toLocaleDateString('es-CL', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }),
+            horaInicio: reservaData.hora_inicio,
+            horaFin: reservaData.hora_fin || horaFin,
+            monto: existingTransaction.amount,
+            reservaId: reservaData.id,
+            orderId: reference,
+            metodoPago: status?.paymentMethod || 'No especificado'
+          })
+
+          if (emailAdminResult.success) {
+            console.log('✅ Notificación enviada al administrador')
+          } else {
+            console.error('⚠️ No se pudo enviar notificación al admin:', emailAdminResult.error)
+          }
+
+        } catch (emailError) {
+          console.error('❌ Error en proceso de envío de emails:', emailError)
+          // No fallar el webhook si los emails fallan
+        }
 
         return NextResponse.json({ 
           received: true,

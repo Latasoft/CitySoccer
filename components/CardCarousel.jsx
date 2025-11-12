@@ -38,7 +38,7 @@ const CardCarousel = () => {
       description: "Canchas de Pickleball con superficies profesionales. El deporte que está revolucionando el mundo.",
       image: getImageUrl('canchas', '/Pickleball2.jpeg', 1),
       ctaText: "RESERVAR PICKLEBALL",
-      ctaLink: "/arrendarcancha/pickleball"
+      ctaLink: "/arrendarcancha/pickleball-individual"
     },
     {
       id: 3,

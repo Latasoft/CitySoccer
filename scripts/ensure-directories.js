@@ -25,12 +25,20 @@ console.log('🔧 Ensuring required directories exist...\n');
 directories.forEach(dir => {
   const fullPath = path.join(process.cwd(), dir);
   
-  if (!fs.existsSync(fullPath)) {
-    fs.mkdirSync(fullPath, { recursive: true });
-    console.log(`✅ Created: ${dir}`);
-  } else {
-    console.log(`✓ Exists: ${dir}`);
+  // Si ya existe (ya sea directorio o symlink), no hacer nada
+  if (fs.existsSync(fullPath)) {
+    const stats = fs.lstatSync(fullPath);
+    if (stats.isSymbolicLink()) {
+      console.log(`🔗 Symlink exists: ${dir} -> ${fs.readlinkSync(fullPath)}`);
+    } else {
+      console.log(`✓ Exists: ${dir}`);
+    }
+    return;
   }
+  
+  // Solo crear si no existe
+  fs.mkdirSync(fullPath, { recursive: true });
+  console.log(`✅ Created: ${dir}`);
 });
 
 console.log('\n✅ All directories ready!');

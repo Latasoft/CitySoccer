@@ -38,8 +38,8 @@ else
   exit 1
 fi
 
-# Lo mismo para content
-PERSISTENT_CONTENT="/var/data/content"
+# Content dentro del mismo disco que uploads
+PERSISTENT_CONTENT="/var/data/uploads/content"
 mkdir -p "$PERSISTENT_CONTENT"
 
 if [ -d "$PUBLIC_DIR/content" ] && [ ! -L "$PUBLIC_DIR/content" ]; then

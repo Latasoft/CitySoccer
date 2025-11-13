@@ -30,15 +30,9 @@ const EditableContent = ({
 }) => {
   const { isAdminMode } = useAdminMode();
   
-  // Inicializar con localStorage si existe
+  // Inicializar con defaultValue, el servidor tiene prioridad
   const cacheKey = `content_${pageKey}_${fieldKey}`;
-  const [value, setValue] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const cached = localStorage.getItem(cacheKey);
-      return cached || defaultValue;
-    }
-    return defaultValue;
-  });
+  const [value, setValue] = useState(defaultValue);
   
   const [editedValue, setEditedValue] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -78,12 +72,20 @@ const EditableContent = ({
           });
           const newValue = data[fieldKey];
           setValue(newValue);
-          // Guardar en localStorage
+          // Guardar en localStorage como backup
           if (typeof window !== 'undefined') {
             localStorage.setItem(cacheKey, newValue);
           }
         } else {
-          console.warn(`[EditableContent] ⚠️ Campo NO encontrado: ${pageKey}.${fieldKey} - usando defaultValue`);
+          console.warn(`[EditableContent] ⚠️ Campo NO encontrado: ${pageKey}.${fieldKey} - intentando localStorage`);
+          // Si no hay valor en servidor, intentar localStorage
+          if (typeof window !== 'undefined') {
+            const cached = localStorage.getItem(cacheKey);
+            if (cached) {
+              console.log(`[EditableContent] 📦 Usando valor de localStorage para ${pageKey}.${fieldKey}`);
+              setValue(cached);
+            }
+          }
         }
       } catch (error) {
         console.error(`[EditableContent] 💥 Exception cargando ${pageKey}.${fieldKey}:`, error);

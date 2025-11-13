@@ -16,15 +16,9 @@ const CardBackgroundImage = ({
 }) => {
   const { isAdminMode } = useAdminMode();
   
-  // Inicializar con valor de localStorage si existe, sino usar defaultValue
+  // Inicializar con defaultValue, el servidor tiene prioridad
   const cacheKey = `content_${pageKey}_${fieldKey}`;
-  const [value, setValue] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const cached = localStorage.getItem(cacheKey);
-      return cached || defaultValue;
-    }
-    return defaultValue;
-  });
+  const [value, setValue] = useState(defaultValue);
   
   const [editedValue, setEditedValue] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -53,9 +47,17 @@ const CardBackgroundImage = ({
         if (data && data[fieldKey] !== undefined) {
           const newValue = data[fieldKey];
           setValue(newValue);
-          // Guardar en localStorage para próxima carga
+          // Guardar en localStorage como backup
           if (typeof window !== 'undefined') {
             localStorage.setItem(cacheKey, newValue);
+          }
+        } else {
+          // Si no hay valor en servidor, intentar localStorage
+          if (typeof window !== 'undefined') {
+            const cached = localStorage.getItem(cacheKey);
+            if (cached) {
+              setValue(cached);
+            }
           }
         }
       } catch (error) {

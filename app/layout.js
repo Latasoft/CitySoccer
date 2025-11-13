@@ -4,6 +4,7 @@ import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import { AdminModeProvider } from "../contexts/AdminModeContext";
 import { EditModeProvider } from "../contexts/EditModeContext";
+import { ContentProvider } from "../contexts/ContentContext";
 import EditModeToggle from "../components/EditModeToggle";
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,18 +29,20 @@ export default function RootLayout({ children }) {
       >
         <AdminModeProvider>
           <EditModeProvider>
-            <Navigation />
-            
-            {/* Main content with responsive padding for navigation */}
-            {/* Mobile: top padding | Desktop: left padding */}
-            <main className="pt-[72px] md:pt-0 md:pl-20 transition-all duration-[382ms]">
-              {children}
-            </main>
-            
-            <Footer />
-            
-            {/* Botón flotante para activar modo edición (solo para admins) */}
-            <EditModeToggle />
+            <ContentProvider>
+              <Navigation />
+              
+              {/* Main content with responsive padding for navigation */}
+              {/* Mobile: top padding | Desktop: left padding */}
+              <main className="pt-[72px] md:pt-0 md:pl-20 transition-all duration-[382ms]">
+                {children}
+              </main>
+              
+              <Footer />
+              
+              {/* Botón flotante para activar modo edición (solo para admins) */}
+              <EditModeToggle />
+            </ContentProvider>
           </EditModeProvider>
         </AdminModeProvider>
       </body>

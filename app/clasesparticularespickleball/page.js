@@ -50,8 +50,8 @@ export default function ClasesParticularePickleball() {
           action: () => openWhatsApp("Hola! Soy principiante en pickleball y quisiera saber más sobre las clases particulares")
         }}
         whatsappNumber={getWhatsAppNumber()}
-        backgroundImage="./Pickleball2.jpeg"
         pageKey="clasesparticularespickleball"
+        imageCategory="clases-pickleball-cta"
       />
     </div>
   );

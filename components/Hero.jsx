@@ -89,6 +89,8 @@ const Hero = () => {
             src={logoUrl}
             alt="City Soccer Logo"
             categoria="logos"
+            pageKey="home"
+            fieldKey="home_logo"
             className="mx-auto mb-8 w-150 h-150 object-contain"
             style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.5))" }}
           />

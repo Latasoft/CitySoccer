@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useAdminMode } from '@/contexts/AdminModeContext';
-import { localContentService } from '@/lib/localContentService';
+import { useContent } from '@/contexts/ContentContext';
 import { Edit2, Save, X, Loader2 } from 'lucide-react';
 
 /**
  * Componente para hacer elementos editables in-place usando editable_content
- * Simplificado y ligero - solo carga cuando se hace clic en editar
+ * Optimizado con caché compartido - evita múltiples llamadas al API
  * 
  * @param {string} pageKey - Identificador de la página
  * @param {string} fieldKey - Identificador del campo
@@ -29,6 +29,7 @@ const EditableContent = ({
   ...props 
 }) => {
   const { isAdminMode } = useAdminMode();
+  const { getField, updateField } = useContent();
   
   // Inicializar con defaultValue, el servidor tiene prioridad
   const cacheKey = `content_${pageKey}_${fieldKey}`;
@@ -39,18 +40,24 @@ const EditableContent = ({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Cargar valor desde archivo JSON al montar el componente
+  // Cargar valor desde caché compartido al montar el componente
   useEffect(() => {
     let isMounted = true;
     
     const loadValue = async () => {
-      console.log(`[EditableContent] 🔄 Cargando ${pageKey}.${fieldKey}...`);
+      const debugMode = process.env.NEXT_PUBLIC_DEBUG_MODE === 'true';
+      
+      if (debugMode) {
+        console.log(`[EditableContent] 🔄 Cargando ${pageKey}.${fieldKey}...`);
+      }
       
       try {
-        const { data, error } = await localContentService.getPageContent(pageKey);
+        const { data, error } = await getField(pageKey, fieldKey);
         
         if (!isMounted) {
-          console.log(`[EditableContent] ⚠️ Componente desmontado antes de cargar ${pageKey}.${fieldKey}`);
+          if (debugMode) {
+            console.log(`[EditableContent] ⚠️ Componente desmontado antes de cargar ${pageKey}.${fieldKey}`);
+          }
           return;
         }
         
@@ -60,39 +67,33 @@ const EditableContent = ({
           return;
         }
         
-        console.log(`[EditableContent] 📦 Datos recibidos para ${pageKey}:`, {
-          totalFields: Object.keys(data || {}).length,
-          fields: Object.keys(data || {}),
-          buscando: fieldKey
-        });
-        
-        if (data && data[fieldKey] !== undefined) {
-          console.log(`[EditableContent] ✅ Campo encontrado ${pageKey}.${fieldKey}:`, {
-            value: data[fieldKey]?.substring?.(0, 50) + (data[fieldKey]?.length > 50 ? '...' : '') || data[fieldKey]
-          });
-          const newValue = data[fieldKey];
-          setValue(newValue);
+        // getField ya devuelve solo el valor del campo
+        if (data !== undefined && data !== null) {
+          if (debugMode) {
+            console.log(`[EditableContent] ✅ Campo encontrado ${pageKey}.${fieldKey}:`, {
+              value: typeof data === 'string' ? data.substring(0, 50) + (data.length > 50 ? '...' : '') : data
+            });
+          }
+          setValue(data);
           // Guardar en localStorage como backup
           if (typeof window !== 'undefined') {
-            localStorage.setItem(cacheKey, newValue);
+            localStorage.setItem(cacheKey, data);
           }
         } else {
-          console.warn(`[EditableContent] ⚠️ Campo NO encontrado: ${pageKey}.${fieldKey} - intentando localStorage`);
-          // Si no hay valor en servidor, intentar localStorage
-          if (typeof window !== 'undefined') {
-            const cached = localStorage.getItem(cacheKey);
-            if (cached) {
-              console.log(`[EditableContent] 📦 Usando valor de localStorage para ${pageKey}.${fieldKey}`);
-              setValue(cached);
-            }
+          if (debugMode) {
+            console.warn(`[EditableContent] ⚠️ Campo NO encontrado: ${pageKey}.${fieldKey} - usando defaultValue`);
           }
+          setValue(defaultValue);
         }
       } catch (error) {
         console.error(`[EditableContent] 💥 Exception cargando ${pageKey}.${fieldKey}:`, error);
+        setValue(defaultValue);
       } finally {
         if (isMounted) {
           setLoading(false);
-          console.log(`[EditableContent] ✓ Carga completada para ${pageKey}.${fieldKey}`);
+          if (debugMode) {
+            console.log(`[EditableContent] ✓ Carga completada para ${pageKey}.${fieldKey}`);
+          }
         }
       }
     };
@@ -118,20 +119,27 @@ const EditableContent = ({
   const handleSave = async () => {
     try {
       setSaving(true);
-      console.log(`\n${'~'.repeat(60)}`);
-      console.log(`✏️ GUARDANDO ${pageKey}.${fieldKey}`);
-      console.log(`Valor anterior: ${value?.substring?.(0, 100) || value}`);
-      console.log(`Valor nuevo: ${editedValue?.substring?.(0, 100) || editedValue}`);
-      console.log('~'.repeat(60));
+      const debugMode = process.env.NEXT_PUBLIC_DEBUG_MODE === 'true';
       
-      const { data, error } = await localContentService.updateField(pageKey, fieldKey, editedValue);
+      if (debugMode) {
+        console.log(`\n${'~'.repeat(60)}`);
+        console.log(`✏️ GUARDANDO ${pageKey}.${fieldKey}`);
+        console.log(`Valor anterior: ${value?.substring?.(0, 100) || value}`);
+        console.log(`Valor nuevo: ${editedValue?.substring?.(0, 100) || editedValue}`);
+        console.log('~'.repeat(60));
+      }
+      
+      const { data, error } = await updateField(pageKey, fieldKey, editedValue);
       
       if (error) {
         console.error(`[EditableContent] ❌ Error del servicio:`, error);
         throw error;
       }
       
-      console.log(`[EditableContent] ✅ Guardado exitoso:`, data);
+      if (debugMode) {
+        console.log(`[EditableContent] ✅ Guardado exitoso:`, data);
+      }
+      
       setValue(editedValue);
       setIsEditing(false);
       
@@ -149,7 +157,9 @@ const EditableContent = ({
       alert(`Error al guardar: ${error.message || 'Error desconocido'}`);
     } finally {
       setSaving(false);
-      console.log(`[EditableContent] ✓ Proceso de guardado finalizado para ${pageKey}.${fieldKey}`);
+      if (process.env.NEXT_PUBLIC_DEBUG_MODE === 'true') {
+        console.log(`[EditableContent] ✓ Proceso de guardado finalizado para ${pageKey}.${fieldKey}`);
+      }
     }
   };
 
@@ -253,8 +263,46 @@ const EditableContent = ({
   // Filtrar children de props para elementos void
   const { children: _, ...propsWithoutChildren } = props;
   
+  // Determinar si debemos usar span o div basado en el elemento
+  const isInlineElement = ['span', 'a', 'input', 'label'].includes(Component);
+  const WrapperComponent = isInlineElement ? 'span' : 'div';
+  
+  // Para botones, no envolver - solo mostrar el contenido con un indicador visual diferente
+  if (Component === 'button') {
+    return (
+      <>
+        <Component 
+          className={`${className} ring-2 ring-yellow-400/50 hover:ring-yellow-400 relative`}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleEdit();
+          }}
+          {...props}
+        >
+          {displayValue}
+          <span className="absolute top-0 right-0 -mt-1 -mr-1 bg-yellow-400 text-black text-xs px-1 rounded-full">✏️</span>
+        </Component>
+      </>
+    );
+  }
+  
+  // Para spans dentro de botones o elementos inline, no agregar botón de edición anidado
+  // Solo mostrar el contenido con borde visual
+  if (Component === 'span') {
+    return (
+      <Component 
+        className={`${className} border-b-2 border-dashed border-yellow-400/50 hover:border-yellow-400 cursor-pointer`}
+        onClick={handleEditClick}
+        title="Clic para editar"
+      >
+        {displayValue}
+      </Component>
+    );
+  }
+  
   return (
-    <div className="group relative inline-block border-2 border-dashed border-yellow-400/30 hover:border-yellow-400/60 transition-all rounded px-1">
+    <WrapperComponent className="group relative inline-block border-2 border-dashed border-yellow-400/30 hover:border-yellow-400/60 transition-all rounded px-1">
       {fieldType === 'image' && Component === 'img' ? (
         <Component src={displayValue} className={className} {...propsWithoutChildren} />
       ) : Component === 'a' ? (
@@ -265,14 +313,6 @@ const EditableContent = ({
           {...props}
         >
           {children || displayValue}
-        </Component>
-      ) : Component === 'button' ? (
-        <Component 
-          className={className} 
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-          {...props}
-        >
-          {displayValue}
         </Component>
       ) : Component === 'input' ? (
         <Component 
@@ -294,7 +334,7 @@ const EditableContent = ({
       >
         <Edit2 className="w-3 h-3" />
       </button>
-    </div>
+    </WrapperComponent>
   );
 };
 

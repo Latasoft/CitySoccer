@@ -2,7 +2,7 @@
   "hero_title_first": "Eventos",
   "hero_title_second": "Deportivos",
   "hero_subtitle": " ",
-  "hero_description": "Nuestras canchas y espacios están disponibles para cumpleaños, campeonatos, clínicas deportivas, actividades empresariales y más.",
+  "hero_description": "Nuestras canchas y espacios están disponibles para cumpleaños, campeonatos, clínicas deportivas, actividades empresariales y más. 111",
   "hero_button_text": "Ver Nuestros Eventos",
   "programs_section_title": "Tipos de Eventos",
   "programs_section_subtitle": "Encuentra el evento perfecto para ti",
@@ -33,5 +33,9 @@
   "cta_title": "¿Tienes una idea diferente?",
   "cta_subtitle": "Organizamos eventos personalizados según tus necesidades. ¡Cuéntanos tu idea y la haremos realidad!",
   "cta_primary_button_text": "Planificar Mi Evento",
-  "cta_secondary_button_text": "Ver Más Información"
+  "cta_secondary_button_text": "Ver Más Información",
+  "eventos_image_3": "/uploads/eventos/eventos_1763050727331_summer-camp.jpg",
+  "eventos_image_2": "/uploads/eventos/eventos_1763050705812_summer-camp.jpg",
+  "eventos_image_1": "/uploads/images/eventos-1.jpg",
+  "eventos-cta_background": "/uploads/images/eventos-cta_background-1.jpg"
 }

@@ -34,10 +34,10 @@ const CTASection = ({
     <section className="py-20 bg-gradient-to-r from-blue-900 via-purple-900 to-green-900 relative overflow-hidden">
       <div className="absolute inset-0 bg-black bg-opacity-50">
         <EditableImage 
-          pageKey={pageKey}
-          fieldKey="cta_background_image"
-          defaultValue={`/uploads/images/${imageCategory}-1.jpg`}
+          src={`/uploads/images/${imageCategory}-1.jpg`}
           categoria={imageCategory}
+          pageKey={pageKey}
+          fieldKey={`${imageCategory}_background`}
           alt="Background"
           className="w-full h-full object-cover opacity-30"
         />

@@ -99,6 +99,7 @@ export default function AcademiaFutbol() {
         }}
         whatsappNumber={getWhatsAppNumber()}
         pageKey="academiadefutbol"
+        imageCategory="academia-futbol-cta"
       />
     </div>
   );

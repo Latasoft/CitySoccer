@@ -11,7 +11,7 @@
   "card1_cta_text": "RESERVAR FÚTBOL",
   "card2_title": "Arrienda Cancha Pickleball",
   "card2_description": "Canchas de Pickleball con superficies profesionales. El deporte que está revolucionando el mundo.",
-  "card2_image": "/uploads/carousel/carousel_1763010488644_summer-camp.jpg",
+  "card2_image": "/uploads/carousel/carousel_1763052269845_Pickleball.webp",
   "card2_cta_text": "RESERVAR PICKLEBALL",
   "card3_title": "Clases Particulares",
   "card3_description": "Entrenamiento personalizado con profesionales certificados. Mejora tu técnica individual.",
@@ -28,5 +28,6 @@
   "card6_title": "Summer Camp",
   "card6_description": "Vacaciones llenas de deporte, diversión y aprendizaje para niños y jóvenes.",
   "card6_image": "/uploads/carousel/carousel_1763001178311_summer-camp.jpg",
-  "card6_cta_text": "MÁS INFO"
+  "card6_cta_text": "MÁS INFO",
+  "home_logo": "/uploads/logos/logos_1763052228678_Logo2.png"
 }

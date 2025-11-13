@@ -45,8 +45,10 @@ export default function Footer() {
 
         <div className="relative block h-32 lg:col-span-2 lg:h-full">
           <EditableImage
+            src="/uploads/images/footer-1.jpg"
             categoria="footer"
-            src="/Cancha3.jpeg"
+            pageKey="footer"
+            fieldKey="footer_image"
             alt="Instalaciones City Soccer"
             className="absolute inset-0 h-full w-full object-cover opacity-80"
           />

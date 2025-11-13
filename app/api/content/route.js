@@ -2,6 +2,40 @@ import { writeFile } from 'fs/promises';
 import { NextResponse } from 'next/server';
 import path from 'path';
 
+// Caché en memoria del servidor (se limpia al reiniciar)
+const serverCache = new Map();
+const CACHE_TTL = 5000; // 5 segundos
+
+// Función auxiliar para obtener contenido (con caché)
+function getContentFromFile(pageKey) {
+  const now = Date.now();
+  const cached = serverCache.get(pageKey);
+  
+  // Si hay caché válido, usarlo
+  if (cached && (now - cached.timestamp) < CACHE_TTL) {
+    return cached.data;
+  }
+  
+  // Leer del disco
+  const filePath = path.join(process.cwd(), 'public', 'content', `${pageKey}.json`);
+  const fs = require('fs');
+  
+  if (!fs.existsSync(filePath)) {
+    throw new Error('Página no encontrada');
+  }
+  
+  const fileContent = fs.readFileSync(filePath, 'utf-8');
+  const content = JSON.parse(fileContent);
+  
+  // Guardar en caché
+  serverCache.set(pageKey, {
+    data: content,
+    timestamp: now
+  });
+  
+  return content;
+}
+
 export async function POST(request) {
   try {
     const { pageKey, fieldKey, fieldValue } = await request.json();
@@ -30,6 +64,9 @@ export async function POST(request) {
     
     // Guardar el archivo
     await writeFile(filePath, JSON.stringify(content, null, 2), 'utf-8');
+    
+    // Invalidar caché del servidor
+    serverCache.delete(pageKey);
     
     console.log(`✅ Guardado: ${pageKey}.${fieldKey} = ${fieldValue?.substring(0, 50)}...`);
     
@@ -60,25 +97,25 @@ export async function GET(request) {
       );
     }
     
-    const filePath = path.join(process.cwd(), 'public', 'content', `${pageKey}.json`);
-    const fs = require('fs');
+    const content = getContentFromFile(pageKey);
     
-    if (!fs.existsSync(filePath)) {
+    return NextResponse.json({
+      success: true,
+      data: content
+    }, {
+      headers: {
+        'Cache-Control': 'public, max-age=5, s-maxage=5, stale-while-revalidate=10'
+      }
+    });
+    
+  } catch (error) {
+    if (error.message === 'Página no encontrada') {
       return NextResponse.json(
         { error: 'Página no encontrada' },
         { status: 404 }
       );
     }
     
-    const fileContent = fs.readFileSync(filePath, 'utf-8');
-    const content = JSON.parse(fileContent);
-    
-    return NextResponse.json({
-      success: true,
-      data: content
-    });
-    
-  } catch (error) {
     console.error('Error leyendo contenido:', error);
     return NextResponse.json(
       { error: 'Error al leer el contenido', details: error.message },

@@ -93,19 +93,21 @@ const CardBackgroundImage = ({
       
       if (error) throw error;
 
+      // URL con cache-busting
+      const urlWithTimestamp = `${data.url}?v=${Date.now()}`;
+
       // Actualizar el campo en el archivo JSON con la nueva URL
       const { error: updateError } = await localContentService.updateField(pageKey, fieldKey, data.url);
       
       if (updateError) throw updateError;
 
-      const newUrl = data.url;
-      setValue(newUrl);
-      setEditedValue(newUrl);
+      setValue(urlWithTimestamp);
+      setEditedValue(urlWithTimestamp);
       setIsEditing(false);
       
       // Guardar en localStorage inmediatamente
       if (typeof window !== 'undefined') {
-        localStorage.setItem(cacheKey, newUrl);
+        localStorage.setItem(cacheKey, data.url);
       }
       
     } catch (error) {

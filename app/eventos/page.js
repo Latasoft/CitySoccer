@@ -101,6 +101,7 @@ export default function Eventos() {
         }}
         whatsappNumber={getWhatsAppNumber()}
         pageKey="eventos"
+        imageCategory="eventos-cta"
       />
     </div>
   );

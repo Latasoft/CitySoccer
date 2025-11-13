@@ -10,5 +10,9 @@
   "cta_title": "¡Comienza tu entrenamiento personalizado!",
   "cta_subtitle": "Agenda tu primera clase particular y experimenta un entrenamiento diseñado exclusivamente para ti",
   "cta_primary_button_text": "Agendar Primera Clase",
-  "cta_secondary_button_text": "Consultar Precios"
+  "cta_secondary_button_text": "Consultar Precios",
+  "clases-futbol_image_1": "/uploads/images/clases-futbol-1.jpg",
+  "clases-futbol_image_2": "/uploads/images/clases-futbol-1.jpg",
+  "clases-futbol_image_3": "/uploads/images/clases-futbol-1.jpg",
+  "clases-futbol-cta_background": "/uploads/images/clases-futbol-cta_background-1.jpg"
 }

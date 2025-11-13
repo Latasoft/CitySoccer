@@ -50,6 +50,7 @@ export default function ClasesParticulareFutbol() {
         }}
         whatsappNumber={getWhatsAppNumber()}
         pageKey="clasesparticularesfutbol"
+        imageCategory="clases-futbol-cta"
       />
     </div>
   );

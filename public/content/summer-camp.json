@@ -2,6 +2,10 @@
   "hero_title_first": "Summer",
   "hero_title_second": "Camp",
   "hero_subtitle": "En City Soccer.",
-  "hero_description": "Este verano vive la mejor experiencia deportiva en el Summer Camp CitySoccer. Un programa lleno de actividades para niños y jóvenes, donde se combinan entrenamientos de fútbol y pickleball con dinámicas recreativas, trabajo en equipo y valores de compañerismo.",
-  "hero_button_text": "Más Información"
+  "hero_description": "Este verano vive la mejor experiencia deportiva en el Summer Camp CitySoccer. Un programa lleno de actividades para niños y jóvenes, donde se combinan entrenamientos de fútbol y pickleball con dinámicas recreativas, trabajo en equipo y valores de compañerismo..",
+  "hero_button_text": "Más Información",
+  "summer-camp_image_1": "/uploads/images/summer-camp-1.jpg",
+  "summer-camp_image_2": "/uploads/summer-camp/summer-camp_1763052326850_Pickleball.webp",
+  "summer-camp_image_3": "/uploads/summer-camp/summer-camp_1763050989166_summer-camp.jpg",
+  "summer-camp-cta_background": "/uploads/images/summer-camp-cta_background-1.jpg"
 }

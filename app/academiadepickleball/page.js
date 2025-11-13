@@ -36,6 +36,7 @@ export default function AcademiaPickleball() {
         }}
         whatsappNumber={getWhatsAppNumber()}
         pageKey="academiadepickleball"
+        imageCategory="academia-pickleball-cta"
       />
     </div>
   );

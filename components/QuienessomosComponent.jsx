@@ -101,6 +101,8 @@ const QuienessomosComponent = () => {
                     src="/uploads/images/quienes-somos-1.jpg"
                     alt="Instalaciones City Soccer"
                     categoria="quienes-somos"
+                    pageKey="quienessomos"
+                    fieldKey="quienes_somos_image_1"
                     className="w-full h-[250px] sm:h-[300px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
                   />
                 </div>
@@ -109,13 +111,17 @@ const QuienessomosComponent = () => {
                 <EditableImage
                   src="/uploads/images/quienes-somos-2.jpg"
                   alt="Pasión por el fútbol"
-                  categoria="general"
+                  categoria="quienes-somos"
+                  pageKey="quienessomos"
+                  fieldKey="quienes_somos_image_2"
                   className="w-full h-[200px] sm:h-[300px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
                 />
                 <EditableImage
                   src="/uploads/images/quienes-somos-3.jpg"
                   alt="Entrenamiento profesional"
-                  categoria="general"
+                  categoria="quienes-somos"
+                  pageKey="quienessomos"
+                  fieldKey="quienes_somos_image_3"
                   className="w-full h-[200px] sm:h-[300px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
                 />
               </div>
@@ -156,6 +162,8 @@ const QuienessomosComponent = () => {
                       src={partnership.url}
                       alt={partnership.country}
                       categoria={`alianza-${index + 1}`}
+                      pageKey="quienessomos"
+                      fieldKey={`partnership_${index + 1}_image`}
                       className="w-16 h-12 object-contain"
                     />
                   </div>

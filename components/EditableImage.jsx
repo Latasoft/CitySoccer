@@ -1,6 +1,7 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAdminMode } from '@/contexts/AdminModeContext';
+import { useContent } from '@/contexts/ContentContext';
 import { imageService } from '@/lib/adminService';
 import { dynamicImageService } from '@/lib/dynamicImageService';
 import { Upload, X, Check, Loader2 } from 'lucide-react';
@@ -12,17 +13,79 @@ const EditableImage = ({
   className = '', 
   style = {},
   onImageChange,
-  pageKey, // Capturar y descartar (legacy prop)
-  fieldKey, // Capturar y descartar (legacy prop)
+  pageKey = 'default',
+  fieldKey,
   children, // Capturar y descartar (no permitido en img)
   dangerouslySetInnerHTML, // Capturar y descartar (no permitido en img)
   ...props 
 }) => {
   const { isAdminMode } = useAdminMode();
+  const { getField, updateField } = useContent();
   const [showUploader, setShowUploader] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
+  const [currentSrc, setCurrentSrc] = useState(src);
+  const [loading, setLoading] = useState(true); // Empezar en true para cargar desde JSON
+  const [cacheBuster, setCacheBuster] = useState(Date.now()); // Para forzar recarga de imagen
+
+  // Generar fieldKey automático si no se proporciona
+  const imageFieldKey = fieldKey || `${categoria}_image`;
+
+  // Cargar imagen desde JSON al montar (solo una vez)
+  useEffect(() => {
+    if (!pageKey || !imageFieldKey) {
+      setCurrentSrc(src);
+      setLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+    const debugMode = process.env.NEXT_PUBLIC_DEBUG_MODE === 'true';
+
+    const loadImageUrl = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await getField(pageKey, imageFieldKey);
+        
+        if (!isMounted) return;
+        
+        if (error) {
+          if (debugMode) {
+            console.error(`[EditableImage] Error cargando ${pageKey}.${imageFieldKey}:`, error);
+          }
+          setCurrentSrc(src); // Fallback al src original
+          return;
+        }
+        
+        if (data) {
+          if (debugMode) {
+            console.log(`[EditableImage] ✅ Cargando desde JSON: ${pageKey}.${imageFieldKey} =`, data);
+          }
+          setCurrentSrc(data);
+          setCacheBuster(Date.now()); // Forzar recarga al cargar desde JSON
+        } else {
+          if (debugMode) {
+            console.log(`[EditableImage] ℹ️ No hay valor en JSON para ${pageKey}.${imageFieldKey}, usando src prop:`, src);
+          }
+          setCurrentSrc(src);
+        }
+      } catch (error) {
+        console.error(`[EditableImage] Error en loadImageUrl:`, error);
+        setCurrentSrc(src);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadImageUrl();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [pageKey, imageFieldKey]); // Removido 'src' de dependencias
 
   const handleImageClick = (e) => {
     if (isAdminMode) {
@@ -39,42 +102,59 @@ const EditableImage = ({
       setUploading(true);
       setUploadProgress('Subiendo imagen...');
 
-      // Generar nombre único
+      // Generar nombre único con timestamp
       const fileName = `${categoria}_${Date.now()}`;
       
       const { data, error } = await imageService.upload(file, categoria, fileName);
       
       if (error) throw error;
 
+      const newImageUrl = data.url;
+      setUploadProgress('Guardando en contenido...');
+
+      // Guardar la nueva URL en el JSON de contenido usando contexto compartido
+      if (pageKey && imageFieldKey) {
+        const { error: saveError } = await updateField(
+          pageKey, 
+          imageFieldKey, 
+          newImageUrl
+        );
+        
+        if (saveError) {
+          console.error('[EditableImage] Error guardando URL en JSON:', saveError);
+          throw new Error('No se pudo guardar la URL en el contenido');
+        }
+      }
+
       setUploadProgress('¡Imagen subida exitosamente! 🎉');
+      
+      // Actualizar el estado local inmediatamente con cache-busting
+      setCurrentSrc(newImageUrl);
+      setCacheBuster(Date.now()); // Forzar recarga de la imagen
       
       // Disparar recarga de imágenes dinámicas
       dynamicImageService.forceReload();
       
-      // Notificar el cambio
+      // Notificar el cambio con URL
       if (onImageChange) {
-        onImageChange(data.url);
+        onImageChange(newImageUrl);
       }
 
-      // Mostrar notificación de éxito
+      // Mostrar notificación de éxito y cerrar modal
       setTimeout(() => {
-        setUploadProgress('✅ Imagen actualizada. Recargando página...');
-      }, 1000);
-
-      // Esperar un poco para que se procese la recarga y luego recargar página
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
-
-    } catch (error) {
-      console.error('Error subiendo imagen:', error);
-      setUploadProgress('Error al subir la imagen. Intenta de nuevo.');
-    } finally {
-      setTimeout(() => {
+        setUploadProgress('✅ Imagen actualizada correctamente');
         setUploading(false);
         setShowUploader(false);
         setUploadProgress('');
-      }, 2000);
+      }, 1500);
+
+    } catch (error) {
+      console.error('Error subiendo imagen:', error);
+      setUploadProgress(`Error: ${error.message || 'Intenta de nuevo'}`);
+      setTimeout(() => {
+        setUploading(false);
+        setUploadProgress('');
+      }, 3000);
     }
   };
 
@@ -100,9 +180,28 @@ const EditableImage = ({
     setDragOver(false);
   };
 
-  const imgElement = src ? (
+  // Mostrar spinner mientras carga
+  if (loading) {
+    return (
+      <div
+        className={`${className} bg-gray-200 flex items-center justify-center`}
+        style={style}
+      >
+        <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
+      </div>
+    );
+  }
+
+  // Añadir cache-busting a la URL de la imagen
+  const getSrcWithCacheBusting = (url) => {
+    if (!url) return url;
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}t=${cacheBuster}`;
+  };
+
+  const imgElement = currentSrc ? (
     <img
-      src={src}
+      src={getSrcWithCacheBusting(currentSrc)}
       alt={alt}
       className={`${className} ${
         isAdminMode 
@@ -112,6 +211,11 @@ const EditableImage = ({
       style={style}
       onClick={handleImageClick}
       title={isAdminMode ? `Clic para cambiar imagen (${categoria})` : alt}
+      onError={(e) => {
+        // Si la imagen falla al cargar, usar placeholder
+        e.target.onerror = null; // Prevenir loop infinito
+        e.target.src = '/Logo2.png';
+      }}
     />
   ) : (
     <div
@@ -122,7 +226,7 @@ const EditableImage = ({
       }`}
       style={style}
       onClick={handleImageClick}
-      title={isAdminMode ? `Clic para cambiar imagen (${categoria})` : alt}
+      title={isAdminMode ? `Clic para agregar imagen (${categoria})` : alt}
     >
       <svg className="w-1/3 h-1/3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />

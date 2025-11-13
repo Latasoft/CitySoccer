@@ -13,5 +13,8 @@
   "form_description": "Ingresa tu nombre y te conectaremos directamente",
   "form_label_name": "Tu nombre *",
   "form_placeholder": "Ingresa tu nombre",
-  "form_button_text": "Contactar por WhatsApp"
+  "form_button_text": "Contactar por WhatsApp",
+  "contacto_image_1": "/uploads/images/contacto-1.jpg",
+  "contacto_image_2": "/uploads/images/contacto-1.jpg",
+  "contacto_image_3": "/uploads/images/contacto-1.jpg"
 }

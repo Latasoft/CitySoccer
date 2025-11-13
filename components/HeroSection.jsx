@@ -110,6 +110,8 @@ const HeroSection = ({
                 src={`/uploads/images/${imageCategory}-1.jpg`}
                 alt="Experiencia 1" 
                 categoria={imageCategory}
+                pageKey={pageKey}
+                fieldKey={`${imageCategory}_image_1`}
                 className="col-span-1 sm:col-span-2 w-full h-[250px] sm:h-[280px] lg:h-[300px] object-cover rounded-t-lg sm:rounded-t-xl rounded-b-none sm:rounded-b-lg shadow-lg sm:shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
               />
               {/* Segunda imagen */}
@@ -117,6 +119,8 @@ const HeroSection = ({
                 src={`/uploads/images/${imageCategory}-2.jpg`}
                 alt="Experiencia 2" 
                 categoria={imageCategory}
+                pageKey={pageKey}
+                fieldKey={`${imageCategory}_image_2`}
                 className="w-full h-[200px] sm:h-[220px] lg:h-[250px] object-cover rounded-bl-lg sm:rounded-l-xl rounded-br-none sm:rounded-br-none shadow-lg sm:shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
               />
               {/* Tercera imagen */}
@@ -124,6 +128,8 @@ const HeroSection = ({
                 src={`/uploads/images/${imageCategory}-3.jpg`}
                 alt="Experiencia 3" 
                 categoria={imageCategory}
+                pageKey={pageKey}
+                fieldKey={`${imageCategory}_image_3`}
                 className="w-full h-[200px] sm:h-[220px] lg:h-[250px] object-cover rounded-br-lg sm:rounded-r-xl rounded-bl-none sm:rounded-bl-none shadow-lg sm:shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
               />
             </div>

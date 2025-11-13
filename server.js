@@ -38,10 +38,12 @@ app.prepare().then(() => {
               '.webm': 'video/webm',
             };
             
+            // Cache más corto para uploads (5 minutos con revalidación)
             res.writeHead(200, {
               'Content-Type': contentTypes[ext] || 'application/octet-stream',
               'Content-Length': stat.size,
-              'Cache-Control': 'public, max-age=31536000, immutable',
+              'Cache-Control': 'public, max-age=300, must-revalidate',
+              'ETag': `"${stat.mtime.getTime()}-${stat.size}"`,
             });
             
             createReadStream(filePath).pipe(res);

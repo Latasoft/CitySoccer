@@ -99,7 +99,7 @@ export const obtenerReservasPorFecha = async (fecha, tipoCancha) => {
   }
 };
 
-// Verificar disponibilidad considerando canchas compartidas de pickleball
+// Verificar disponibilidad considerando canchas compartidas (pickleball y fútbol)
 export const verificarDisponibilidad = async (fecha, horaInicio, canchaId) => {
   try {
     // Primero obtener información de la cancha para saber su tipo
@@ -113,6 +113,7 @@ export const verificarDisponibilidad = async (fecha, horaInicio, canchaId) => {
 
     // Determinar si es una cancha de pickleball (individual o dobles)
     const esPickleball = canchaInfo.tipo === 'pickleball' || canchaInfo.tipo === 'pickleball-dobles';
+    const esFutbol = canchaInfo.tipo === 'futbol7' || canchaInfo.tipo === 'futbol9';
 
     let condicionesConsulta = supabase
       .from('reservas')
@@ -143,8 +144,43 @@ export const verificarDisponibilidad = async (fecha, horaInicio, canchaId) => {
 
       // Verificar si CUALQUIERA de las modalidades (individual o dobles) tiene reserva
       condicionesConsulta = condicionesConsulta.in('cancha_id', idsRelacionados);
+    } else if (esFutbol) {
+      // REGLA CRÍTICA: Las canchas de fútbol 7 y fútbol 9 comparten espacios físicos
+      // Si reservo F7_1, bloquea F9 (misma cancha física)
+      
+      // Buscar canchas que comparten el mismo grupo/espacio físico
+      const { data: grupoData, error: grupoError } = await supabase
+        .from('cancha_grupo_miembros')
+        .select('grupo_id')
+        .eq('cancha_id', canchaId)
+        .single();
+
+      if (grupoError && grupoError.code !== 'PGRST116') {
+        // PGRST116 = no encontrado, es OK si la cancha no está en ningún grupo
+        throw grupoError;
+      }
+
+      let idsRelacionados = [canchaId]; // Por defecto, solo la cancha actual
+
+      if (grupoData) {
+        // Si la cancha está en un grupo, obtener TODAS las canchas de ese grupo
+        const { data: canchasGrupo, error: canchasGrupoError } = await supabase
+          .from('cancha_grupo_miembros')
+          .select('cancha_id')
+          .eq('grupo_id', grupoData.grupo_id);
+
+        if (canchasGrupoError) throw canchasGrupoError;
+
+        if (canchasGrupo && canchasGrupo.length > 0) {
+          idsRelacionados = canchasGrupo.map(c => c.cancha_id);
+          console.log(`⚽ Verificando fútbol: Cancha ${canchaInfo.nombre} - IDs relacionados:`, idsRelacionados);
+        }
+      }
+
+      // Verificar si CUALQUIERA de las canchas del grupo tiene reserva
+      condicionesConsulta = condicionesConsulta.in('cancha_id', idsRelacionados);
     } else {
-      // Para canchas de fútbol, verificar normalmente solo la cancha específica
+      // Para otras canchas, verificar normalmente solo la cancha específica
       condicionesConsulta = condicionesConsulta.eq('cancha_id', canchaId);
     }
 
@@ -157,6 +193,11 @@ export const verificarDisponibilidad = async (fecha, horaInicio, canchaId) => {
     if (!estaDisponible && esPickleball) {
       console.log(`⚠️ Cancha de pickleball ocupada: ${canchaInfo.nombre} - ${fecha} ${horaInicio}`);
       console.log(`Reserva existente bloquea ambas modalidades (individual y dobles)`);
+    }
+
+    if (!estaDisponible && esFutbol) {
+      console.log(`⚠️ Cancha de fútbol ocupada: ${canchaInfo.nombre} (${canchaInfo.tipo}) - ${fecha} ${horaInicio}`);
+      console.log(`Reserva existente bloquea canchas que comparten el mismo espacio físico`);
     }
 
     return estaDisponible;

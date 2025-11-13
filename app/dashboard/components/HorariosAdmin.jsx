@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { diasBloqueadosService } from '@/lib/adminService';
 import { notifyScheduleChange } from '@/lib/notificationService';
+import { invalidateScheduleConfigCache } from '@/hooks/useScheduleConfig';
 import { useAuth } from '@/hooks/useAuth';
 import { Calendar, Clock, Ban, Trash2, Plus, Save, AlertCircle } from 'lucide-react';
 
@@ -121,6 +122,9 @@ export default function HorariosAdmin() {
           cambiosRealizados: cambios
         });
       }
+
+      // Invalidar cache de configuración para que las tablas se actualicen
+      invalidateScheduleConfigCache();
 
       showMessage('success', 'Horarios actualizados correctamente');
       

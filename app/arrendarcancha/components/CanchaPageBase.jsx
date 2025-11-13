@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { usePrices } from "@/hooks/usePrices";
+import { useScheduleConfig } from "@/hooks/useScheduleConfig";
 import EditableContent from "@/components/EditableContent";
 
 const CanchaPageBase = ({ 
@@ -22,6 +23,7 @@ const CanchaPageBase = ({
 
   const tipoBD = mapTipoCancha(tipoCancha);
   const { precios: tarifas, loading, error } = usePrices(tipoBD);
+  const { isWeekdaysActive, isSaturdayActive, isSundayActive, loading: loadingConfig } = useScheduleConfig();
 
   if (showReservation) {
     return (
@@ -32,7 +34,7 @@ const CanchaPageBase = ({
     );
   }
 
-  if (loading) {
+  if (loading || loadingConfig) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-950 flex items-center justify-center">
         <div className="text-white text-xl">Cargando tarifas...</div>
@@ -114,15 +116,21 @@ const CanchaPageBase = ({
                     <th className="border border-gray-700 px-4 py-2 text-white">
                       Horario
                     </th>
-                    <th className="border border-gray-700 px-4 py-2 text-white">
-                      Lunes a Viernes
-                    </th>
-                    <th className="border border-gray-700 px-4 py-2 text-white">
-                      Sábado
-                    </th>
-                    <th className="border border-gray-700 px-4 py-2 text-white">
-                      Domingo y Festivos
-                    </th>
+                    {isWeekdaysActive && (
+                      <th className="border border-gray-700 px-4 py-2 text-white">
+                        Lunes a Viernes
+                      </th>
+                    )}
+                    {isSaturdayActive && (
+                      <th className="border border-gray-700 px-4 py-2 text-white">
+                        Sábado
+                      </th>
+                    )}
+                    {isSundayActive && (
+                      <th className="border border-gray-700 px-4 py-2 text-white">
+                        Domingo y Festivos
+                      </th>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
@@ -131,15 +139,21 @@ const CanchaPageBase = ({
                       <td className="border border-gray-700 px-4 py-2 font-semibold text-gray-300">
                         {time}
                       </td>
-                      <td className="border border-gray-700 px-4 py-2 font-medium" style={{ color: colorPrimario }}>
-                        ${prices.price.toLocaleString()}
-                      </td>
-                      <td className="border border-gray-700 px-4 py-2 font-medium" style={{ color: colorPrimario }}>
-                        ${tarifas.saturday[time]?.price.toLocaleString() || 'N/A'}
-                      </td>
-                      <td className="border border-gray-700 px-4 py-2 font-medium" style={{ color: colorPrimario }}>
-                        ${tarifas.sunday[time]?.price.toLocaleString() || 'N/A'}
-                      </td>
+                      {isWeekdaysActive && (
+                        <td className="border border-gray-700 px-4 py-2 font-medium" style={{ color: colorPrimario }}>
+                          ${prices.price.toLocaleString()}
+                        </td>
+                      )}
+                      {isSaturdayActive && (
+                        <td className="border border-gray-700 px-4 py-2 font-medium" style={{ color: colorPrimario }}>
+                          ${tarifas.saturday[time]?.price.toLocaleString() || 'N/A'}
+                        </td>
+                      )}
+                      {isSundayActive && (
+                        <td className="border border-gray-700 px-4 py-2 font-medium" style={{ color: colorPrimario }}>
+                          ${tarifas.sunday[time]?.price.toLocaleString() || 'N/A'}
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>

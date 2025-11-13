@@ -5,6 +5,7 @@ import { pricesService } from '@/lib/adminService';
 import { invalidatePricesCache as invalidateDynamicCache } from '@/lib/dynamicConfigService';
 import { invalidatePricesCache as invalidateHookCache } from '@/hooks/usePrices';
 import { notifyPriceChange } from '@/lib/notificationService';
+import { useScheduleConfig } from '@/hooks/useScheduleConfig';
 import { useAuth } from '@/hooks/useAuth';
 import { DollarSign, Save, Loader2, AlertCircle, CheckCircle2, Plus, X, Trash2 } from 'lucide-react';
 import { CURRENCY } from '@/lib/constants';
@@ -24,6 +25,7 @@ const invalidatePricesCache = () => {
  */
 const PricesAdminGrid = () => {
   const { user } = useAuth();
+  const { isWeekdaysActive, isSaturdayActive, isSundayActive, loading: loadingConfig } = useScheduleConfig();
   const [precios, setPrecios] = useState([]);
   const [preciosOriginales, setPreciosOriginales] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -235,7 +237,20 @@ const PricesAdminGrid = () => {
         
         <div className="flex gap-2">
           <button
-            onClick={() => setShowAddModal(true)}
+            onClick={() => {
+              // Determinar el primer día activo para el valor inicial
+              const primerDiaActivo = isWeekdaysActive ? 'weekdays' 
+                : isSaturdayActive ? 'saturday' 
+                : isSundayActive ? 'sunday' 
+                : 'weekdays';
+              
+              setNewSlot({
+                dia_semana: primerDiaActivo,
+                hora: '09:00',
+                precio: 25000
+              });
+              setShowAddModal(true);
+            }}
             className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
           >
             <Plus className="w-4 h-4" />
@@ -301,7 +316,14 @@ const PricesAdminGrid = () => {
             </tr>
           </thead>
           <tbody>
-            {diasSemana.map(dia => (
+            {diasSemana
+              .filter(dia => {
+                if (dia.id === 'weekdays') return isWeekdaysActive;
+                if (dia.id === 'saturday') return isSaturdayActive;
+                if (dia.id === 'sunday') return isSundayActive;
+                return true;
+              })
+              .map(dia => (
               <tr key={dia.id}>
                 <td className="border border-gray-600 bg-gray-700 p-3 font-semibold text-white sticky left-0 z-10">
                   {dia.name}
@@ -377,9 +399,17 @@ const PricesAdminGrid = () => {
                   onChange={(e) => setNewSlot({ ...newSlot, dia_semana: e.target.value })}
                   className="w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-white"
                 >
-                  {diasSemana.map(dia => (
-                    <option key={dia.id} value={dia.id}>{dia.name}</option>
-                  ))}
+                  {diasSemana
+                    .filter(dia => {
+                      if (dia.id === 'weekdays') return isWeekdaysActive;
+                      if (dia.id === 'saturday') return isSaturdayActive;
+                      if (dia.id === 'sunday') return isSundayActive;
+                      return true;
+                    })
+                    .map(dia => (
+                      <option key={dia.id} value={dia.id}>{dia.name}</option>
+                    ))
+                  }
                 </select>
               </div>
 

@@ -15,7 +15,17 @@ const CardBackgroundImage = ({
   className = ''
 }) => {
   const { isAdminMode } = useAdminMode();
-  const [value, setValue] = useState(defaultValue);
+  
+  // Inicializar con valor de localStorage si existe, sino usar defaultValue
+  const cacheKey = `content_${pageKey}_${fieldKey}`;
+  const [value, setValue] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem(cacheKey);
+      return cached || defaultValue;
+    }
+    return defaultValue;
+  });
+  
   const [editedValue, setEditedValue] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -24,7 +34,7 @@ const CardBackgroundImage = ({
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
 
-  // Cargar valor desde archivo JSON
+  // Cargar valor desde archivo JSON y actualizar localStorage
   useEffect(() => {
     let isMounted = true;
     
@@ -41,7 +51,12 @@ const CardBackgroundImage = ({
         }
         
         if (data && data[fieldKey] !== undefined) {
-          setValue(data[fieldKey]);
+          const newValue = data[fieldKey];
+          setValue(newValue);
+          // Guardar en localStorage para próxima carga
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(cacheKey, newValue);
+          }
         }
       } catch (error) {
         console.error(`Error cargando ${pageKey}.${fieldKey}:`, error);
@@ -57,7 +72,7 @@ const CardBackgroundImage = ({
     return () => {
       isMounted = false;
     };
-  }, [pageKey, fieldKey, defaultValue]);
+  }, [pageKey, fieldKey, defaultValue, cacheKey]);
 
   const handleEdit = () => {
     setEditedValue(value);
@@ -80,9 +95,15 @@ const CardBackgroundImage = ({
       
       if (updateError) throw updateError;
 
-      setValue(data.url);
-      setEditedValue(data.url);
+      const newUrl = data.url;
+      setValue(newUrl);
+      setEditedValue(newUrl);
       setIsEditing(false);
+      
+      // Guardar en localStorage inmediatamente
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(cacheKey, newUrl);
+      }
       
     } catch (error) {
       console.error('Error subiendo imagen:', error);

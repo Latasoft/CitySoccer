@@ -29,7 +29,17 @@ const EditableContent = ({
   ...props 
 }) => {
   const { isAdminMode } = useAdminMode();
-  const [value, setValue] = useState(defaultValue);
+  
+  // Inicializar con localStorage si existe
+  const cacheKey = `content_${pageKey}_${fieldKey}`;
+  const [value, setValue] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem(cacheKey);
+      return cached || defaultValue;
+    }
+    return defaultValue;
+  });
+  
   const [editedValue, setEditedValue] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -66,7 +76,12 @@ const EditableContent = ({
           console.log(`[EditableContent] ✅ Campo encontrado ${pageKey}.${fieldKey}:`, {
             value: data[fieldKey]?.substring?.(0, 50) + (data[fieldKey]?.length > 50 ? '...' : '') || data[fieldKey]
           });
-          setValue(data[fieldKey]);
+          const newValue = data[fieldKey];
+          setValue(newValue);
+          // Guardar en localStorage
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(cacheKey, newValue);
+          }
         } else {
           console.warn(`[EditableContent] ⚠️ Campo NO encontrado: ${pageKey}.${fieldKey} - usando defaultValue`);
         }
@@ -85,7 +100,7 @@ const EditableContent = ({
     return () => {
       isMounted = false;
     };
-  }, [pageKey, fieldKey, defaultValue]);
+  }, [pageKey, fieldKey, defaultValue, cacheKey]);
 
   const handleEdit = () => {
     setEditedValue(value);
@@ -117,6 +132,11 @@ const EditableContent = ({
       console.log(`[EditableContent] ✅ Guardado exitoso:`, data);
       setValue(editedValue);
       setIsEditing(false);
+      
+      // Guardar en localStorage inmediatamente
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(cacheKey, editedValue);
+      }
       
       // Llamar callback opcional después de guardar
       if (onSave && typeof onSave === 'function') {

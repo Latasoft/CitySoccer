@@ -9,7 +9,7 @@ services:
     plan: standard # $25/mes - 2GB RAM, 1 CPU
 
     # Build Command
-    buildCommand: npm run build
+    buildCommand: node scripts/ensure-directories.js && npm run build
 
     # Start Command
     startCommand: npm run start
@@ -28,12 +28,16 @@ services:
       - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
         sync: false
 
-    # PERSISTENT DISK - Preserva cambios en /public/
-    # Esto permite que las ediciones del admin persistan entre deploys
+    # PERSISTENT DISK - Solo para contenido editable del admin
+    # Monta solo /uploads y /content para preservar ediciones entre deploys
+    # Las imágenes estáticas vienen del repositorio Git
     disks:
+      - name: citysoccer-uploads
+        mountPath: /opt/render/project/src/public/uploads
+        sizeGB: 3
       - name: citysoccer-content
-        mountPath: /opt/render/project/src/public
-        sizeGB: 5
+        mountPath: /opt/render/project/src/public/content
+        sizeGB: 1
 
     # Auto-Deploy
     autoDeploy: true

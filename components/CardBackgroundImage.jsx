@@ -199,7 +199,7 @@ const CardBackgroundImage = ({
                 src={editedValue} 
                 alt="Preview" 
                 className="w-full h-32 object-cover rounded"
-                onError={(e) => e.target.src = '/placeholder.jpg'}
+                onError={(e) => e.target.src = '/Logo2.png'}
               />
             </div>
           )}

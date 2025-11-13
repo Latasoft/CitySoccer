@@ -1,6 +1,8 @@
 import { createServer } from 'http';
 import { parse } from 'url';
 import next from 'next';
+import { createReadStream, existsSync, statSync } from 'fs';
+import path from 'path';
 
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = process.env.HOSTNAME || 'localhost';
@@ -15,6 +17,44 @@ app.prepare().then(() => {
   server = createServer(async (req, res) => {
     try {
       const parsedUrl = parse(req.url, true);
+      
+      // Servir archivos de /uploads directamente desde el disco persistente
+      if (parsedUrl.pathname.startsWith('/uploads/')) {
+        const filePath = path.join(process.cwd(), 'public', parsedUrl.pathname);
+        
+        if (existsSync(filePath)) {
+          const stat = statSync(filePath);
+          
+          if (stat.isFile()) {
+            // Determinar content-type
+            const ext = path.extname(filePath).toLowerCase();
+            const contentTypes = {
+              '.jpg': 'image/jpeg',
+              '.jpeg': 'image/jpeg',
+              '.png': 'image/png',
+              '.webp': 'image/webp',
+              '.gif': 'image/gif',
+              '.mp4': 'video/mp4',
+              '.webm': 'video/webm',
+            };
+            
+            res.writeHead(200, {
+              'Content-Type': contentTypes[ext] || 'application/octet-stream',
+              'Content-Length': stat.size,
+              'Cache-Control': 'public, max-age=31536000, immutable',
+            });
+            
+            createReadStream(filePath).pipe(res);
+            return;
+          }
+        }
+        
+        // Si no existe, devolver 404
+        res.writeHead(404);
+        res.end('File not found');
+        return;
+      }
+      
       await handle(req, res, parsedUrl);
     } catch (err) {
       console.error('Error occurred handling', req.url, err);

@@ -8,6 +8,7 @@ import {
   obtenerTarifasPorTipo,
   obtenerDisponibilidadPickleball
 } from "../data/supabaseService";
+import { diasBloqueadosService } from "@/lib/adminService";
 import { createPayment, validatePaymentData } from "../../../utils/paymentService";
 
 const ArrendamientoBase = ({ 
@@ -33,6 +34,7 @@ const ArrendamientoBase = ({
   const [loading, setLoading] = useState(false);
   const [reservasExistentes, setReservasExistentes] = useState([]);
   const [tarifasReales, setTarifasReales] = useState(null);
+  const [diasBloqueados, setDiasBloqueados] = useState([]); // Días bloqueados
 
   // Mapeo de nombres de tipos de cancha para la BD
   const mapTipoCancha = (tipo) => {
@@ -106,6 +108,28 @@ const ArrendamientoBase = ({
     };
   }, [tipoCancha]);
 
+  // Cargar días bloqueados al montar
+  useEffect(() => {
+    let mounted = true;
+
+    const fetchDiasBloqueados = async () => {
+      try {
+        const { data, error } = await diasBloqueadosService.getFuturos();
+        if (mounted && data) {
+          setDiasBloqueados(data.map(d => d.fecha));
+        }
+      } catch (error) {
+        console.error('❌ Error cargando días bloqueados:', error);
+      }
+    };
+
+    fetchDiasBloqueados();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   // Obtener canchas disponibles
   useEffect(() => {
     let mounted = true;
@@ -149,10 +173,17 @@ const ArrendamientoBase = ({
 
   // Obtener horarios disponibles cuando se selecciona fecha
   useEffect(() => {
+    // VALIDACIÓN: No cargar horarios si la fecha está bloqueada
+    if (selectedDate && diasBloqueados.includes(selectedDate)) {
+      setAvailableTimes([]);
+      setCurrentStep(1); // Forzar volver a paso 1
+      return;
+    }
+    
     if (selectedDate && tarifasReales) {
       fetchAvailableTimes();
     }
-  }, [selectedDate, tarifasReales]);
+  }, [selectedDate, tarifasReales, diasBloqueados]);
 
   const fetchAvailableTimes = async () => {
     setLoading(true);
@@ -258,6 +289,16 @@ const ArrendamientoBase = ({
   };
 
   const handleDateChange = (date) => {
+    // Verificar si la fecha está bloqueada
+    if (diasBloqueados.includes(date)) {
+      alert('⚠️ Esta fecha está bloqueada para reservas. Por favor selecciona otra fecha.');
+      setSelectedDate(""); // Limpiar fecha seleccionada
+      setSelectedTime("");
+      setCanchasDisponiblesEnHorario([]);
+      setCurrentStep(1); // Volver al paso 1
+      return;
+    }
+    
     setSelectedDate(date);
     setSelectedTime("");
     setCanchasDisponiblesEnHorario([]);
@@ -470,10 +511,38 @@ const ArrendamientoBase = ({
                 min={new Date().toISOString().split('T')[0]}
                 className="p-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:border-yellow-400 focus:outline-none"
               />
-              {selectedDate && (
+              {selectedDate && diasBloqueados.includes(selectedDate) && (
+                <p className="text-red-400 mt-2 flex items-center">
+                  <span className="mr-2">⚠️</span>
+                  Esta fecha está bloqueada para reservas
+                </p>
+              )}
+              {selectedDate && !diasBloqueados.includes(selectedDate) && (
                 <p className="text-green-400 mt-2">
                   ✓ Fecha seleccionada: {new Date(selectedDate + 'T00:00:00').toLocaleDateString()}
                 </p>
+              )}
+              {diasBloqueados.length > 0 && (
+                <div className="mt-4 p-3 bg-yellow-900/20 border border-yellow-600/30 rounded-lg">
+                  <p className="text-yellow-300 text-sm font-semibold mb-2">
+                    📅 Días no disponibles para reserva:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {diasBloqueados.slice(0, 5).map(fecha => (
+                      <span key={fecha} className="text-yellow-200 text-xs bg-yellow-900/40 px-2 py-1 rounded">
+                        {new Date(fecha + 'T00:00:00').toLocaleDateString('es-CL', { 
+                          day: 'numeric', 
+                          month: 'short' 
+                        })}
+                      </span>
+                    ))}
+                    {diasBloqueados.length > 5 && (
+                      <span className="text-yellow-200 text-xs">
+                        +{diasBloqueados.length - 5} más
+                      </span>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
           )}

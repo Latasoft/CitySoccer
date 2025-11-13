@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import { useAdminMode } from '@/contexts/AdminModeContext';
+import { useAuth } from '@/hooks/useAuth';
 import { 
   Users, 
   Calendar, 
@@ -24,8 +25,8 @@ import HorariosAdmin from './components/HorariosAdmin';
 import NavigationAdmin from './components/NavigationAdmin';
 
 export default function Dashboard() {
-  const { isAdmin } = useAdminMode();
-  const [user, setUser] = useState(null);
+  const { isAdmin: isAdminMode } = useAdminMode();
+  const { user, loading: authLoading, isAdmin, userRole } = useAuth();
   const [stats, setStats] = useState({
     totalClientes: 0,
     totalReservas: 0,
@@ -56,27 +57,22 @@ export default function Dashboard() {
 
   // Verificar autenticación y cargar datos
   useEffect(() => {
-    const checkAuthAndLoadData = async () => {
-      // Verificar autenticación con localStorage (para compatibilidad)
-      const adminData = localStorage.getItem('admin');
-      
-      // También verificar sesión de Supabase
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!adminData && !session?.user) {
-        router.push('/login');
-        return;
-      }
-      
-      if (session?.user) {
-        setUser(session.user);
-      }
-      
-      loadDashboardData();
-    };
+    if (!authLoading && !user) {
+      router.push('/login');
+      return;
+    }
     
-    checkAuthAndLoadData();
-  }, [router, isAdmin, loadDashboardData]);
+    if (user && !authLoading) {
+      // Cargar datos solo para admins
+      if (userRole === 'admin') {
+        loadDashboardData();
+      } else {
+        // Para empleados, no redirigir automáticamente
+        // Solo cargar cuando estén en la página
+        setLoading(false);
+      }
+    }
+  }, [authLoading, user, userRole, router, loadDashboardData]);
 
   const loadGeneralStats = async () => {
     try {
@@ -186,6 +182,7 @@ export default function Dashboard() {
 
   const handleLogout = async () => {
     try {
+      setLoading(true); // Mostrar indicador de carga
       await supabase.auth.signOut();
       localStorage.removeItem('admin');
       router.push('/login');
@@ -197,10 +194,63 @@ export default function Dashboard() {
     }
   };
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-950 flex items-center justify-center">
         <div className="text-[#ffee00] text-xl">Cargando dashboard...</div>
+      </div>
+    );
+  }
+  
+  // Vista simple para empleados
+  if (userRole === 'empleado') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-950">
+        {/* Header */}
+        <header className="bg-gray-800/50 border-b border-gray-700 backdrop-blur-sm">
+          <div className="max-w-full px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-[#ffee00]">CitySoccer - Panel Empleado</h1>
+                <p className="text-sm sm:text-base text-gray-300">Consulta de Reservas</p>
+              </div>
+              <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                <div className="text-left sm:text-right flex-1 sm:flex-initial">
+                  <p className="text-white font-semibold text-sm sm:text-base truncate">{user?.email}</p>
+                  <p className="text-gray-400 text-xs sm:text-sm">Empleado</p>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white transition-colors text-sm sm:text-base whitespace-nowrap"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">Cerrar Sesión</span>
+                  <span className="sm:hidden">Salir</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Contenido para empleados */}
+        <div className="px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-gray-800/50 rounded-xl border border-gray-700 p-8 text-center">
+              <Calendar className="w-16 h-16 text-[#ffee00] mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-white mb-2">Gestión de Reservas</h2>
+              <p className="text-gray-300 mb-6">
+                Accede a la vista de reservas para consultar y gestionar las reservas de los clientes
+              </p>
+              <button
+                onClick={() => router.push('/dashboard/reservas')}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-[#ffee00] text-black font-semibold rounded-lg hover:bg-[#e6d000] transition"
+              >
+                <Calendar className="w-5 h-5" />
+                Ver Reservas
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -218,7 +268,9 @@ export default function Dashboard() {
             <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
               <div className="text-left sm:text-right flex-1 sm:flex-initial">
                 <p className="text-white font-semibold text-sm sm:text-base truncate">{user?.email}</p>
-                <p className="text-gray-400 text-xs sm:text-sm capitalize">Administrador</p>
+                <p className="text-gray-400 text-xs sm:text-sm capitalize">
+                  {userRole === 'admin' ? 'Administrador' : 'Empleado'}
+                </p>
               </div>
               <button
                 onClick={handleLogout}
@@ -248,6 +300,7 @@ export default function Dashboard() {
                   { id: 'canchas', label: 'Canchas', icon: MapPin },
                   { id: 'precios', label: 'Precios', icon: DollarSign },
                   { id: 'horarios', label: 'Horarios', icon: Clock },
+                  { id: 'usuarios', label: 'Usuarios', icon: Users },
                   { id: 'navegacion', label: 'Menú', icon: Menu },
                   { id: 'imagenes', label: 'Imágenes', icon: Images },
                 ].map((item) => (
@@ -258,6 +311,8 @@ export default function Dashboard() {
                         router.push('/dashboard/reservas');
                       } else if (item.id === 'clientes') {
                         router.push('/dashboard/clientes');
+                      } else if (item.id === 'usuarios') {
+                        router.push('/dashboard/usuarios');
                       } else {
                         setActiveTab(item.id);
                       }
@@ -285,6 +340,7 @@ export default function Dashboard() {
                   { id: 'canchas', label: 'Canchas', icon: MapPin },
                   { id: 'precios', label: 'Precios', icon: DollarSign },
                   { id: 'horarios', label: 'Config Horarios', icon: Clock },
+                  { id: 'usuarios', label: 'Usuarios', icon: Users },
                   { id: 'navegacion', label: 'Navegación', icon: Menu },
                   { id: 'imagenes', label: 'Imágenes', icon: Images },
                 ].map((item) => (
@@ -295,6 +351,8 @@ export default function Dashboard() {
                         router.push('/dashboard/reservas');
                       } else if (item.id === 'clientes') {
                         router.push('/dashboard/clientes');
+                      } else if (item.id === 'usuarios') {
+                        router.push('/dashboard/usuarios');
                       } else {
                         setActiveTab(item.id);
                       }

@@ -7,6 +7,7 @@ export const useAuth = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [userRole, setUserRole] = useState(null); // 'admin' o 'empleado'
   const router = useRouter();
 
   useEffect(() => {
@@ -24,23 +25,44 @@ export const useAuth = () => {
 
         if (session?.user) {
           // Verificar si es admin en la tabla admin_users
-          const { data: adminData, error: adminError } = await supabase
+          // Intentar con user_roles, si falla usar solo admin_users
+          let adminData = null;
+          let roleName = null;
+          
+          const { data, error } = await supabase
             .from('admin_users')
-            .select('*')
+            .select('*, user_roles(nombre)')
             .eq('user_id', session.user.id)
             .eq('activo', true)
             .single();
           
-          const userIsAdmin = !adminError && !!adminData;
+          if (error) {
+            // Si falla (probablemente porque user_roles no existe), intentar sin JOIN
+            const { data: fallbackData } = await supabase
+              .from('admin_users')
+              .select('*')
+              .eq('user_id', session.user.id)
+              .eq('activo', true)
+              .single();
+            
+            adminData = fallbackData;
+            roleName = 'admin'; // Por defecto, todos son admin si no existe la tabla de roles
+          } else {
+            adminData = data;
+            roleName = data?.user_roles?.nombre || 'admin';
+          }
+          
+          const userIsAdmin = !!adminData;
           
           setUser(session.user);
-          setIsAdmin(userIsAdmin);
+          setIsAdmin(userIsAdmin && roleName === 'admin');
+          setUserRole(roleName);
           
           // Sincronizar con localStorage
           if (userIsAdmin) {
             localStorage.setItem('admin', JSON.stringify({
               correo: session.user.email,
-              rol: 'admin',
+              rol: roleName,
               userId: session.user.id
             }));
           } else {
@@ -67,23 +89,44 @@ export const useAuth = () => {
         
         if (session?.user) {
           // Verificar si es admin en la tabla admin_users
-          const { data: adminData, error: adminError } = await supabase
+          // Intentar con user_roles, si falla usar solo admin_users
+          let adminData = null;
+          let roleName = null;
+          
+          const { data, error } = await supabase
             .from('admin_users')
-            .select('*')
+            .select('*, user_roles(nombre)')
             .eq('user_id', session.user.id)
             .eq('activo', true)
             .single();
           
-          const userIsAdmin = !adminError && !!adminData;
+          if (error) {
+            // Si falla (probablemente porque user_roles no existe), intentar sin JOIN
+            const { data: fallbackData } = await supabase
+              .from('admin_users')
+              .select('*')
+              .eq('user_id', session.user.id)
+              .eq('activo', true)
+              .single();
+            
+            adminData = fallbackData;
+            roleName = 'admin'; // Por defecto, todos son admin si no existe la tabla de roles
+          } else {
+            adminData = data;
+            roleName = data?.user_roles?.nombre || 'admin';
+          }
+          
+          const userIsAdmin = !!adminData;
           
           setUser(session.user);
-          setIsAdmin(userIsAdmin);
+          setIsAdmin(userIsAdmin && roleName === 'admin');
+          setUserRole(roleName);
           
           // Sincronizar con localStorage
           if (userIsAdmin) {
             localStorage.setItem('admin', JSON.stringify({
               correo: session.user.email,
-              rol: 'admin',
+              rol: roleName,
               userId: session.user.id
             }));
           } else {
@@ -106,6 +149,7 @@ export const useAuth = () => {
   const clearLocalSession = () => {
     setUser(null);
     setIsAdmin(false);
+    setUserRole(null);
     localStorage.removeItem('admin');
   };
 
@@ -142,6 +186,7 @@ export const useAuth = () => {
     user,
     loading,
     isAdmin,
+    userRole, // 'admin' o 'empleado'
     signOut,
     requireAuth,
     requireAdmin

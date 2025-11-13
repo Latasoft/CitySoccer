@@ -28,7 +28,7 @@ const EditableNavLink = ({
   useEffect(() => {
     const loadText = async () => {
       try {
-        const { data } = await localContentService.getPageContent('navigation');
+        const { data } = await localContentService.getContent('navigation');
         
         if (data && data.menu_items) {
           // Buscar el item por ID en el array plano o en submenus
@@ -71,7 +71,7 @@ const EditableNavLink = ({
       setSaving(true);
       
       // Leer todo el navigation.json
-      const { data } = await localContentService.getPageContent('navigation');
+      const { data } = await localContentService.getContent('navigation');
       
       if (!data || !data.menu_items) {
         throw new Error('No se pudo cargar el menú');
@@ -92,21 +92,31 @@ const EditableNavLink = ({
       
       const updatedMenuItems = updateItem(data.menu_items);
       
-      // Guardar todo el objeto actualizado
-      const response = await fetch('/api/content/navigation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ menu_items: updatedMenuItems, logo_alt: data.logo_alt })
-      });
+      // Guardar usando updateField (actualiza todo menu_items)
+      const result = await localContentService.updateField(
+        'navigation',
+        'menu_items',
+        updatedMenuItems
+      );
       
-      if (!response.ok) throw new Error('Error al guardar');
+      // Verificar si realmente hubo un error
+      if (result.error) {
+        throw result.error;
+      }
+      
+      // Si llegamos aquí, el guardado fue exitoso
+      // Forzar recarga del componente Navigation
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('navigation-updated'));
+      }
       
       setText(editedText);
       setIsEditing(false);
+      setSaving(false); // ✅ Marcar como guardado antes del catch
+      
     } catch (error) {
-      console.error('Error guardando:', error);
-      alert('Error al guardar el texto');
-    } finally {
+      console.error('Error guardando navbar:', error);
+      alert(`Error al guardar: ${error.message || 'Intenta nuevamente'}`);
       setSaving(false);
     }
   };
@@ -160,14 +170,23 @@ const EditableNavLink = ({
   if (isAdminMode) {
     return (
       <span 
-        className={`${className} relative group`}
+        className={`${className} relative group cursor-pointer`}
         onDoubleClick={handleEdit}
+        onClick={(e) => {
+          // Prevenir navegación en modo admin
+          e.preventDefault();
+          e.stopPropagation();
+        }}
         title="Doble clic o clic en el lápiz para editar"
         {...props}
       >
         {displayText}
         <button
-          onClick={handleEdit}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleEdit(e);
+          }}
           className="inline-flex items-center ml-1 opacity-0 group-hover:opacity-100 text-yellow-400 transition-opacity hover:text-yellow-300"
           type="button"
           aria-label="Editar texto"

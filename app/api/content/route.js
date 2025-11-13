@@ -68,7 +68,11 @@ export async function POST(request) {
     // Invalidar caché del servidor
     serverCache.delete(pageKey);
     
-    console.log(`✅ Guardado: ${pageKey}.${fieldKey} = ${fieldValue?.substring(0, 50)}...`);
+    // Log seguro que maneja objetos/arrays
+    const valuePreview = typeof fieldValue === 'object' 
+      ? `[${Array.isArray(fieldValue) ? 'Array' : 'Object'} con ${Array.isArray(fieldValue) ? fieldValue.length : Object.keys(fieldValue).length} elementos]`
+      : String(fieldValue).substring(0, 50);
+    console.log(`✅ Guardado: ${pageKey}.${fieldKey} = ${valuePreview}...`);
     
     return NextResponse.json({
       success: true,

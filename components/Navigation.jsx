@@ -57,7 +57,7 @@ export default function Navigation() {
     useEffect(() => {
         const loadMenuItems = async () => {
             try {
-                const response = await fetch('/api/content/navigation');
+                const response = await fetch('/api/content?pageKey=navigation');
                 
                 if (!response.ok) {
                     throw new Error('No se pudo cargar navigation.json');
@@ -70,7 +70,7 @@ export default function Navigation() {
                     const itemsWithAuth = [...data.menu_items];
                     
                     // Agregar Login o Dashboard al final según autenticación
-                    if (user && isAdmin) {
+                    if (user) {
                         itemsWithAuth.push({ id: 999, text: "Dashboard", href: "/dashboard" });
                     } else {
                         itemsWithAuth.push({ id: 999, text: "Login", href: "/login" });
@@ -81,7 +81,7 @@ export default function Navigation() {
                     // Usar fallback
                     const itemsWithAuth = [...fallbackNavItems];
                     
-                    if (user && isAdmin) {
+                    if (user) {
                         itemsWithAuth.push({ id: 999, text: "Dashboard", href: "/dashboard" });
                     } else {
                         itemsWithAuth.push({ id: 999, text: "Login", href: "/login" });
@@ -94,7 +94,7 @@ export default function Navigation() {
                 // Usar fallback con Login/Dashboard correcto
                 const itemsWithAuth = [...fallbackNavItems];
                 
-                if (user && isAdmin) {
+                if (user) {
                     itemsWithAuth.push({ id: 999, text: "Dashboard", href: "/dashboard" });
                 } else {
                     itemsWithAuth.push({ id: 999, text: "Login", href: "/login" });
@@ -107,6 +107,17 @@ export default function Navigation() {
         };
 
         loadMenuItems();
+        
+        // Escuchar evento de actualización desde EditableNavLink
+        const handleNavigationUpdate = () => {
+            loadMenuItems();
+        };
+        
+        window.addEventListener('navigation-updated', handleNavigationUpdate);
+        
+        return () => {
+            window.removeEventListener('navigation-updated', handleNavigationUpdate);
+        };
     }, [user, isAdmin]);
 
     useEffect(() => {

@@ -33,6 +33,7 @@ const PricesAdminGrid = () => {
   const [message, setMessage] = useState({ type: '', text: '' });
   const [activeTab, setActiveTab] = useState('futbol7');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [horas, setHoras] = useState([]); // Horarios dinámicos de BD
   const [newSlot, setNewSlot] = useState({
     dia_semana: 'weekdays',
     hora: '09:00',
@@ -52,7 +53,17 @@ const PricesAdminGrid = () => {
     { id: 'sunday', name: 'Domingo' }
   ];
 
-  const horas = pricesService.getAvailableHours(); // 09:00 - 23:00
+  // Cargar horarios disponibles de BD
+  useEffect(() => {
+    const loadHorarios = async () => {
+      const horariosDisponibles = await pricesService.getAvailableHours();
+      setHoras(horariosDisponibles);
+      if (horariosDisponibles.length > 0) {
+        setNewSlot(prev => ({ ...prev, hora: horariosDisponibles[0] }));
+      }
+    };
+    loadHorarios();
+  }, []);
 
   useEffect(() => {
     loadPrecios();

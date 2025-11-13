@@ -284,6 +284,7 @@ export default function ReservasPage() {
           hora_inicio,
           estado,
           creado_en,
+          transaction_id,
           clientes ( nombre, correo, telefono ),
           canchas ( nombre, tipo )
         `)
@@ -302,6 +303,21 @@ export default function ReservasPage() {
         return;
       }
 
+      // Obtener montos de las transacciones
+      const transactionIds = data.map(r => r.transaction_id).filter(Boolean);
+      const { data: transactions } = await supabase
+        .from('transactions')
+        .select('order_id, amount')
+        .in('order_id', transactionIds);
+
+      // Crear mapa de montos por transaction_id
+      const montosMap = {};
+      if (transactions) {
+        transactions.forEach(t => {
+          montosMap[t.order_id] = t.amount;
+        });
+      }
+
       // Preparar datos para Excel
       const excelData = data.map((reserva, index) => ({
         'N°': index + 1,
@@ -311,6 +327,9 @@ export default function ReservasPage() {
         'Cliente': reserva.clientes?.nombre || 'Sin nombre',
         'Correo': reserva.clientes?.correo || '',
         'Teléfono': reserva.clientes?.telefono || '',
+        'Monto': reserva.transaction_id && montosMap[reserva.transaction_id] 
+          ? `$${montosMap[reserva.transaction_id].toLocaleString('es-CL')}` 
+          : 'N/A',
         'Estado': reserva.estado ? reserva.estado.charAt(0).toUpperCase() + reserva.estado.slice(1) : '',
         'Fecha Reserva': reserva.creado_en ? new Date(reserva.creado_en).toLocaleString('es-CL') : ''
       }));
@@ -327,6 +346,7 @@ export default function ReservasPage() {
         { wch: 25 }, // Cliente
         { wch: 30 }, // Correo
         { wch: 15 }, // Teléfono
+        { wch: 12 }, // Monto
         { wch: 12 }, // Estado
         { wch: 20 }  // Fecha Reserva
       ];

@@ -13,7 +13,7 @@ export default function ClasesParticularePickleball() {
       title: { first: "Clases", second: "Particulares" },
       subtitle: "de Pickleball",
       titleColors: { first: "text-orange-400", second: "text-pink-400" },
-      description: "Nuestras clases particulares de pickleball son ideales si buscas avanzar rápido, mejorar tu técnica de saque, voleas y estrategia de juego. Los entrenadores se adaptan a tu ritmo y objetivos, entregándote una experiencia enfocada 100% en ti.",
+      description: "Nuestras clases particulares de pickleball son ideales para ti.",
       buttonText: "Reservar Clase",
       buttonLink: "#contacto",
       images: {
@@ -23,20 +23,6 @@ export default function ClasesParticularePickleball() {
       },
       backgroundGradient: "bg-gradient-to-br from-orange-900 via-pink-900 to-purple-800"
     },
-    includes: [
-      "Instructor certificado en Pickleball",
-      "Evaluación inicial de habilidades",
-      "Técnicas específicas de golpeo",
-      "Estrategias de posicionamiento en cancha",
-      "Raquetas y pelotas profesionales incluidas",
-      "Ejercicios de precisión y control",
-      "Tácticas de juego individual y dobles",
-      "Análisis personalizado de tu juego",
-      "Consejos para prevenir lesiones",
-      "Horarios completamente flexibles",
-      "Progresión adaptada a tu nivel",
-      "Certificado de participación"
-    ],
     schedules: [
       { day: "Lunes a Viernes", time: "8:00 - 19:00" },
       { day: "Sábados", time: "8:00 - 17:00" },
@@ -48,11 +34,10 @@ export default function ClasesParticularePickleball() {
     <div className="min-h-screen">
       <HeroSection {...classData.heroProps} pageKey="clasesparticularespickleball" />
       
-      
-      
       <SchedulePricingSection 
         schedules={classData.schedules}
         whatsappNumber={getWhatsAppNumber()}
+        pageKey="clasesparticularespickleball"
       />
       
       <CTASection 
@@ -71,6 +56,7 @@ export default function ClasesParticularePickleball() {
         }}
         whatsappNumber={getWhatsAppNumber()}
         backgroundImage="./Pickleball2.jpeg"
+        pageKey="clasesparticularespickleball"
       />
     </div>
   );

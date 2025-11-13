@@ -3,36 +3,37 @@
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { AdminModeToggle } from "@/contexts/AdminModeContext";
-import { supabase } from "@/lib/supabaseClient";
+import { AdminModeToggle, useAdminMode } from "@/contexts/AdminModeContext";
 import { useAuth } from "@/hooks/useAuth";
+import EditableNavLink from "./EditableNavLink";
 
-// Fallback estático (se usa si falla la carga desde BD)
+// Fallback estático (se usa si falla la carga desde archivo JSON)
 const fallbackNavItems = [
-    { linkText: "Inicio", href: "/" },
-    { linkText: "Quienes somos", href: "/quienessomos" },
+    { id: 1, text: "Inicio", href: "/" },
+    { id: 2, text: "Quienes somos", href: "/quienessomos" },
     {
-        linkText: "Futbol",
-        subTitulos: [
-            { linkText: "Arriendos Futbol 7", href: "/arrendarcancha/futbol7" },
-            { linkText: "Arriendos Futbol 9", href: "/arrendarcancha/futbol9" },
-            { linkText: "Clases particulares Futbol", href: "/clasesparticularesfutbol" },
-            { linkText: "Academia de futbol", href: "/academiadefutbol" },
+        id: 3,
+        text: "Futbol",
+        submenu: [
+            { id: 31, text: "Arriendos Futbol 7", href: "/arrendarcancha/futbol7" },
+            { id: 32, text: "Arriendos Futbol 9", href: "/arrendarcancha/futbol9" },
+            { id: 33, text: "Clases particulares Futbol", href: "/clasesparticularesfutbol" },
+            { id: 34, text: "Academia de futbol", href: "/academiadefutbol" },
         ],
     },
     {
-        linkText: "Pickleball",
-        subTitulos: [
-            { linkText: "Arriendos Pickleball Single", href: "/arrendarcancha/pickleball-individual" },
-            { linkText: "Arriendos Pickleball Dobles", href: "/arrendarcancha/pickleball-dobles" },
-            { linkText: "Clases particulares Pickleball", href: "/clasesparticularespickleball" },
-            { linkText: "Academia de Pickeball", href: "/academiadepickleball" },
+        id: 4,
+        text: "Pickleball",
+        submenu: [
+            { id: 41, text: "Arriendos Pickleball Single", href: "/arrendarcancha/pickleball-individual" },
+            { id: 42, text: "Arriendos Pickleball Dobles", href: "/arrendarcancha/pickleball-dobles" },
+            { id: 43, text: "Clases particulares Pickleball", href: "/clasesparticularespickleball" },
+            { id: 44, text: "Academia de Pickeball", href: "/academiadepickleball" },
         ],
     },
-    { linkText: "Summer Camp", href: "/summer-camp" },
-    { linkText: "Eventos", href: "/eventos" },
-    { linkText: "Contacto", href: "/contacto" },
-    { linkText: "Login", href: "/login" },
+    { id: 5, text: "Summer Camp", href: "/summer-camp" },
+    { id: 6, text: "Eventos", href: "/eventos" },
+    { id: 7, text: "Contacto", href: "/contacto" },
 ];
 
 const remToPixels = (rem) => {
@@ -42,6 +43,7 @@ const remToPixels = (rem) => {
 export default function Navigation() {
     const pathname = usePathname();
     const { user, isAdmin } = useAuth();
+    const { isAdminMode } = useAdminMode();
     const [activePath, setActivePath] = useState(pathname);
     const [subMenuOpening, setOpenSubMenu] = useState(null);
     const [menuOpen, setMenuOpen] = useState(false);
@@ -51,56 +53,50 @@ export default function Navigation() {
 
     const subMenuRefs = useRef([]);
 
-    // Cargar items del menú desde la base de datos
+    // Cargar items del menú desde archivo JSON local
     useEffect(() => {
         const loadMenuItems = async () => {
             try {
-                const { data, error } = await supabase
-                    .from('menu_items')
-                    .select('*')
-                    .eq('activo', true)
-                    .order('orden', { ascending: true });
-
-                if (error) throw error;
-
-                if (data && data.length > 0) {
-                    // Transformar datos de BD al formato del componente
-                    const transformedItems = transformMenuData(data);
+                const response = await fetch('/content/navigation.json');
+                
+                if (!response.ok) {
+                    throw new Error('No se pudo cargar navigation.json');
+                }
+                
+                const data = await response.json();
+                
+                if (data && data.menu_items && data.menu_items.length > 0) {
+                    const itemsWithAuth = [...data.menu_items];
                     
-                    // IMPORTANTE: Agregar siempre Login/Dashboard al final según autenticación
-                    const itemsWithAuth = [...transformedItems];
-                    
-                    // Asegurarse de que el último item sea Login o Dashboard
+                    // Agregar Login o Dashboard al final según autenticación
                     if (user && isAdmin) {
-                        itemsWithAuth.push({ linkText: "Dashboard", href: "/dashboard" });
+                        itemsWithAuth.push({ id: 999, text: "Dashboard", href: "/dashboard" });
                     } else {
-                        itemsWithAuth.push({ linkText: "Login", href: "/login" });
+                        itemsWithAuth.push({ id: 999, text: "Login", href: "/login" });
                     }
                     
                     setNavItems(itemsWithAuth);
                 } else {
-                    // Si no hay datos en BD, usar fallback pero actualizar Login/Dashboard
+                    // Usar fallback
                     const itemsWithAuth = [...fallbackNavItems];
-                    const lastIndex = itemsWithAuth.length - 1;
                     
                     if (user && isAdmin) {
-                        itemsWithAuth[lastIndex] = { linkText: "Dashboard", href: "/dashboard" };
+                        itemsWithAuth.push({ id: 999, text: "Dashboard", href: "/dashboard" });
                     } else {
-                        itemsWithAuth[lastIndex] = { linkText: "Login", href: "/login" };
+                        itemsWithAuth.push({ id: 999, text: "Login", href: "/login" });
                     }
                     
                     setNavItems(itemsWithAuth);
                 }
             } catch (error) {
-                console.error('Error cargando menú desde BD:', error);
+                console.error('Error cargando menú desde JSON:', error);
                 // Usar fallback con Login/Dashboard correcto
                 const itemsWithAuth = [...fallbackNavItems];
-                const lastIndex = itemsWithAuth.length - 1;
                 
                 if (user && isAdmin) {
-                    itemsWithAuth[lastIndex] = { linkText: "Dashboard", href: "/dashboard" };
+                    itemsWithAuth.push({ id: 999, text: "Dashboard", href: "/dashboard" });
                 } else {
-                    itemsWithAuth[lastIndex] = { linkText: "Login", href: "/login" };
+                    itemsWithAuth.push({ id: 999, text: "Login", href: "/login" });
                 }
                 
                 setNavItems(itemsWithAuth);
@@ -110,6 +106,9 @@ export default function Navigation() {
         };
 
         loadMenuItems();
+    }, [user, isAdmin]);
+
+    useEffect(() => {
     }, [user, isAdmin]); // Agregar dependencias user e isAdmin
 
     // Función para transformar datos de BD al formato esperado
@@ -175,6 +174,11 @@ export default function Navigation() {
     };
 
     const handleSubMenuToggle = (index) => {
+        // No abrir submenús en modo admin (para permitir edición)
+        if (isAdminMode) {
+            return;
+        }
+        
         if (subMenuOpening === index) {
             closeSubMenu(index);
             setOpenSubMenu(null);
@@ -187,7 +191,13 @@ export default function Navigation() {
         }
     };
 
-    const handleLinkClick = () => {
+    const handleLinkClick = (e) => {
+        // Prevenir navegación en modo admin
+        if (isAdminMode) {
+            e.preventDefault();
+            return;
+        }
+        
         if (subMenuOpening !== null) {
             closeSubMenu(subMenuOpening);
             setOpenSubMenu(null);
@@ -227,14 +237,14 @@ export default function Navigation() {
         }
     };
 
-    const isSubItemActive = (subTitulos) => {
+    const isSubItemActive = (submenu) => {
         return (
-            subTitulos && subTitulos.some((subItem) => subItem.href === activePath)
+            submenu && submenu.some((subItem) => subItem.href === activePath)
         );
     };
 
-    const getLinkClass = (path, subTitulos) => {
-        const isActive = path === activePath || isSubItemActive(subTitulos);
+    const getLinkClass = (path, submenu) => {
+        const isActive = path === activePath || isSubItemActive(submenu);
         return `text-white ${
             isActive ? "text-[#57AA32] font-medium" : "hover:text-[#FFED00]"
         }`;
@@ -295,19 +305,19 @@ export default function Navigation() {
                                                 item.href
                                             )} no-underline tracking-wide block py-3 px-2 rounded-lg transition-all duration-300 hover:bg-white/5`}
                                         >
-                                            {item.linkText}
+                                            <EditableNavLink itemId={item.id} defaultText={item.text} />
                                         </Link>
                                     )}
-                                    {item.subTitulos && (
+                                    {item.submenu && (
                                         <div>
                                             <div
                                                 onClick={() => handleSubMenuToggle(index)}
                                                 className={`${getLinkClass(
                                                     item.href,
-                                                    item.subTitulos
+                                                    item.submenu
                                                 )} cursor-pointer tracking-wide py-3 px-2 rounded-lg flex items-center justify-between transition-all duration-300 hover:bg-white/5`}
                                             >
-                                                {item.linkText}
+                                                <EditableNavLink itemId={item.id} defaultText={item.text} />
                                                 <svg
                                                     className={`w-4 h-4 transition-transform duration-300 ${
                                                         subMenuOpening === index ? "rotate-180" : ""
@@ -328,7 +338,7 @@ export default function Navigation() {
                                                 ref={(el) => (subMenuRefs.current[index] = el)}
                                                 className="h-0 opacity-0 leading-tight transition-all overflow-hidden"
                                             >
-                                                {item.subTitulos.map((subItem, subIndex) => (
+                                                {item.submenu.map((subItem, subIndex) => (
                                                     <li key={subIndex} className="ml-4">
                                                         <Link
                                                             href={subItem.href}
@@ -337,7 +347,7 @@ export default function Navigation() {
                                                                 subItem.href
                                                             )} no-underline text-sm font-normal tracking-wide block py-2 px-2 rounded-lg transition-all duration-300 hover:bg-white/5`}
                                                         >
-                                                            {subItem.linkText}
+                                                            <EditableNavLink itemId={subItem.id} defaultText={subItem.text} />
                                                         </Link>
                                                     </li>
                                                 ))}
@@ -405,19 +415,19 @@ export default function Navigation() {
                                                     item.href
                                                 )} no-underline tracking-wide block py-3 px-3 rounded-lg transition-all duration-300 hover:bg-white/5`}
                                             >
-                                                {item.linkText}
+                                                <EditableNavLink itemId={item.id} defaultText={item.text} />
                                             </Link>
                                         )}
-                                        {item.subTitulos && (
+                                        {item.submenu && (
                                             <div>
                                                 <div
                                                     onClick={() => handleSubMenuToggle(index)}
                                                     className={`${getLinkClass(
                                                         item.href,
-                                                        item.subTitulos
+                                                        item.submenu
                                                     )} cursor-pointer tracking-wide py-3 px-3 rounded-lg flex items-center justify-between transition-all duration-300 hover:bg-white/5`}
                                                 >
-                                                    {item.linkText}
+                                                    <EditableNavLink itemId={item.id} defaultText={item.text} />
                                                     <svg
                                                         className={`w-4 h-4 transition-transform duration-300 ${
                                                             subMenuOpening === index ? "rotate-180" : ""
@@ -438,7 +448,7 @@ export default function Navigation() {
                                                     ref={(el) => (subMenuRefs.current[index] = el)}
                                                     className="h-0 opacity-0 leading-tight transition-all overflow-hidden"
                                                 >
-                                                    {item.subTitulos.map((subItem, subIndex) => (
+                                                    {item.submenu.map((subItem, subIndex) => (
                                                         <li key={subIndex} className="ml-4">
                                                             <Link
                                                                 href={subItem.href}
@@ -447,7 +457,7 @@ export default function Navigation() {
                                                                     subItem.href
                                                                 )} no-underline text-sm font-normal tracking-wide block py-2 px-3 rounded-lg transition-all duration-300 hover:bg-white/5`}
                                                             >
-                                                                {subItem.linkText}
+                                                                <EditableNavLink itemId={subItem.id} defaultText={subItem.text} />
                                                             </Link>
                                                         </li>
                                                     ))}

@@ -2,6 +2,7 @@
 
 import HeroSection from '@/components/HeroSection';
 import ProgramsSection from '@/components/ProgramsSection';
+import BenefitsSection from '@/components/BenefitsSection';
 import CTASection from '@/components/CTASection';
 import EditableContent from '@/components/EditableContent';
 import { useWhatsApp } from '@/hooks/useWhatsApp';
@@ -78,9 +79,16 @@ export default function Eventos() {
         programs={eventData.categories}
         whatsappNumber={getWhatsAppNumber()}
         onWhatsAppClick={openWhatsApp}
+        pageKey="eventos"
       />
       
-      
+      {/* Servicios Incluidos */}
+      <BenefitsSection 
+        title="Servicios Incluidos"
+        benefits={eventData.services}
+        bgColor="bg-gray-800"
+        pageKey="eventos"
+      />
       
       {/* Call to Action */}
       <CTASection 
@@ -96,8 +104,9 @@ export default function Eventos() {
           type: "whatsapp", 
           message: "Hola! Necesito más detalles sobre los tipos de eventos y servicios disponibles"
         }}
-        whatsappNumber={eventData.whatsapp}
-        backgroundImage="./Birthday.jpeg"
+        whatsappNumber={getWhatsAppNumber()}
+        backgroundImage="/Birthday.jpeg"
+        pageKey="eventos"
       />
     </div>
   );

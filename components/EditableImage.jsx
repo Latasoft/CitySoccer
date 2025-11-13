@@ -13,6 +13,10 @@ const EditableImage = ({
   style = {},
   fallbackSrc = '/imgPrincipal.jpeg',
   onImageChange,
+  pageKey, // Capturar y descartar (legacy prop)
+  fieldKey, // Capturar y descartar (legacy prop)
+  children, // Capturar y descartar (no permitido en img)
+  dangerouslySetInnerHTML, // Capturar y descartar (no permitido en img)
   ...props 
 }) => {
   const { isAdminMode } = useAdminMode();
@@ -97,21 +101,24 @@ const EditableImage = ({
     setDragOver(false);
   };
 
+  const imgElement = (
+    <img
+      src={src || fallbackSrc}
+      alt={alt}
+      className={`${className} ${
+        isAdminMode 
+          ? 'cursor-pointer hover:ring-4 hover:ring-[#ffee00] hover:ring-opacity-70 transition-all duration-200' 
+          : ''
+      }`}
+      style={style}
+      onClick={handleImageClick}
+      title={isAdminMode ? `Clic para cambiar imagen (${categoria})` : alt}
+    />
+  );
+
   return (
     <>
-      <img
-        src={src || fallbackSrc}
-        alt={alt}
-        className={`${className} ${
-          isAdminMode 
-            ? 'cursor-pointer hover:ring-4 hover:ring-[#ffee00] hover:ring-opacity-70 transition-all duration-200' 
-            : ''
-        }`}
-        style={style}
-        onClick={handleImageClick}
-        title={isAdminMode ? `Clic para cambiar imagen (${categoria})` : alt}
-        {...props}
-      />
+      {imgElement}
 
       {/* Modal de subida */}
       {showUploader && (

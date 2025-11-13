@@ -1,18 +1,38 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePrimaryImage, useDynamicImages } from "@/lib/dynamicImageService";
 import EditableImage from './EditableImage';
 import EditableContent from './EditableContent';
+import EditableVideo from './EditableVideo';
+import { useAdminMode } from '@/contexts/AdminModeContext';
 
 const Hero = () => {
   const videoRef = useRef(null);
+  const [videoUrl, setVideoUrl] = useState('/videofutbol.mp4');
+  const { isAdminMode } = useAdminMode();
   
   // Cargar imagen principal del logo desde admin
   const { imageUrl: logoUrl, loading: logoLoading } = usePrimaryImage('logos', '/Logo2.png');
   
   // Cargar imagen de fondo desde admin (categoría hero)
   const { imageUrl: backgroundUrl, loading: bgLoading } = usePrimaryImage('hero', '/imgPrincipal.jpeg');
+
+  // Cargar URL del video desde archivo JSON
+  useEffect(() => {
+    const loadVideoUrl = async () => {
+      try {
+        const { localContentService } = await import('@/lib/localContentService');
+        const { data } = await localContentService.getPageContent('home');
+        if (data && data.hero_video_url) {
+          setVideoUrl(data.hero_video_url);
+        }
+      } catch (error) {
+        console.error('Error cargando video URL:', error);
+      }
+    };
+    loadVideoUrl();
+  }, []);
 
   useEffect(() => {
     // Asegurar que el video se reproduzca automáticamente
@@ -21,7 +41,7 @@ const Hero = () => {
         console.log("Error al reproducir el video:", error);
       });
     }
-  }, []);
+  }, [videoUrl]);
 
   return (
     <section
@@ -38,14 +58,27 @@ const Hero = () => {
           muted
           playsInline
           poster={backgroundUrl}
+          key={videoUrl}
         >
-          <source src="/videofutbol.mp4" type="video/mp4" />
+          <source src={videoUrl} type="video/mp4" />
           {/* Fallback para navegadores que no soportan video */}
           Tu navegador no soporta videos HTML5.
         </video>
 
         {/* Overlay oscuro para mejor legibilidad del texto */}
         <div className="absolute inset-0 bg-brand-dark-gray/50"></div>
+        
+        {/* Botón de edición del video en modo admin */}
+        {isAdminMode && (
+          <div className="absolute top-4 right-4 z-20">
+            <EditableVideo
+              pageKey="home"
+              fieldKey="hero_video_url"
+              defaultValue="/videofutbol.mp4"
+              onSave={(newValue) => setVideoUrl(newValue)}
+            />
+          </div>
+        )}
       </div>
 
       {/* Content */}

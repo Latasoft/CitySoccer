@@ -1,5 +1,8 @@
+'use client';
+
 import React from 'react';
 import EditableImage from './EditableImage';
+import EditableContent from './EditableContent';
 import { useDynamicImages } from '@/lib/dynamicImageService';
 import { useConfig } from "@/lib/dynamicConfigService";
 
@@ -62,24 +65,45 @@ const QuienessomosComponent = () => {
             {/* Texto del Hero */}
             <div className="flex flex-col gap-6 sm:gap-8 text-center lg:text-left">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-tight text-white uppercase">
-                <span className="text-green-400">Sobre </span>
-                <span className="text-blue-400">City Soccer</span>
+                <EditableContent
+                  pageKey="quienessomos"
+                  fieldKey="hero_title_first"
+                  fieldType="text"
+                  defaultValue="Sobre"
+                  as="span"
+                  className="text-green-400"
+                />
+                {' '}
+                <EditableContent
+                  pageKey="quienessomos"
+                  fieldKey="hero_title_second"
+                  fieldType="text"
+                  defaultValue="City Soccer"
+                  as="span"
+                  className="text-blue-400"
+                />
               </h1>
 
               <div className="flex flex-col gap-4 sm:gap-6 text-gray-300">
-                <p className="text-lg sm:text-xl leading-relaxed">
-                  Más que un centro deportivo, somos una familia unida por la pasión del fútbol.
-                  En City Soccer creamos espacios donde el deporte se vive con profesionalismo,
-                  diversión y valores que trascienden las canchas.
-                </p>
+                <EditableContent
+                  pageKey="quienessomos"
+                  fieldKey="hero_description"
+                  fieldType="textarea"
+                  defaultValue="Más que un centro deportivo, somos una familia unida por la pasión del fútbol. En City Soccer creamos espacios donde el deporte se vive con profesionalismo, diversión y valores que trascienden las canchas."
+                  as="p"
+                  className="text-lg sm:text-xl leading-relaxed"
+                />
               </div>
 
-              <button
-                onClick={handleWhatsAppClick}
+              <EditableContent
+                pageKey="quienessomos"
+                fieldKey="hero_button_text"
+                fieldType="text"
+                defaultValue="Contáctanos"
+                as="button"
                 className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 sm:py-4 sm:px-8 rounded-full text-sm sm:text-base uppercase tracking-wide transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-500/40 self-center lg:self-start"
-              >
-                Contáctanos
-              </button>
+                onClick={handleWhatsAppClick}
+              />
             </div>
 
             {/* Grid de Imágenes - Responsive */}
@@ -122,8 +146,22 @@ const QuienessomosComponent = () => {
       <section className="py-20 bg-gray-800">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Nuestras Alianzas</h2>
-            <p className="text-xl text-gray-300">Colaboramos con centros deportivos de clase mundial</p>
+            <EditableContent
+              pageKey="quienessomos"
+              fieldKey="partnerships_title"
+              fieldType="text"
+              defaultValue="Nuestras Alianzas"
+              as="h2"
+              className="text-4xl md:text-5xl font-bold text-white mb-4"
+            />
+            <EditableContent
+              pageKey="quienessomos"
+              fieldKey="partnerships_subtitle"
+              fieldType="text"
+              defaultValue="Colaboramos con centros deportivos de clase mundial"
+              as="p"
+              className="text-xl text-gray-300"
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -131,14 +169,32 @@ const QuienessomosComponent = () => {
               <div key={index} className="bg-gray-700 rounded-xl p-6 hover:bg-gray-600 transition-all duration-300 hover:scale-105">
                 <div className="text-center">
                   <div className="w-28 h-20 rounded-lg mx-auto mb-4 flex items-center justify-center overflow-hidden bg-white/10">
-                    <img
+                    <EditableImage
                       src={partnership.url}
                       alt={partnership.country}
+                      categoria={`alianza-${index + 1}`}
                       className="w-16 h-12 object-contain"
+                      fallbackSrc={partnership.url}
                     />
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-2">{partnership.name}</h3>
-                  <p className="text-gray-300 mb-4">{partnership.country}</p>
+                  <h3 className="text-xl font-bold text-white mb-2">
+                    <EditableContent
+                      pageKey="quienessomos"
+                      fieldKey={`partnership${index + 1}_name`}
+                      fieldType="text"
+                      defaultValue={partnership.name}
+                      as="span"
+                    />
+                  </h3>
+                  <p className="text-gray-300 mb-4">
+                    <EditableContent
+                      pageKey="quienessomos"
+                      fieldKey={`partnership${index + 1}_country`}
+                      fieldType="text"
+                      defaultValue={partnership.country}
+                      as="span"
+                    />
+                  </p>
                   <button
                     onClick={() => handlePartnershipClick(partnership.instagram)}
                     className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-semibold transition-colors duration-300 text-sm inline-flex items-center justify-center gap-2"

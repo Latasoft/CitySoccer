@@ -19,6 +19,8 @@ export const AdminModeProvider = ({ children }) => {
 
   // Función para verificar si el usuario es admin consultando la tabla admin_users
   const checkIfUserIsAdmin = async (userId) => {
+    console.log(`[AdminMode] 🔍 Verificando permisos de admin para userId: ${userId}`);
+    
     try {
       const { data, error } = await supabase
         .from('admin_users')
@@ -29,13 +31,14 @@ export const AdminModeProvider = ({ children }) => {
 
       if (error) {
         // Si no encuentra el registro, no es admin
-        console.log('Usuario no encontrado en admin_users o no activo');
+        console.log(`[AdminMode] ⚠️ Usuario NO es admin - no encontrado en admin_users o inactivo`);
         return false;
       }
 
+      console.log(`[AdminMode] ✅ Usuario ES admin - registro encontrado:`, data);
       return data ? true : false;
     } catch (error) {
-      console.error('Error verificando permisos de admin:', error);
+      console.error('[AdminMode] ❌ Error verificando permisos de admin:', error);
       return false;
     }
   };
@@ -54,10 +57,10 @@ export const AdminModeProvider = ({ children }) => {
           setUser(session.user);
           setIsAdmin(isUserAdmin);
           
-          console.log('Sesión detectada:', {
+          console.log(`[AdminMode] 🔐 Sesión detectada:`, {
             email: userEmail,
             userId: userId,
-            isAdmin: isUserAdmin
+            isAdmin: isUserAdmin ? '✅ ES ADMIN' : '❌ NO ES ADMIN'
           });
           
           // Sincronizar con localStorage para el dashboard
@@ -99,10 +102,10 @@ export const AdminModeProvider = ({ children }) => {
           setUser(session.user);
           setIsAdmin(isUserAdmin);
           
-          console.log('Estado de autenticación actualizado:', {
+          console.log(`[AdminMode] 🔄 Estado de autenticación actualizado:`, {
             email: userEmail,
             userId: userId,
-            isAdmin: isUserAdmin
+            isAdmin: isUserAdmin ? '✅ ES ADMIN' : '❌ NO ES ADMIN'
           });
           
           // Sincronizar con localStorage
@@ -132,7 +135,11 @@ export const AdminModeProvider = ({ children }) => {
 
   const toggleAdminMode = () => {
     if (isAdmin) {
-      setIsAdminMode(!isAdminMode);
+      const newMode = !isAdminMode;
+      setIsAdminMode(newMode);
+      console.log(`[AdminMode] ${newMode ? '✏️ MODO EDICIÓN ACTIVADO' : '👁️ MODO VISTA ACTIVADO'}`);
+    } else {
+      console.warn('[AdminMode] ⚠️ Intento de toggle sin permisos de admin');
     }
   };
 
@@ -148,17 +155,6 @@ export const AdminModeProvider = ({ children }) => {
       exitAdminMode
     }}>
       {children}
-
-      {/* Overlay de instrucciones cuando está en modo admin */}
-      {isAdminMode && (
-        <div className="fixed top-20 right-4 z-40 bg-black/90 text-white p-4 rounded-lg max-w-sm">
-          <h3 className="font-bold text-[#ffee00] mb-2">🎯 Modo Administrador Activo</h3>
-          <p className="text-sm">
-            Haz clic en cualquier imagen del sitio para cambiarla. 
-            Las imágenes editables mostrarán un borde amarillo al pasar el mouse.
-          </p>
-        </div>
-      )}
     </AdminModeContext.Provider>
   );
 };

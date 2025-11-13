@@ -6,7 +6,7 @@ import ArrendamientoBase from "../components/ArrendamientoBase";
 const ArrendamientoF7 = ({ onBack }) => (
   <ArrendamientoBase
     onBack={onBack}
-    tipoCancha="f7"
+    tipoCancha="futbol7"
     titulo="Fútbol 7"
     colorPrimario="#eeff00"
     requiereSeleccionCancha={true}

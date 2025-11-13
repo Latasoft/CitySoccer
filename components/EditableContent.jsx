@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAdminMode } from '@/contexts/AdminModeContext';
-import { editableContentService } from '@/lib/adminService';
+import { localContentService } from '@/lib/localContentService';
 import { Edit2, Save, X, Loader2 } from 'lucide-react';
 
 /**
@@ -15,6 +15,7 @@ import { Edit2, Save, X, Loader2 } from 'lucide-react';
  * @param {string} defaultValue - Valor por defecto
  * @param {string} as - Elemento HTML (span, h1, h2, p, a, img)
  * @param {string} className - Clases CSS
+ * @param {function} onSave - Callback opcional después de guardar exitosamente
  */
 const EditableContent = ({ 
   pageKey, 
@@ -24,6 +25,7 @@ const EditableContent = ({
   as: Component = 'span',
   className = '',
   children,
+  onSave,
   ...props 
 }) => {
   const { isAdminMode } = useAdminMode();
@@ -32,36 +34,48 @@ const EditableContent = ({
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [fieldId, setFieldId] = useState(null);
 
-  // Cargar valor desde DB al montar el componente
+  // Cargar valor desde archivo JSON al montar el componente
   useEffect(() => {
     let isMounted = true;
     
     const loadValue = async () => {
+      console.log(`[EditableContent] 🔄 Cargando ${pageKey}.${fieldKey}...`);
+      
       try {
-        const { data, error } = await editableContentService.getPageContent(pageKey);
+        const { data, error } = await localContentService.getPageContent(pageKey);
         
-        if (!isMounted) return;
+        if (!isMounted) {
+          console.log(`[EditableContent] ⚠️ Componente desmontado antes de cargar ${pageKey}.${fieldKey}`);
+          return;
+        }
         
         if (error) {
-          console.error(`Error loading ${pageKey}.${fieldKey}:`, error);
+          console.error(`[EditableContent] ❌ Error loading ${pageKey}.${fieldKey}:`, error);
           setLoading(false);
           return;
         }
         
-        if (data && Array.isArray(data)) {
-          const field = data.find(f => f.field_key === fieldKey);
-          if (field) {
-            setValue(field.field_value || defaultValue);
-            setFieldId(field.id);
-          }
+        console.log(`[EditableContent] 📦 Datos recibidos para ${pageKey}:`, {
+          totalFields: Object.keys(data || {}).length,
+          fields: Object.keys(data || {}),
+          buscando: fieldKey
+        });
+        
+        if (data && data[fieldKey] !== undefined) {
+          console.log(`[EditableContent] ✅ Campo encontrado ${pageKey}.${fieldKey}:`, {
+            value: data[fieldKey]?.substring?.(0, 50) + (data[fieldKey]?.length > 50 ? '...' : '') || data[fieldKey]
+          });
+          setValue(data[fieldKey]);
+        } else {
+          console.warn(`[EditableContent] ⚠️ Campo NO encontrado: ${pageKey}.${fieldKey} - usando defaultValue`);
         }
       } catch (error) {
-        console.error(`Error cargando ${pageKey}.${fieldKey}:`, error);
+        console.error(`[EditableContent] 💥 Exception cargando ${pageKey}.${fieldKey}:`, error);
       } finally {
         if (isMounted) {
           setLoading(false);
+          console.log(`[EditableContent] ✓ Carga completada para ${pageKey}.${fieldKey}`);
         }
       }
     };
@@ -78,26 +92,42 @@ const EditableContent = ({
     setIsEditing(true);
   };
 
-  const handleSave = async () => {
-    if (!fieldId) {
-      alert('Error: No se pudo obtener el ID del campo. Recarga la página.');
-      return;
-    }
+  const handleEditClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleEdit();
+  };
 
+  const handleSave = async () => {
     try {
       setSaving(true);
+      console.log(`\n${'~'.repeat(60)}`);
+      console.log(`✏️ GUARDANDO ${pageKey}.${fieldKey}`);
+      console.log(`Valor anterior: ${value?.substring?.(0, 100) || value}`);
+      console.log(`Valor nuevo: ${editedValue?.substring?.(0, 100) || editedValue}`);
+      console.log('~'.repeat(60));
       
-      const { data, error } = await editableContentService.updateField(fieldId, editedValue);
+      const { data, error } = await localContentService.updateField(pageKey, fieldKey, editedValue);
       
-      if (error) throw error;
+      if (error) {
+        console.error(`[EditableContent] ❌ Error del servicio:`, error);
+        throw error;
+      }
       
+      console.log(`[EditableContent] ✅ Guardado exitoso:`, data);
       setValue(editedValue);
       setIsEditing(false);
+      
+      // Llamar callback opcional después de guardar
+      if (onSave && typeof onSave === 'function') {
+        onSave(editedValue);
+      }
     } catch (error) {
-      console.error('Error guardando:', error);
+      console.error(`[EditableContent] 💥 Error guardando ${pageKey}.${fieldKey}:`, error);
       alert(`Error al guardar: ${error.message || 'Error desconocido'}`);
     } finally {
       setSaving(false);
+      console.log(`[EditableContent] ✓ Proceso de guardado finalizado para ${pageKey}.${fieldKey}`);
     }
   };
 
@@ -162,28 +192,73 @@ const EditableContent = ({
 
   // Vista normal (usuario no admin O modo admin desactivado)
   if (!isAdminMode) {
-    const displayValue = loading ? (children || defaultValue) : value;
+    // Mientras carga, mostrar indicador
+    if (loading) {
+      // Filtrar children de props para elementos void
+      const { children: _, ...restProps } = props;
+      
+      // Para elementos void (auto-cerrados) no usar children
+      if (Component === 'input') {
+        return <Component className={className} placeholder="⏳ Cargando..." {...restProps} />;
+      }
+      if (Component === 'img' || fieldType === 'image') {
+        return <Component className={className} alt="Cargando..." {...restProps} />;
+      }
+      return <Component className={className} {...props}>⏳ Cargando...</Component>;
+    }
+    
+    const displayValue = value || defaultValue;
     
     if (fieldType === 'image' && Component === 'img') {
-      return <Component src={displayValue} className={className} {...props} />;
+      const { children: _, ...restProps } = props;
+      return <Component src={displayValue} className={className} {...restProps} />;
     }
     if (Component === 'a') {
-      return <Component href={displayValue} className={className} {...props}>{children}</Component>;
+      // Usar children si existen, sino usar displayValue
+      const linkContent = children || displayValue;
+      return <Component href={props.href} className={className} {...props}>{linkContent}</Component>;
+    }
+    if (Component === 'input') {
+      const { children: _, ...restProps } = props;
+      return <Component className={className} placeholder={displayValue} {...restProps} />;
     }
     return <Component className={className} {...props}>{displayValue}</Component>;
   }
 
   // Vista admin con botón editar (SIEMPRE visible si modo admin está activo)
-  const displayValue = loading ? (children || defaultValue) : value;
+  const displayValue = loading ? '⏳ Cargando...' : (value || defaultValue);
+  
+  // Filtrar children de props para elementos void
+  const { children: _, ...propsWithoutChildren } = props;
   
   return (
     <div className="group relative inline-block border-2 border-dashed border-yellow-400/30 hover:border-yellow-400/60 transition-all rounded px-1">
       {fieldType === 'image' && Component === 'img' ? (
-        <Component src={displayValue} className={className} {...props} />
+        <Component src={displayValue} className={className} {...propsWithoutChildren} />
       ) : Component === 'a' ? (
-        <Component href={displayValue} className={className} {...props}>
-          {children}
+        <Component 
+          href={props.href} 
+          className={className} 
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          {...props}
+        >
+          {children || displayValue}
         </Component>
+      ) : Component === 'button' ? (
+        <Component 
+          className={className} 
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          {...props}
+        >
+          {displayValue}
+        </Component>
+      ) : Component === 'input' ? (
+        <Component 
+          className={className} 
+          placeholder={displayValue}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          {...propsWithoutChildren}
+        />
       ) : (
         <Component className={className} {...props}>
           {displayValue}
@@ -191,7 +266,7 @@ const EditableContent = ({
       )}
       
       <button
-        onClick={handleEdit}
+        onClick={handleEditClick}
         className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-[#ffee00] text-black p-1.5 rounded-full shadow-lg hover:scale-110 z-10"
         title="Editar"
       >

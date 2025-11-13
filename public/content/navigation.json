@@ -1,0 +1,82 @@
+{
+  "logo_alt": "City Soccer Logo",
+  "menu_items": [
+    {
+      "id": 1,
+      "text": "Inicio",
+      "href": "/"
+    },
+    {
+      "id": 2,
+      "text": "Quienes somos",
+      "href": "/quienessomos"
+    },
+    {
+      "id": 3,
+      "text": "Futbol",
+      "submenu": [
+        {
+          "id": 31,
+          "text": "Arriendos Futbol 7",
+          "href": "/arrendarcancha/futbol7"
+        },
+        {
+          "id": 32,
+          "text": "Arriendos Futbol 9",
+          "href": "/arrendarcancha/futbol9"
+        },
+        {
+          "id": 33,
+          "text": "Clases particulares Futbol",
+          "href": "/clasesparticularesfutbol"
+        },
+        {
+          "id": 34,
+          "text": "Academia de futbol",
+          "href": "/academiadefutbol"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "text": "Pickleball",
+      "submenu": [
+        {
+          "id": 41,
+          "text": "Arriendos Pickleball Single",
+          "href": "/arrendarcancha/pickleball-individual"
+        },
+        {
+          "id": 42,
+          "text": "Arriendos Pickleball Dobles",
+          "href": "/arrendarcancha/pickleball-dobles"
+        },
+        {
+          "id": 43,
+          "text": "Clases particulares Pickleball",
+          "href": "/clasesparticularespickleball"
+        },
+        {
+          "id": 44,
+          "text": "Academia de Pickeball",
+          "href": "/academiadepickleball"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "text": "Summer Camp",
+      "href": "/summer-camp"
+    },
+    {
+      "id": 6,
+      "text": "Eventos",
+      "href": "/eventos"
+    },
+    {
+      "id": 7,
+      "text": "Contacto",
+      "href": "/contacto"
+    }
+  ]
+}

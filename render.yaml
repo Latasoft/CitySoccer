@@ -1,26 +1,42 @@
 # Render Build Configuration
 # This file tells Render how to build and deploy your Next.js app
 
-# Build Command
-buildCommand: npm run build
+services:
+  - type: web
+    name: city-soccer
+    env: node
+    region: oregon # o usa 'singapore' si prefieres
+    plan: standard # $25/mes - 2GB RAM, 1 CPU
 
-# Start Command  
-startCommand: npm run start
+    # Build Command
+    buildCommand: npm run build
 
-# Node.js Version
-node: 18
+    # Start Command
+    startCommand: npm run start
 
-# Environment
-envVars:
-  - key: NODE_ENV
-    value: production
-  - key: NEXT_PUBLIC_SUPABASE_URL
-    sync: false
-  - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
-    sync: false
+    # Node.js Version
+    buildFilter:
+      paths:
+        - "**"
 
-# Auto-Deploy
-autoDeploy: true
+    # Environment Variables
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
 
-# Health Check
-healthCheckPath: /
+    # PERSISTENT DISK - Preserva cambios en /public/
+    # Esto permite que las ediciones del admin persistan entre deploys
+    disks:
+      - name: citysoccer-content
+        mountPath: /opt/render/project/src/public
+        sizeGB: 5
+
+    # Auto-Deploy
+    autoDeploy: true
+
+    # Health Check
+    healthCheckPath: /

@@ -4,76 +4,110 @@ import Link from 'next/link';
 import { useDynamicImages } from '@/lib/dynamicImageService';
 import EditableImage from './EditableImage';
 import EditableContent from './EditableContent';
+import CardBackgroundImage from './CardBackgroundImage';
 
 const CardCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [cardsData, setCardsData] = useState([]);
   
   // Cargar imágenes dinámicas de canchas desde admin
   const { images: imagenesCanchas, loading: loadingCanchas } = useDynamicImages('canchas');
   const { images: imagenesEventos, loading: loadingEventos } = useDynamicImages('eventos');
 
-  // Función helper para obtener imagen dinámica o fallback
-  const getImageUrl = (categoria, fallback, index = 0) => {
-    if (categoria === 'canchas' && imagenesCanchas.length > index) {
-      return imagenesCanchas[index].url;
-    }
-    if (categoria === 'eventos' && imagenesEventos.length > index) {
-      return imagenesEventos[index].url;
-    }
-    return fallback;
-  };
-
-  const cardsData = [
-    {
-      id: 1,
-      title: "Arrienda Cancha Fútbol",
-      description: "Canchas profesionales con césped sintético de última generación. Reserva online las 24 horas.",
-      image: getImageUrl('canchas', '/Cancha1.jpeg', 0),
-      ctaText: "RESERVAR FÚTBOL",
-      ctaLink: "/arrendarcancha/futbol7"
-    },
-    {
-      id: 2,
-      title: "Arrienda Cancha Pickleball",
-      description: "Canchas de Pickleball con superficies profesionales. El deporte que está revolucionando el mundo.",
-      image: getImageUrl('canchas', '/Pickleball2.jpeg', 1),
-      ctaText: "RESERVAR PICKLEBALL",
-      ctaLink: "/arrendarcancha/pickleball-individual"
-    },
-    {
-      id: 3,
-      title: "Clases Particulares",
-      description: "Entrenamiento personalizado con profesionales certificados. Mejora tu técnica individual.",
-      image: getImageUrl('eventos', '/Entrenamiento4.jpeg', 0),
-      ctaText: "VER CLASES",
-      ctaLink: "/clasesparticularesfutbol"
-    },
-    {
-      id: 4,
-      title: "Academia Deportiva",
-      description: "Programas de formación deportiva para niños y jóvenes. Desarrollo técnico y valores.",
-      image: getImageUrl('eventos', '/Entrenamiento2.jpeg', 1),
-      ctaText: "CONOCER MÁS",
-      ctaLink: "/academiadefutbol"
-    },
-    {
-      id: 5,
-      title: "Summer Camp 2026",
-      description: "La experiencia deportiva más completa del verano. Diversión y aprendizaje garantizados.",
-      image: getImageUrl('eventos', '/Entrenamiento5.jpeg', 2),
-      ctaText: "INSCRIBIR",
-      ctaLink: "/summer-camp"
-    },
-    {
-      id: 6,
-      title: "Quiénes Somos",
-      description: "Más de 10 años creando experiencias deportivas únicas. Conoce nuestra historia y valores.",
-      image: "/imgCitySoccer.jpeg",
-      ctaText: "NUESTRA HISTORIA",
-      ctaLink: "/quienessomos"
-    }
-  ];
+  // Cargar datos de las tarjetas desde BD
+  useEffect(() => {
+    const loadCardsData = async () => {
+      try {
+        const { editableContentService } = await import('@/lib/adminService');
+        const { data } = await editableContentService.getPageContent('home');
+        
+        if (data) {
+          // Construir array de tarjetas desde los datos
+          const cards = [
+            {
+              id: 1,
+              titleKey: 'card1_title',
+              descKey: 'card1_description',
+              imageKey: 'card1_image',
+              ctaKey: 'card1_cta_text',
+              ctaLink: "/arrendarcancha/futbol7",
+              defaultTitle: "Arrienda Cancha Fútbol",
+              defaultDesc: "Canchas profesionales con césped sintético de última generación.",
+              defaultImage: "/Cancha1.jpeg",
+              defaultCta: "RESERVAR FÚTBOL"
+            },
+            {
+              id: 2,
+              titleKey: 'card2_title',
+              descKey: 'card2_description',
+              imageKey: 'card2_image',
+              ctaKey: 'card2_cta_text',
+              ctaLink: "/arrendarcancha/pickleball-individual",
+              defaultTitle: "Arrienda Cancha Pickleball",
+              defaultDesc: "Canchas de Pickleball con superficies profesionales.",
+              defaultImage: "/Pickleball2.jpeg",
+              defaultCta: "RESERVAR PICKLEBALL"
+            },
+            {
+              id: 3,
+              titleKey: 'card3_title',
+              descKey: 'card3_description',
+              imageKey: 'card3_image',
+              ctaKey: 'card3_cta_text',
+              ctaLink: "/clasesparticularesfutbol",
+              defaultTitle: "Clases Particulares",
+              defaultDesc: "Entrenamiento personalizado con profesionales certificados.",
+              defaultImage: "/Entrenamiento4.jpeg",
+              defaultCta: "VER CLASES"
+            },
+            {
+              id: 4,
+              titleKey: 'card4_title',
+              descKey: 'card4_description',
+              imageKey: 'card4_image',
+              ctaKey: 'card4_cta_text',
+              ctaLink: "/academiadefutbol",
+              defaultTitle: "Academia Deportiva",
+              defaultDesc: "Programas de formación deportiva para niños y jóvenes.",
+              defaultImage: "/Entrenamiento2.jpeg",
+              defaultCta: "CONOCER MÁS"
+            },
+            {
+              id: 5,
+              titleKey: 'card5_title',
+              descKey: 'card5_description',
+              imageKey: 'card5_image',
+              ctaKey: 'card5_cta_text',
+              ctaLink: "/eventos",
+              defaultTitle: "Eventos Deportivos",
+              defaultDesc: "Organiza cumpleaños, torneos y eventos corporativos.",
+              defaultImage: "/Cancha2.jpeg",
+              defaultCta: "VER EVENTOS"
+            },
+            {
+              id: 6,
+              titleKey: 'card6_title',
+              descKey: 'card6_description',
+              imageKey: 'card6_image',
+              ctaKey: 'card6_cta_text',
+              ctaLink: "/summer-camp",
+              defaultTitle: "Summer Camp",
+              defaultDesc: "Vacaciones llenas de deporte, diversión y aprendizaje.",
+              defaultImage: "/SummerCamp1.jpeg",
+              defaultCta: "MÁS INFO"
+            }
+          ];
+          
+          setCardsData(cards);
+        }
+      } catch (error) {
+        console.error('Error cargando datos de tarjetas:', error);
+      }
+    };
+    
+    loadCardsData();
+  }, []);
 
   // Detect mobile
   useEffect(() => {
@@ -169,10 +203,12 @@ const CardCarousel = () => {
                   className={`flex-none ${isMobile ? 'w-full' : 'w-1/3'} px-3`}
                 >
                   <div className="relative h-96 rounded-lg overflow-hidden shadow-lg">
-                    {/* Background Image */}
-                    <div
+                    {/* Background Image Editable */}
+                    <CardBackgroundImage
+                      pageKey="home"
+                      fieldKey={card.imageKey}
+                      defaultValue={card.defaultImage}
                       className="absolute inset-0 bg-cover bg-center"
-                      style={{ backgroundImage: `url(${card.image})` }}
                     />
                     
                     {/* Overlay */}
@@ -181,13 +217,33 @@ const CardCarousel = () => {
                     {/* Content */}
                     <div className="absolute inset-0 p-6 flex flex-col justify-between text-white">
                       <div>
-                        <h3 className="text-2xl font-bold mb-4">{card.title}</h3>
-                        <p className="text-sm opacity-90">{card.description}</p>
+                        <EditableContent
+                          pageKey="home"
+                          fieldKey={card.titleKey}
+                          fieldType="text"
+                          defaultValue={card.defaultTitle}
+                          as="h3"
+                          className="text-2xl font-bold mb-4"
+                        />
+                        <EditableContent
+                          pageKey="home"
+                          fieldKey={card.descKey}
+                          fieldType="textarea"
+                          defaultValue={card.defaultDesc}
+                          as="p"
+                          className="text-sm opacity-90"
+                        />
                       </div>
 
                       <Link href={card.ctaLink}>
                         <button className="w-full py-4 px-6 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white rounded-xl font-bold text-lg tracking-wide uppercase shadow-lg transform transition-all duration-200 hover:scale-105 hover:shadow-xl border-2 border-transparent hover:border-green-300">
-                          {card.ctaText}
+                          <EditableContent
+                            pageKey="home"
+                            fieldKey={card.ctaKey}
+                            fieldType="text"
+                            defaultValue={card.defaultCta}
+                            as="span"
+                          />
                         </button>
                       </Link>
                     </div>

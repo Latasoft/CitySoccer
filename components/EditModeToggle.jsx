@@ -7,9 +7,7 @@ import Link from 'next/link';
 const EditModeToggle = () => {
   const { isAdminMode, toggleAdminMode, isAdmin } = useAdminMode();
 
-  // Debug temporal
-  console.log('EditModeToggle - isAdmin:', isAdmin, 'isAdminMode:', isAdminMode);
-
+  // Solo mostrar si es admin
   if (!isAdmin) return null;
 
   return (

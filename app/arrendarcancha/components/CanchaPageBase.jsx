@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { obtenerTarifasPorTipo } from "../data/supabaseService";
+import { useState } from "react";
+import { usePrices } from "@/hooks/usePrices";
 import EditableContent from "@/components/EditableContent";
 
 const CanchaPageBase = ({ 
@@ -12,49 +12,16 @@ const CanchaPageBase = ({
   mostrarEquipos = false // Cambiado a false por defecto ya que no tienes equipos en BD
 }) => {
   const [showReservation, setShowReservation] = useState(false);
-  const [tarifas, setTarifas] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   // Mapeo de nombres de tipos de cancha para la BD
   const mapTipoCancha = (tipo) => {
-    const mapping = {
-      'f7': 'futbol7', // Según tu BD, usas 'futbol7' no 'f7'
-      'f9': 'futbol9', // Probablemente necesites 'futbol9' en tu BD
-      'pickleball': 'pickleball',
-      'pickleball-individual': 'pickleball',
-      'pickleball-dobles': 'pickleball-dobles',
-      'futbol7': 'futbol7',
-      'futbol9': 'futbol9'
-    };
-    return mapping[tipo] || tipo;
+    // Los tipos ya vienen correctos desde las páginas, no necesitamos mapeo
+    // Tipos válidos: 'futbol7', 'futbol9', 'pickleball', 'pickleball-dobles'
+    return tipo;
   };
 
-  useEffect(() => {
-    const fetchTarifas = async () => {
-      try {
-        setLoading(true);
-        const tipoBD = mapTipoCancha(tipoCancha);
-        
-        console.log('Buscando tarifas para tipo:', tipoBD);
-        const tarifasDB = await obtenerTarifasPorTipo(tipoBD);
-        
-        if (tarifasDB && Object.keys(tarifasDB.weekdays || {}).length > 0) {
-          console.log('Tarifas encontradas:', tarifasDB);
-          setTarifas(tarifasDB);
-        } else {
-          throw new Error(`No se encontraron tarifas para ${tipoBD} en la base de datos`);
-        }
-      } catch (error) {
-        console.error('Error cargando tarifas:', error);
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTarifas();
-  }, [tipoCancha]);
+  const tipoBD = mapTipoCancha(tipoCancha);
+  const { precios: tarifas, loading, error } = usePrices(tipoBD);
 
   if (showReservation) {
     return (
@@ -75,9 +42,23 @@ const CanchaPageBase = ({
 
   if (error || !tarifas) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-950 flex items-center justify-center">
-        <div className="text-red-400 text-xl">
-          Error cargando tarifas: {error || 'No se encontraron tarifas'}
+      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-950 flex items-center justify-center px-4">
+        <div className="max-w-2xl text-center">
+          <div className="text-red-400 text-2xl font-bold mb-4">
+            ⚠️ Error al cargar precios
+          </div>
+          <div className="text-gray-300 text-lg mb-6">
+            {error || `No se encontraron precios configurados para ${titulo}`}
+          </div>
+          <div className="text-gray-400 text-sm">
+            Por favor, configura los precios en el Dashboard de Administración para el tipo: <span className="font-mono text-yellow-400">{tipoBD}</span>
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-8 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+          >
+            Reintentar
+          </button>
         </div>
       </div>
     );

@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import EditableContent from './EditableContent';
+import EditableImage from './EditableImage';
 
 const CTASection = ({ 
   title = '¿Listo para jugar?', 
@@ -8,7 +9,8 @@ const CTASection = ({
   primaryButton = { text: 'Reservar Ahora', link: '/arrendarcancha', type: 'link' }, 
   secondaryButton = { text: 'Ver Precios', link: '#precios', type: 'link' }, 
   whatsappNumber,
-  backgroundImage = '/images/cta-background.jpg'
+  backgroundImage = '/images/cta-background.jpg',
+  pageKey = 'default'
 }) => {
   const handlePrimaryClick = () => {
     if (primaryButton.type === 'whatsapp') {
@@ -32,12 +34,11 @@ const CTASection = ({
     <section className="py-20 bg-gradient-to-r from-blue-900 via-purple-900 to-green-900 relative overflow-hidden">
       {backgroundImage && (
         <div className="absolute inset-0 bg-black bg-opacity-50">
-          <EditableContent 
-            pageKey="component_cta"
-            fieldKey="background_image"
-            fieldType="image"
+          <EditableImage 
+            pageKey={pageKey}
+            fieldKey="cta_background_image"
             defaultValue={backgroundImage}
-            as="img"
+            categoria="general"
             alt="Background"
             className="w-full h-full object-cover opacity-30"
           />
@@ -46,8 +47,8 @@ const CTASection = ({
       
       <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
         <EditableContent 
-          pageKey="component_cta"
-          fieldKey="title"
+          pageKey={pageKey}
+          fieldKey="cta_title"
           fieldType="text"
           defaultValue={title}
           as="h2"
@@ -55,8 +56,8 @@ const CTASection = ({
         />
         
         <EditableContent 
-          pageKey="component_cta"
-          fieldKey="subtitle"
+          pageKey={pageKey}
+          fieldKey="cta_subtitle"
           fieldType="textarea"
           defaultValue={subtitle}
           as="p"
@@ -69,8 +70,8 @@ const CTASection = ({
             className="bg-green-600 hover:bg-green-700 text-white py-4 px-8 rounded-lg font-bold text-lg transition-all duration-300 hover:scale-105"
           >
             <EditableContent 
-              pageKey="component_cta"
-              fieldKey="button_text"
+              pageKey={pageKey}
+              fieldKey="cta_primary_button_text"
               fieldType="text"
               defaultValue={primaryButton.text}
               as="span"
@@ -83,8 +84,8 @@ const CTASection = ({
               className="bg-transparent border-2 border-white hover:bg-white hover:text-gray-900 text-white py-4 px-8 rounded-lg font-bold text-lg transition-all duration-300"
             >
               <EditableContent 
-                pageKey="component_cta"
-                fieldKey="secondary_button_text"
+                pageKey={pageKey}
+                fieldKey="cta_secondary_button_text"
                 fieldType="text"
                 defaultValue={secondaryButton.text}
                 as="span"

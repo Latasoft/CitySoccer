@@ -3,9 +3,11 @@
 import React, { useState, useEffect } from "react";
 import { MapPin, Phone, Mail, Instagram, MessageCircle } from "lucide-react";
 import { useContactInfo } from "@/hooks/useContactInfo";
+import { useAdminMode } from "@/contexts/AdminModeContext";
 import EditableContent from "@/components/EditableContent";
 
 export default function Contacto() {
+    const { isAdminMode } = useAdminMode();
     const [isVisible, setIsVisible] = useState(false);
     const [nombre, setNombre] = useState('');
     const [error, setError] = useState('');
@@ -41,6 +43,12 @@ export default function Contacto() {
         const mensajePredefinido = `Hola! Mi nombre es ${nombre.trim()}. Me gustaría obtener más información sobre los servicios de CitySoccer. ¡Gracias!`;
         openWhatsApp(mensajePredefinido);
         setNombre(''); // Limpiar el campo después de enviar
+    };
+
+    const handleLinkClick = (e) => {
+        if (isAdminMode) {
+            e.preventDefault();
+        }
     };
 
     if (loading) {
@@ -81,8 +89,22 @@ export default function Contacto() {
                                         <MapPin className="w-6 h-6 text-black" />
                                     </div>
                                     <div>
-                                        <p className="text-white font-medium">Dirección:</p>
-                                        <p className="text-gray-300 text-sm">{getAddress()}</p>
+                                        <EditableContent 
+                                            pageKey="contacto"
+                                            fieldKey="label_address"
+                                            fieldType="text"
+                                            defaultValue="Dirección:"
+                                            as="p"
+                                            className="text-white font-medium"
+                                        />
+                                        <EditableContent 
+                                            pageKey="contacto"
+                                            fieldKey="address_value"
+                                            fieldType="text"
+                                            defaultValue={getAddress()}
+                                            as="p"
+                                            className="text-gray-300 text-sm"
+                                        />
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4">
@@ -90,10 +112,24 @@ export default function Contacto() {
                                         <Phone className="w-6 h-6 text-black" />
                                     </div>
                                     <div>
-                                        <p className="text-white font-medium">Teléfono:</p>
-                                        <a href={`tel:${getPhoneNumber()}`} className="text-[#eeff00] hover:text-[#d4d400] transition-colors">
-                                            {getPhoneNumber()}
-                                        </a>
+                                        <EditableContent 
+                                            pageKey="contacto"
+                                            fieldKey="label_phone"
+                                            fieldType="text"
+                                            defaultValue="Teléfono:"
+                                            as="p"
+                                            className="text-white font-medium"
+                                        />
+                                        <EditableContent 
+                                            pageKey="contacto"
+                                            fieldKey="phone_number"
+                                            fieldType="text"
+                                            defaultValue={getPhoneNumber()}
+                                            as="a"
+                                            href={`tel:${getPhoneNumber()}`}
+                                            onClick={handleLinkClick}
+                                            className="text-[#eeff00] hover:text-[#d4d400] transition-colors"
+                                        />
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4">
@@ -101,10 +137,24 @@ export default function Contacto() {
                                         <Mail className="w-6 h-6 text-black" />
                                     </div>
                                     <div>
-                                        <p className="text-white font-medium">Email:</p>
-                                        <a href={`mailto:${getEmailAddress()}`} className="text-[#eeff00] hover:text-[#d4d400] transition-colors">
-                                            {getEmailAddress()}
-                                        </a>
+                                        <EditableContent 
+                                            pageKey="contacto"
+                                            fieldKey="label_email"
+                                            fieldType="text"
+                                            defaultValue="Email:"
+                                            as="p"
+                                            className="text-white font-medium"
+                                        />
+                                        <EditableContent 
+                                            pageKey="contacto"
+                                            fieldKey="email_address"
+                                            fieldType="text"
+                                            defaultValue={getEmailAddress()}
+                                            as="a"
+                                            href={`mailto:${getEmailAddress()}`}
+                                            onClick={handleLinkClick}
+                                            className="text-[#eeff00] hover:text-[#d4d400] transition-colors"
+                                        />
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4">
@@ -112,10 +162,26 @@ export default function Contacto() {
                                         <Instagram className="w-6 h-6 text-black" />
                                     </div>
                                     <div>
-                                        <p className="text-white font-medium">Instagram:</p>
-                                        <a href={getInstagramUrl()} target="_blank" rel="noopener noreferrer" className="text-[#eeff00] hover:text-[#d4d400] transition-colors">
-                                            @{getInstagramUsername()}
-                                        </a>
+                                        <EditableContent 
+                                            pageKey="contacto"
+                                            fieldKey="label_instagram"
+                                            fieldType="text"
+                                            defaultValue="Instagram:"
+                                            as="p"
+                                            className="text-white font-medium"
+                                        />
+                                        <EditableContent 
+                                            pageKey="contacto"
+                                            fieldKey="instagram_username"
+                                            fieldType="text"
+                                            defaultValue={`@${getInstagramUsername()}`}
+                                            as="a"
+                                            href={getInstagramUrl()}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            onClick={handleLinkClick}
+                                            className="text-[#eeff00] hover:text-[#d4d400] transition-colors"
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -150,13 +216,23 @@ export default function Contacto() {
                             <form onSubmit={handleWhatsAppSubmit} className="space-y-6">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Tu nombre *
+                                        <EditableContent 
+                                            pageKey="contacto"
+                                            fieldKey="form_label_name"
+                                            fieldType="text"
+                                            defaultValue="Tu nombre *"
+                                            as="span"
+                                        />
                                     </label>
-                                    <input 
-                                        type="text" 
+                                    <EditableContent 
+                                        pageKey="contacto"
+                                        fieldKey="form_placeholder"
+                                        fieldType="text"
+                                        defaultValue="Ingresa tu nombre"
+                                        as="input"
+                                        type="text"
                                         value={nombre}
                                         onChange={handleChange}
-                                        placeholder="Ingresa tu nombre"
                                         className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors bg-gray-700 text-white placeholder-gray-400 ${
                                             error ? 'border-red-500 focus:border-red-500' : 'border-gray-600 focus:border-[#eeff00]'
                                         }`}
@@ -169,7 +245,13 @@ export default function Contacto() {
                                     className="w-full bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-4 px-6 rounded-lg transition-all font-semibold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 flex items-center justify-center gap-3"
                                 >
                                     <MessageCircle className="w-5 h-5" />
-                                    Contactar por WhatsApp
+                                    <EditableContent 
+                                        pageKey="contacto"
+                                        fieldKey="form_button_text"
+                                        fieldType="text"
+                                        defaultValue="Contactar por WhatsApp"
+                                        as="span"
+                                    />
                                 </button>                            
                             </form>
                         </div>

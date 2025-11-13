@@ -10,7 +10,8 @@ const ProgramsSection = ({
     { name: 'Summer Camp', description: 'Campamentos de verano para todas las edades', focus: ['Deportes', 'Diversión', 'Amigos', 'Aprendizaje'] }
   ], 
   whatsappNumber, 
-  onWhatsAppClick 
+  onWhatsAppClick,
+  pageKey = 'default'
 }) => {
   const handleWhatsAppClick = (programName) => {
     const message = `Hola! Me interesa información sobre ${programName}. ¿Podrían contarme más detalles?`;
@@ -27,8 +28,8 @@ const ProgramsSection = ({
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-16">
           <EditableContent 
-            pageKey="component_programs"
-            fieldKey="section_title"
+            pageKey={pageKey}
+            fieldKey="programs_section_title"
             fieldType="text"
             defaultValue={title}
             as="h2"
@@ -36,8 +37,8 @@ const ProgramsSection = ({
           />
           
           <EditableContent 
-            pageKey="component_programs"
-            fieldKey="section_subtitle"
+            pageKey={pageKey}
+            fieldKey="programs_section_subtitle"
             fieldType="textarea"
             defaultValue="Encuentra el programa perfecto para ti"
             as="p"
@@ -50,7 +51,7 @@ const ProgramsSection = ({
             <div key={index} className="bg-gray-800 rounded-2xl p-8 hover:bg-gray-750 transition-all duration-300 hover:scale-105">
               <div className="flex items-center justify-between mb-6">
                 <EditableContent 
-                  pageKey="component_programs"
+                  pageKey={pageKey}
                   fieldKey={`program_${index + 1}_title`}
                   fieldType="text"
                   defaultValue={program.name}
@@ -60,7 +61,7 @@ const ProgramsSection = ({
               </div>
               
               <EditableContent 
-                pageKey="component_programs"
+                pageKey={pageKey}
                 fieldKey={`program_${index + 1}_description`}
                 fieldType="textarea"
                 defaultValue={program.description}
@@ -74,7 +75,14 @@ const ProgramsSection = ({
                   {program.focus?.map((item, idx) => (
                     <div key={idx} className="flex items-center text-gray-300">
                       <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
-                      <span className="text-sm">{item}</span>
+                      <EditableContent 
+                        pageKey={pageKey}
+                        fieldKey={`program_${index + 1}_focus_${idx + 1}`}
+                        fieldType="text"
+                        defaultValue={item}
+                        as="span"
+                        className="text-sm"
+                      />
                     </div>
                   ))}
                 </div>

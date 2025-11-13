@@ -22,8 +22,10 @@ const ArrendamientoBase = ({
   const [selectedCourt, setSelectedCourt] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerName, setCustomerName] = useState(""); // Nuevo campo para el nombre
+  const [customerPhone, setCustomerPhone] = useState(""); // Campo para teléfono
   const [emailError, setEmailError] = useState("");
   const [nameError, setNameError] = useState(""); // Error para el nombre
+  const [phoneError, setPhoneError] = useState(""); // Error para teléfono
   const [availableTimes, setAvailableTimes] = useState([]);
   const [availableCourts, setAvailableCourts] = useState([]);
   const [canchasDisponiblesEnHorario, setCanchasDisponiblesEnHorario] = useState([]);
@@ -34,15 +36,9 @@ const ArrendamientoBase = ({
 
   // Mapeo de nombres de tipos de cancha para la BD
   const mapTipoCancha = (tipo) => {
-    const mapping = {
-      'f7': 'futbol7',
-      'f9': 'futbol9', 
-      'pickleball': 'pickleball',
-      'pickleball-dobles': 'pickleball-dobles',
-      'futbol7': 'futbol7',
-      'futbol9': 'futbol9'
-    };
-    return mapping[tipo] || tipo;
+    // Los tipos ya vienen correctos desde las páginas
+    // Tipos válidos: 'futbol7', 'futbol9', 'pickleball', 'pickleball-dobles'
+    return tipo;
   };
 
   // Verificar si es una modalidad de pickleball
@@ -61,71 +57,94 @@ const ArrendamientoBase = ({
     return nombre && nombre.trim().length >= 2;
   };
 
+  // Validar teléfono chileno (+569 XXXX XXXX o 9 XXXX XXXX)
+  const validarTelefono = (telefono) => {
+    const phoneRegex = /^(\+?56)?\s?9\s?\d{4}\s?\d{4}$/;
+    return phoneRegex.test(telefono.trim());
+  };
+
+  // Formatear teléfono para enviar a GetNet (+56912345678)
+  const formatearTelefono = (telefono) => {
+    const digits = telefono.replace(/\D/g, ''); // Solo dígitos
+    if (digits.startsWith('56')) {
+      return `+${digits}`;
+    } else if (digits.startsWith('9')) {
+      return `+56${digits}`;
+    }
+    return `+56${digits}`;
+  };
+
   // Obtener tarifas reales al cargar el componente
   useEffect(() => {
+    let mounted = true;
+
     const fetchTarifas = async () => {
       try {
         const tipoBD = mapTipoCancha(tipoCancha);
         const tarifas = await obtenerTarifasPorTipo(tipoBD);
         
-        if (tarifas && Object.keys(tarifas.weekdays || {}).length > 0) {
-          setTarifasReales(tarifas);
-        } else {
-          console.error('❌ No se encontraron tarifas en la BD para:', tipoBD);
-          setTarifasReales(null);
+        if (mounted) {
+          if (tarifas && Object.keys(tarifas.weekdays || {}).length > 0) {
+            setTarifasReales(tarifas);
+          } else {
+            console.error('❌ No se encontraron tarifas en la BD para:', tipoBD);
+            setTarifasReales(null);
+          }
         }
       } catch (error) {
         console.error('❌ Error cargando tarifas:', error);
-        setTarifasReales(null);
+        if (mounted) {
+          setTarifasReales(null);
+        }
       }
     };
 
     fetchTarifas();
+
+    return () => {
+      mounted = false;
+    };
   }, [tipoCancha]);
 
   // Obtener canchas disponibles
   useEffect(() => {
+    let mounted = true;
+
     const fetchCanchas = async () => {
       try {
         const tipoBD = mapTipoCancha(tipoCancha);
+        
         const canchas = await obtenerCanchasPorTipo(tipoBD);
         
-        setAvailableCourts(canchas);
-        
-        // Si solo hay una cancha (futbol9), seleccionarla automáticamente
-        if (!requiereSeleccionCancha && canchas.length === 1) {
-          setSelectedCourt(canchas[0].id.toString());
+        if (!canchas || canchas.length === 0) {
+          console.error(`❌ No se encontraron canchas para tipo: ${tipoBD}`);
+          if (mounted) {
+            setAvailableCourts([]);
+          }
+          return;
+        }
+
+        if (mounted) {
+          setAvailableCourts(canchas);
+          
+          // Si solo hay una cancha (futbol9), seleccionarla automáticamente
+          if (!requiereSeleccionCancha && canchas.length === 1) {
+            setSelectedCourt(canchas[0].id.toString());
+          }
         }
       } catch (error) {
-        console.error('Error cargando canchas:', error);
-        // Fallback a datos mock
-        const canchasMock = {
-          f7: [
-            { id: 1, nombre: 'f7_1', tipo: 'f7' },
-            { id: 2, nombre: 'f7_2', tipo: 'f7' },
-            { id: 3, nombre: 'f7_3', tipo: 'f7' }
-          ],
-          f9: [
-            { id: 4, nombre: 'f9', tipo: 'f9' }
-          ],
-          pickleball: [
-            { id: 5, nombre: 'pickleball_1', tipo: 'pickleball' },
-            { id: 6, nombre: 'pickleball_2', tipo: 'pickleball' },
-            { id: 7, nombre: 'pickleball_3', tipo: 'pickleball' }
-          ]
-        };
-
-        const tipoBD = mapTipoCancha(tipoCancha);
-        const canchasDisponibles = canchasMock[tipoBD] || [];
-        setAvailableCourts(canchasDisponibles);
-        
-        if (!requiereSeleccionCancha && canchasDisponibles.length === 1) {
-          setSelectedCourt(canchasDisponibles[0].id.toString());
+        console.error('❌ Error cargando canchas desde BD:', error);
+        if (mounted) {
+          setAvailableCourts([]);
         }
       }
     };
 
     fetchCanchas();
+
+    return () => {
+      mounted = false;
+    };
   }, [tipoCancha, requiereSeleccionCancha]);
 
   // Obtener horarios disponibles cuando se selecciona fecha
@@ -303,6 +322,14 @@ const ArrendamientoBase = ({
       hasErrors = true;
     }
 
+    if (!customerPhone) {
+      setPhoneError("El teléfono es requerido");
+      hasErrors = true;
+    } else if (!validarTelefono(customerPhone)) {
+      setPhoneError("Por favor ingresa un teléfono válido (ej: +569 1234 5678 o 9 1234 5678)");
+      hasErrors = true;
+    }
+
     if (!hasErrors) {
       setCurrentStep(5);
     }
@@ -341,6 +368,7 @@ const ArrendamientoBase = ({
         amount: horario.precio,
         buyerName: customerName,
         buyerEmail: customerEmail,
+        buyerPhone: formatearTelefono(customerPhone),
         description: `Reserva ${titulo} - ${selectedDate} ${selectedTime}`,
         fecha: selectedDate,
         hora: selectedTime,
@@ -625,11 +653,41 @@ const ArrendamientoBase = ({
                     Te enviaremos la confirmación de tu reserva a este email
                   </p>
                 </div>
+
+                {/* Campo Teléfono */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Teléfono celular
+                  </label>
+                  <input
+                    type="tel"
+                    value={customerPhone}
+                    onChange={(e) => {
+                      setCustomerPhone(e.target.value);
+                      setPhoneError("");
+                    }}
+                    placeholder="+56 9 1234 5678 o 9 1234 5678"
+                    className={`w-full p-3 rounded-lg bg-gray-700 text-white border ${
+                      phoneError ? 'border-red-500' : 'border-gray-600'
+                    } focus:border-yellow-400 focus:outline-none`}
+                  />
+                  {phoneError && (
+                    <p className="text-red-400 text-sm mt-2">{phoneError}</p>
+                  )}
+                  {customerPhone && !phoneError && validarTelefono(customerPhone) && (
+                    <p className="text-green-400 text-sm mt-2">
+                      ✓ Teléfono válido
+                    </p>
+                  )}
+                  <p className="text-gray-400 text-xs mt-2">
+                    Ingresa tu número celular para contactarte en caso necesario
+                  </p>
+                </div>
               </div>
               
               <button
-                onClick={handleContactInfoConfirm}i
-                disabled={!customerName || !customerEmail || nameError || emailError}
+                onClick={handleContactInfoConfirm}
+                disabled={!customerName || !customerEmail || !customerPhone || nameError || emailError || phoneError}
                 className="mt-4 px-6 py-3 rounded-lg font-semibold transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ 
                   backgroundColor: colorPrimario,
@@ -642,7 +700,7 @@ const ArrendamientoBase = ({
           )}
 
           {/* Paso 5: Confirmación */}
-          {currentStep >= 5 && customerName && customerEmail && (
+          {currentStep >= 5 && customerName && customerEmail && customerPhone && (
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-white mb-4">
                 {requiereSeleccionCancha ? "5" : "4"}. Confirma tu reserva
@@ -658,6 +716,7 @@ const ArrendamientoBase = ({
                   )}
                   <p><strong>Nombre:</strong> {customerName}</p>
                   <p><strong>Email:</strong> {customerEmail}</p>
+                  <p><strong>Teléfono:</strong> {customerPhone}</p>
                   <p><strong style={{ color: colorPrimario }}>
                     Precio: ${horario?.precio?.toLocaleString()}
                   </strong></p>

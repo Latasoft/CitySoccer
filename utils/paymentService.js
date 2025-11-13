@@ -8,6 +8,7 @@ export const createPayment = async ({
   amount,
   buyerName,
   buyerEmail,
+  buyerPhone,
   description,
   fecha,
   hora,
@@ -18,6 +19,7 @@ export const createPayment = async ({
     currency: CURRENCY,
     buyerName,
     buyerEmail,
+    buyerPhone,
     description,
     fecha,
     hora,
@@ -109,6 +111,10 @@ export const validatePaymentData = (paymentData) => {
 
   if (!paymentData.buyerEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(paymentData.buyerEmail)) {
     errors.push('Email inválido')
+  }
+
+  if (!paymentData.buyerPhone || !/^\+56\d{9}$/.test(paymentData.buyerPhone)) {
+    errors.push('Teléfono inválido (debe estar en formato +56912345678)')
   }
 
   if (!paymentData.fecha) {

@@ -11,7 +11,11 @@ import {
   calculateEndTime,
   ERROR_MESSAGES
 } from '@/lib/constants'
-import { sendReservationConfirmation, sendAdminReservationNotification } from '@/lib/emailService'
+import { 
+  sendReservationConfirmation, 
+  sendAdminReservationNotification,
+  sendRefundNotification 
+} from '@/lib/emailService'
 import { generateReservationPDF } from '@/lib/pdfService'
 
 // Configuración para rutas
@@ -203,13 +207,55 @@ export async function POST(request) {
               monto: existingTransaction.amount
             })
             
+            // ENVIAR EMAIL AUTOMÁTICO DE REEMBOLSO AL CLIENTE
+            const refundEmailResult = await sendRefundNotification({
+              clienteEmail: existingTransaction.buyer_email,
+              clienteNombre: existingTransaction.buyer_name,
+              orderId: reference,
+              monto: existingTransaction.amount,
+              motivo: 'La cancha ya fue reservada por otro usuario mientras procesábamos tu pago',
+              fecha: new Date(existingTransaction.fecha).toLocaleDateString('es-CL'),
+              horaInicio: existingTransaction.hora,
+              canchaInfo: 'Cancha solicitada'
+            })
+
+            if (refundEmailResult.success) {
+              console.log('✅ Email de reembolso enviado al cliente')
+            } else {
+              console.error('⚠️ No se pudo enviar email de reembolso:', refundEmailResult.error)
+            }
+
+            // NOTIFICAR AL ADMIN DEL CONFLICTO
+            try {
+              const adminNotificationResult = await sendAdminReservationNotification({
+                clienteNombre: existingTransaction.buyer_name,
+                clienteEmail: existingTransaction.buyer_email,
+                clienteTelefono: existingTransaction.buyer_phone || 'No proporcionado',
+                canchaInfo: `CONFLICTO - Cancha ID: ${existingTransaction.cancha_id}`,
+                fecha: new Date(existingTransaction.fecha).toLocaleDateString('es-CL'),
+                horaInicio: existingTransaction.hora,
+                horaFin: calculateEndTime(existingTransaction.hora),
+                monto: existingTransaction.amount,
+                reservaId: 'CONFLICTO',
+                orderId: reference,
+                metodoPago: status?.paymentMethod || 'No especificado'
+              })
+
+              if (adminNotificationResult.success) {
+                console.log('✅ Alerta de conflicto enviada al admin')
+              }
+            } catch (adminError) {
+              console.error('⚠️ Error enviando alerta al admin:', adminError)
+            }
+            
             return NextResponse.json({ 
               received: true,
               status: transactionStatus,
               orderId: reference,
               warning: 'PAYMENT_CONFLICT',
-              message: 'Pago aprobado pero cancha ya reservada. Requiere reembolso manual.',
-              action_required: 'Contactar al cliente y procesar reembolso',
+              message: 'Pago aprobado pero cancha ya reservada. Email de reembolso enviado al cliente.',
+              refund_email_sent: refundEmailResult.success,
+              action_required: 'Procesar reembolso manualmente en plataforma de pagos',
               cliente: {
                 email: existingTransaction.buyer_email,
                 nombre: existingTransaction.buyer_name,

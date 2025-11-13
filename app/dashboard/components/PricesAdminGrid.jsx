@@ -2,11 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { pricesService } from '@/lib/adminService';
-import { invalidatePricesCache } from '@/lib/dynamicConfigService';
+import { invalidatePricesCache as invalidateDynamicCache } from '@/lib/dynamicConfigService';
+import { invalidatePricesCache as invalidateHookCache } from '@/hooks/usePrices';
 import { notifyPriceChange } from '@/lib/notificationService';
 import { useAuth } from '@/hooks/useAuth';
 import { DollarSign, Save, Loader2, AlertCircle, CheckCircle2, Plus, X, Trash2 } from 'lucide-react';
 import { CURRENCY } from '@/lib/constants';
+
+// Función helper para invalidar todos los cachés de precios
+const invalidatePricesCache = () => {
+  invalidateDynamicCache();
+  invalidateHookCache();
+};
 
 /**
  * Componente MEJORADO para administrar precios de canchas

@@ -2,22 +2,22 @@
 import React from 'react';
 import EditableContent from './EditableContent';
 
-const BenefitsSection = ({ title, benefits, bgColor = "bg-gray-800" }) => {
+const BenefitsSection = ({ title, benefits, bgColor = "bg-gray-800", pageKey = 'default' }) => {
   return (
     <section className={`py-20 ${bgColor}`}>
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-16">
           <EditableContent
-            pageKey="component_benefits"
-            fieldKey="section_title"
+            pageKey={pageKey}
+            fieldKey="benefits_section_title"
             fieldType="text"
             defaultValue={title || "¿Por qué elegirnos?"}
             as="h2"
             className="text-4xl md:text-5xl font-bold text-white mb-4"
           />
           <EditableContent
-            pageKey="component_benefits"
-            fieldKey="section_subtitle"
+            pageKey={pageKey}
+            fieldKey="benefits_section_subtitle"
             fieldType="textarea"
             defaultValue="Todo lo que obtienes al entrenar con nosotros"
             as="p"
@@ -35,8 +35,8 @@ const BenefitsSection = ({ title, benefits, bgColor = "bg-gray-800" }) => {
                   </svg>
                 </div>
                 <EditableContent
-                  pageKey="component_benefits"
-                  fieldKey={`benefit_${index + 1}_description`}
+                  pageKey={pageKey}
+                  fieldKey={`benefit_${index + 1}_text`}
                   fieldType="textarea"
                   defaultValue={benefit}
                   as="p"

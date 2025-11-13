@@ -7,9 +7,6 @@ const nextConfig = {
   // Habilitar compresión
   compress: true,
   
-  // Optimizar builds
-  swcMinify: true,
-  
   // Power optimizations
   poweredByHeader: false,
   

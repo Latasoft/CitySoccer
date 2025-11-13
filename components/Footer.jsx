@@ -2,10 +2,12 @@
 import React from "react";
 import { useContactInfo } from "@/hooks/useContactInfo";
 import { useWhatsApp } from "@/hooks/useWhatsApp";
+import { useAdminMode } from "@/contexts/AdminModeContext";
 import EditableContent from "./EditableContent";
 import EditableImage from "./EditableImage";
 
 export default function Footer() {
+  const { isAdminMode } = useAdminMode();
   const { 
     loading, 
     getPhoneNumber, 
@@ -19,6 +21,13 @@ export default function Footer() {
   const handleWhatsAppClick = () => {
     const message = "¡Hola! Me gustaría saber más sobre City Soccer.";
     openWhatsApp(message);
+  };
+
+  // Prevenir navegación en modo admin
+  const handleLinkClick = (e) => {
+    if (isAdminMode) {
+      e.preventDefault();
+    }
   };
 
   if (loading) {
@@ -36,8 +45,6 @@ export default function Footer() {
 
         <div className="relative block h-32 lg:col-span-2 lg:h-full">
           <EditableImage
-            pageKey="footer"
-            fieldKey="background_image"
             categoria="footer"
             src="/Cancha3.jpeg"
             alt="Instalaciones City Soccer"
@@ -67,6 +74,7 @@ export default function Footer() {
                   defaultValue={getPhoneNumber()}
                   as="a"
                   href={`tel:${getPhoneNumber()}`}
+                  onClick={handleLinkClick}
                   className="block text-2xl font-bold text-white hover:text-yellow-100 sm:text-3xl transition-colors duration-300 drop-shadow-lg"
                 />
               </p>
@@ -132,6 +140,7 @@ export default function Footer() {
                     href="https://maps.google.com/?q=Tiltil+2569,+Macul,+Chile"
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={handleLinkClick}
                     className="text-yellow-100 hover:text-white transition-colors duration-300"
                   >
                     Ubicación - <EditableContent 
@@ -140,6 +149,7 @@ export default function Footer() {
                       fieldType="text"
                       defaultValue={getAddress()}
                       as="span"
+                      onClick={handleLinkClick}
                     />
                   </a>
                 </li>
@@ -151,6 +161,7 @@ export default function Footer() {
                     href="#"
                     rel="noreferrer"
                     target="_blank"
+                    onClick={handleLinkClick}
                     className="text-white hover:text-yellow-200 transition-colors duration-300 transform hover:scale-110"
                   >
                     <span className="sr-only">Facebook</span>
@@ -174,6 +185,7 @@ export default function Footer() {
                     href={getInstagramUrl()}
                     rel="noreferrer"
                     target="_blank"
+                    onClick={handleLinkClick}
                     className="text-white hover:text-yellow-200 transition-colors duration-300 transform hover:scale-110"
                   >
                     <span className="sr-only">Instagram</span>
@@ -214,67 +226,121 @@ export default function Footer() {
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div>
                 <p className="font-bold text-white text-lg mb-4 drop-shadow-md">
-                  Servicios
+                  <EditableContent 
+                    pageKey="footer" 
+                    fieldKey="services_title" 
+                    fieldType="text"
+                    defaultValue="Servicios"
+                    as="span"
+                  />
                 </p>
 
                 <ul className="space-y-3 text-sm">
                   <li>
                     <a
                       href="/arrendarcancha/futbol7"
+                      onClick={handleLinkClick}
                       className="text-yellow-100 hover:text-white transition-colors duration-300 font-medium flex items-center gap-2"
                     >
                       <span className="w-2 h-2 bg-yellow-300 rounded-full"></span>
-                      Arriendo Canchas Fútbol
+                      <EditableContent 
+                        pageKey="footer" 
+                        fieldKey="services_futbol" 
+                        fieldType="text"
+                        defaultValue="Arriendo Canchas Fútbol"
+                        as="span"
+                        onClick={handleLinkClick}
+                      />
                     </a>
                   </li>
 
                   <li>
                     <a
                       href="/arrendarcancha/pickleball-individual"
+                      onClick={handleLinkClick}
                       className="text-yellow-100 hover:text-white transition-colors duration-300 font-medium flex items-center gap-2"
                     >
                       <span className="w-2 h-2 bg-yellow-300 rounded-full"></span>
-                      Arriendo Cancha Pickleball Individual
+                      <EditableContent 
+                        pageKey="footer" 
+                        fieldKey="services_pickleball_individual" 
+                        fieldType="text"
+                        defaultValue="Arriendo Cancha Pickleball Individual"
+                        as="span"
+                        onClick={handleLinkClick}
+                      />
                     </a>
                   </li>
 
                   <li>
                     <a
                       href="/arrendarcancha/pickleball-dobles"
+                      onClick={handleLinkClick}
                       className="text-yellow-100 hover:text-white transition-colors duration-300 font-medium flex items-center gap-2"
                     >
                       <span className="w-2 h-2 bg-yellow-300 rounded-full"></span>
-                      Arriendo Cancha Pickleball Dobles
+                      <EditableContent 
+                        pageKey="footer" 
+                        fieldKey="services_pickleball_dobles" 
+                        fieldType="text"
+                        defaultValue="Arriendo Cancha Pickleball Dobles"
+                        as="span"
+                        onClick={handleLinkClick}
+                      />
                     </a>
                   </li>
 
                   <li>
                     <a
                       href="/clasesparticularesfutbol"
+                      onClick={handleLinkClick}
                       className="text-yellow-100 hover:text-white transition-colors duration-300 font-medium flex items-center gap-2"
                     >
                       <span className="w-2 h-2 bg-yellow-300 rounded-full"></span>
-                      Clases Particulares
+                      <EditableContent 
+                        pageKey="footer" 
+                        fieldKey="services_clases" 
+                        fieldType="text"
+                        defaultValue="Clases Particulares"
+                        as="span"
+                        onClick={handleLinkClick}
+                      />
                     </a>
                   </li>
 
                   <li>
                     <a
                       href="/academiadefutbol"
+                      onClick={handleLinkClick}
                       className="text-yellow-100 hover:text-white transition-colors duration-300 font-medium flex items-center gap-2"
                     >
                       <span className="w-2 h-2 bg-yellow-300 rounded-full"></span>
-                      Academia Deportiva
+                      <EditableContent 
+                        pageKey="footer" 
+                        fieldKey="services_academia" 
+                        fieldType="text"
+                        defaultValue="Academia Deportiva"
+                        as="span"
+                        onClick={handleLinkClick}
+                      />
                     </a>
                   </li>
 
                   <li>
                     <a
                       href="/summer-camp"
+                      onClick={handleLinkClick}
                       className="text-yellow-100 hover:text-white transition-colors duration-300 font-medium flex items-center gap-2"
                     >
                       <span className="w-2 h-2 bg-yellow-300 rounded-full"></span>
-                      Summer Camp 2026
+                      <EditableContent 
+                        pageKey="footer" 
+                        fieldKey="services_summer" 
+                        fieldType="text"
+                        defaultValue="Summer Camp 2026"
+                        as="span"
+                        onClick={handleLinkClick}
+                      />
                     </a>
                   </li>
                 </ul>
@@ -282,37 +348,67 @@ export default function Footer() {
 
               <div>
                 <p className="font-bold text-white text-lg mb-4 drop-shadow-md">
-                  Empresa
+                  <EditableContent 
+                    pageKey="footer" 
+                    fieldKey="company_title" 
+                    fieldType="text"
+                    defaultValue="Empresa"
+                    as="span"
+                  />
                 </p>
 
                 <ul className="space-y-3 text-sm">
                   <li>
                     <a
                       href="/quienessomos"
+                      onClick={handleLinkClick}
                       className="text-yellow-100 hover:text-white transition-colors duration-300 font-medium flex items-center gap-2"
                     >
                       <span className="w-2 h-2 bg-yellow-300 rounded-full"></span>
-                      Quiénes Somos
+                      <EditableContent 
+                        pageKey="footer" 
+                        fieldKey="company_about" 
+                        fieldType="text"
+                        defaultValue="Quiénes Somos"
+                        as="span"
+                        onClick={handleLinkClick}
+                      />
                     </a>
                   </li>
 
                   <li>
                     <a
                       href="/contacto"
+                      onClick={handleLinkClick}
                       className="text-yellow-100 hover:text-white transition-colors duration-300 font-medium flex items-center gap-2"
                     >
                       <span className="w-2 h-2 bg-yellow-300 rounded-full"></span>
-                      Contacto
+                      <EditableContent 
+                        pageKey="footer" 
+                        fieldKey="company_contact" 
+                        fieldType="text"
+                        defaultValue="Contacto"
+                        as="span"
+                        onClick={handleLinkClick}
+                      />
                     </a>
                   </li>
 
                   <li>
                     <a
                       href="#"
+                      onClick={handleLinkClick}
                       className="text-yellow-100 hover:text-white transition-colors duration-300 font-medium flex items-center gap-2"
                     >
                       <span className="w-2 h-2 bg-yellow-300 rounded-full"></span>
-                      Testimonios
+                      <EditableContent 
+                        pageKey="footer" 
+                        fieldKey="company_testimonials" 
+                        fieldType="text"
+                        defaultValue="Testimonios"
+                        as="span"
+                        onClick={handleLinkClick}
+                      />
                     </a>
                   </li>
                 </ul>
@@ -326,37 +422,73 @@ export default function Footer() {
                 <li>
                   <a
                     href="#"
+                    onClick={handleLinkClick}
                     className="text-yellow-200 hover:text-white transition-colors duration-300 font-medium"
                   >
-                    Términos y Condiciones
+                    <EditableContent 
+                      pageKey="footer" 
+                      fieldKey="footer_terms" 
+                      fieldType="text"
+                      defaultValue="Términos y Condiciones"
+                      as="span"
+                      onClick={handleLinkClick}
+                    />
                   </a>
                 </li>
 
                 <li>
                   <a
                     href="#"
+                    onClick={handleLinkClick}
                     className="text-yellow-200 hover:text-white transition-colors duration-300 font-medium"
                   >
-                    Política de Privacidad
+                    <EditableContent 
+                      pageKey="footer" 
+                      fieldKey="footer_privacy" 
+                      fieldType="text"
+                      defaultValue="Política de Privacidad"
+                      as="span"
+                      onClick={handleLinkClick}
+                    />
                   </a>
                 </li>
 
                 <li>
                   <a
                     href="#"
+                    onClick={handleLinkClick}
                     className="text-yellow-200 hover:text-white transition-colors duration-300 font-medium"
                   >
-                    Cookies
+                    <EditableContent 
+                      pageKey="footer" 
+                      fieldKey="footer_cookies" 
+                      fieldType="text"
+                      defaultValue="Cookies"
+                      as="span"
+                      onClick={handleLinkClick}
+                    />
                   </a>
                 </li>
               </ul>
 
               <div className="mt-6 sm:mt-0 text-right">
                 <p className="text-sm text-yellow-100 font-bold drop-shadow-md">
-                  &copy; 2025. City Soccer. Todos los derechos reservados.
+                  <EditableContent 
+                    pageKey="footer" 
+                    fieldKey="copyright_text" 
+                    fieldType="text"
+                    defaultValue="© 2025. City Soccer. Todos los derechos reservados."
+                    as="span"
+                  />
                 </p>
                 <p className="text-xs text-yellow-200 mt-1">
-                  🏆 La mejor experiencia deportiva de Chile
+                  <EditableContent 
+                    pageKey="footer" 
+                    fieldKey="copyright_tagline" 
+                    fieldType="text"
+                    defaultValue="🏆 La mejor experiencia deportiva de Chile"
+                    as="span"
+                  />
                 </p>
               </div>
             </div>

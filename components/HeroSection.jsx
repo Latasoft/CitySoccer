@@ -1,7 +1,6 @@
 import React from 'react';
 import EditableImage from './EditableImage';
 import EditableContent from './EditableContent';
-import { useDynamicImages } from '@/lib/dynamicImageService';
 
 const HeroSection = ({ 
   title = { first: "", second: "" },
@@ -16,17 +15,6 @@ const HeroSection = ({
   imageCategory = "summer-camp",
   pageKey = "default"
 }) => {
-  
-  // Cargar imágenes dinámicas según la categoría
-  const { images: dynamicImages } = useDynamicImages(imageCategory);
-  
-  // Función helper para obtener imagen dinámica o fallback
-  const getImageUrl = (index, fallback) => {
-    if (dynamicImages && dynamicImages[index]) {
-      return dynamicImages[index].url;
-    }
-    return fallback || "";
-  };
   
   const handleButtonClick = () => {
     // Si hay una función personalizada, usarla en lugar de la navegación
@@ -119,27 +107,24 @@ const HeroSection = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 sm:gap-1 lg:gap-2 w-full max-w-2xl">
               {/* Primera imagen - ocupa toda la fila superior */}
               <EditableImage
-                src={getImageUrl(0, images.img1)}
+                src={`/uploads/images/${imageCategory}-1.jpg`}
                 alt="Experiencia 1" 
                 categoria={imageCategory}
                 className="col-span-1 sm:col-span-2 w-full h-[250px] sm:h-[280px] lg:h-[300px] object-cover rounded-t-lg sm:rounded-t-xl rounded-b-none sm:rounded-b-lg shadow-lg sm:shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
-                fallbackSrc={images.img1}
               />
               {/* Segunda imagen */}
               <EditableImage
-                src={getImageUrl(1, images.img2)}
+                src={`/uploads/images/${imageCategory}-2.jpg`}
                 alt="Experiencia 2" 
                 categoria={imageCategory}
                 className="w-full h-[200px] sm:h-[220px] lg:h-[250px] object-cover rounded-bl-lg sm:rounded-l-xl rounded-br-none sm:rounded-br-none shadow-lg sm:shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
-                fallbackSrc={images.img2}
               />
               {/* Tercera imagen */}
               <EditableImage
-                src={getImageUrl(2, images.img3)}
+                src={`/uploads/images/${imageCategory}-3.jpg`}
                 alt="Experiencia 3" 
                 categoria={imageCategory}
                 className="w-full h-[200px] sm:h-[220px] lg:h-[250px] object-cover rounded-br-lg sm:rounded-r-xl rounded-bl-none sm:rounded-bl-none shadow-lg sm:shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
-                fallbackSrc={images.img3}
               />
             </div>
           </div>

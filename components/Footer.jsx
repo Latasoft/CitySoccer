@@ -49,7 +49,6 @@ export default function Footer() {
             src="/Cancha3.jpeg"
             alt="Instalaciones City Soccer"
             className="absolute inset-0 h-full w-full object-cover opacity-80"
-            fallbackSrc="/Cancha3.jpeg"
           />
           {/* Sin gradiente overlay en la imagen */}
         </div>

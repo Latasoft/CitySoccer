@@ -57,13 +57,14 @@ export default function Navigation() {
     useEffect(() => {
         const loadMenuItems = async () => {
             try {
-                const response = await fetch('/content/navigation.json');
+                const response = await fetch('/api/content/navigation');
                 
                 if (!response.ok) {
                     throw new Error('No se pudo cargar navigation.json');
                 }
                 
-                const data = await response.json();
+                const result = await response.json();
+                const data = result.data;
                 
                 if (data && data.menu_items && data.menu_items.length > 0) {
                     const itemsWithAuth = [...data.menu_items];

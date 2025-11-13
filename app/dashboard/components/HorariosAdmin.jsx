@@ -344,7 +344,7 @@ export default function HorariosAdmin() {
             {diasSemana.map(dia => (
               <button
                 key={dia}
-                onClick={() => toggleDiaSemana(dia)}
+                onClick={() => toggleDiaActivo(dia)}
                 className={`px-4 py-2 rounded-lg font-medium transition ${
                   diasActivos.includes(dia)
                     ? 'bg-[#ffee00] text-black'

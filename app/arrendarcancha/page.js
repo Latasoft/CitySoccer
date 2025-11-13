@@ -115,7 +115,6 @@ export default function ArriendaCanchaSelector() {
                     alt={content[cancha.titleKey] || cancha.titleKey}
                     categoria={cancha.categoria}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                    fallbackSrc={cancha.image}
                   />
                 </div>
                 

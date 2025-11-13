@@ -16,11 +16,6 @@ export default function ClasesParticularePickleball() {
       description: "Nuestras clases particulares de pickleball son ideales para ti.",
       buttonText: "Reservar Clase",
       buttonLink: "#contacto",
-      images: {
-        img1: "/Pickleball.jpeg",
-        img2: "/Pickleball2.jpeg",
-        img3: "/Pickleball.jpeg"
-      },
       backgroundGradient: "bg-gradient-to-br from-orange-900 via-pink-900 to-purple-800"
     },
     schedules: [
@@ -32,7 +27,7 @@ export default function ClasesParticularePickleball() {
 
   return (
     <div className="min-h-screen">
-      <HeroSection {...classData.heroProps} pageKey="clasesparticularespickleball" />
+      <HeroSection {...classData.heroProps} pageKey="clasesparticularespickleball" imageCategory="clases-pickleball" />
       
       <SchedulePricingSection 
         schedules={classData.schedules}

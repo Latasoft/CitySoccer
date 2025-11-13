@@ -16,11 +16,6 @@ export default function ClasesParticulareFutbol() {
       description: "Las clases particulares de fútbol CitySoccer están diseñadas para ti.",
       buttonText: "Agendar Clase",
       buttonLink: "#contacto",
-      images: {
-        img1: "/Entrenamiento.jpeg",
-        img2: "/Pelota.jpg",
-        img3: "/Cancha1.jpeg"
-      },
       backgroundGradient: "bg-gradient-to-br from-green-900 via-blue-900 to-emerald-800"
     },
     schedules: [
@@ -32,7 +27,7 @@ export default function ClasesParticulareFutbol() {
 
   return (
     <div className="min-h-screen">
-      <HeroSection {...classData.heroProps} pageKey="clasesparticularesfutbol" />
+      <HeroSection {...classData.heroProps} pageKey="clasesparticularesfutbol" imageCategory="clases-futbol" />
       
       <SchedulePricingSection 
         schedules={classData.schedules}

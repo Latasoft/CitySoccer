@@ -53,17 +53,12 @@ export default function AcademiaFutbol() {
     description: "La pasión por el fútbol se vive en nuestra Academia CitySoccer.",
     buttonText: "Ver Programas",
     buttonLink: "/academiadefutbol",
-    images: {
-      img1: "/Entrenamiento3.jpeg",
-      img2: "/Entrenamiento5.jpeg",
-      img3: "/Entrenamiento4.jpeg"
-    },
     backgroundGradient: "bg-gradient-to-br from-green-900 via-blue-900 to-green-800"
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-950">
-      <HeroSection {...heroProps} pageKey="academiadefutbol" />
+      <HeroSection {...heroProps} pageKey="academiadefutbol" imageCategory="academia-futbol" />
       
       <ProgramsSection 
         title="Nuestros Programas"
@@ -103,7 +98,6 @@ export default function AcademiaFutbol() {
           message: "Hola! Necesito más información sobre la Academia de Fútbol"
         }}
         whatsappNumber={getWhatsAppNumber()}
-        backgroundImage="/Entrenamiento2.jpeg"
         pageKey="academiadefutbol"
       />
     </div>

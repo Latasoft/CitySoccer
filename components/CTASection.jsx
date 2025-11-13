@@ -9,7 +9,7 @@ const CTASection = ({
   primaryButton = { text: 'Reservar Ahora', link: '/arrendarcancha', type: 'link' }, 
   secondaryButton = { text: 'Ver Precios', link: '#precios', type: 'link' }, 
   whatsappNumber,
-  backgroundImage = '/images/cta-background.jpg',
+  imageCategory = 'eventos-cta',
   pageKey = 'default'
 }) => {
   const handlePrimaryClick = () => {
@@ -32,18 +32,16 @@ const CTASection = ({
 
   return (
     <section className="py-20 bg-gradient-to-r from-blue-900 via-purple-900 to-green-900 relative overflow-hidden">
-      {backgroundImage && (
-        <div className="absolute inset-0 bg-black bg-opacity-50">
-          <EditableImage 
-            pageKey={pageKey}
-            fieldKey="cta_background_image"
-            defaultValue={backgroundImage}
-            categoria="general"
-            alt="Background"
-            className="w-full h-full object-cover opacity-30"
-          />
-        </div>
-      )}
+      <div className="absolute inset-0 bg-black bg-opacity-50">
+        <EditableImage 
+          pageKey={pageKey}
+          fieldKey="cta_background_image"
+          defaultValue={`/uploads/images/${imageCategory}-1.jpg`}
+          categoria={imageCategory}
+          alt="Background"
+          className="w-full h-full object-cover opacity-30"
+        />
+      </div>
       
       <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
         <EditableContent 

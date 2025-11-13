@@ -21,11 +21,7 @@ export default function SummerCamp() {
         description="Este verano vive la mejor experiencia deportiva en el Summer Camp CitySoccer. Un programa lleno de actividades para niños y jóvenes, donde se combinan entrenamientos de fútbol y pickleball con dinámicas recreativas, trabajo en equipo y valores de compañerismo."
         buttonText="Más Información"
         buttonAction={handleWhatsAppClick}
-        images={{
-          img1: "/Entrenamiento3.jpeg",
-          img2: "/Entrenamiento2.jpeg",
-          img3: "/Entrenamiento5.jpeg"
-        }}
+        imageCategory="summer-camp"
         backgroundGradient = "bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800"
       />  
       

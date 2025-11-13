@@ -23,11 +23,6 @@ export default function Eventos() {
       description: "Nuestras canchas y espacios están disponibles para cumpleaños, campeonatos, clínicas deportivas, actividades empresariales y más.",
       buttonText: "Ver Nuestros Eventos",
       buttonAction: () => handleWhatsAppClick(),
-      images: {
-        img1: "/Birthday.jpeg",
-        img2: "/Pelota.jpg",
-        img3: "/Cancha1.jpeg"
-      },
       backgroundGradient: "bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-800"
     },
     categories: [
@@ -71,7 +66,7 @@ export default function Eventos() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <HeroSection {...eventData.heroProps} pageKey="eventos" />
+      <HeroSection {...eventData.heroProps} pageKey="eventos" imageCategory="eventos" />
       
       {/* Tipos de Eventos */}
       <ProgramsSection 
@@ -105,7 +100,6 @@ export default function Eventos() {
           message: "Hola! Necesito más detalles sobre los tipos de eventos y servicios disponibles"
         }}
         whatsappNumber={getWhatsAppNumber()}
-        backgroundImage="/Birthday.jpeg"
         pageKey="eventos"
       />
     </div>

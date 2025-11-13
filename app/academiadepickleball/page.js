@@ -14,17 +14,12 @@ export default function AcademiaPickleball() {
     description: "Descubre la emoción del pickleball en nuestra Academia CitySoccer.",
     buttonText: "Ver Programas",
     buttonLink: "/academiadepickleball",
-    images: {
-      img1: "/Pickleball.jpeg",
-      img2: "/Pickleball2.jpeg",
-      img3: "/Pickleball.jpeg"
-    },
     backgroundGradient: "bg-gradient-to-br from-orange-900 via-pink-900 to-purple-800"
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-950">
-      <HeroSection {...heroProps} pageKey="academiadepickleball" />
+      <HeroSection {...heroProps} pageKey="academiadepickleball" imageCategory="academia-pickleball" />
       
       <CTASection 
         title="¿Te animas a jugar pickleball?"
@@ -40,7 +35,6 @@ export default function AcademiaPickleball() {
           message: "Hola! Necesito más información sobre la Academia de Pickleball"
         }}
         whatsappNumber={getWhatsAppNumber()}
-        backgroundImage="/Pickleball2.jpeg"
         pageKey="academiadepickleball"
       />
     </div>

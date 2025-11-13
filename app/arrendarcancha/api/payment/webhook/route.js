@@ -214,8 +214,15 @@ export async function POST(request) {
         if (!resultadoReserva.success) {
           console.error('Error o conflicto al crear reserva:', resultadoReserva.error)
           
-          // Si el error es de disponibilidad (código específico o mensaje)
-          if (resultadoReserva.code === 'SLOT_UNAVAILABLE' || resultadoReserva.error.includes('no está disponible')) {
+          // Si el error es de disponibilidad (código específico, mensaje o error de BD)
+          const esConflictoReserva = 
+            resultadoReserva.code === 'SLOT_UNAVAILABLE' || 
+            resultadoReserva.error?.includes('no está disponible') ||
+            resultadoReserva.error?.includes('ya fue reservada') ||
+            resultadoReserva.dbError?.includes('unique constraint') ||
+            resultadoReserva.dbError?.includes('idx_reservas_unique_slot');
+          
+          if (esConflictoReserva) {
             console.warn('⚠️ CONFLICTO DE RESERVA: La cancha ya fue reservada por otro usuario')
             console.warn('⚠️ ACCIÓN REQUERIDA: Reembolsar pago al usuario:', {
               orderId: reference,

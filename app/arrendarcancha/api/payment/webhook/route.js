@@ -118,8 +118,26 @@ export async function POST(request) {
       newStatus: transactionStatus,
       cancha_id: existingTransaction.cancha_id,
       fecha: existingTransaction.fecha,
-      hora: existingTransaction.hora
+      hora: existingTransaction.hora,
+      webhookAlreadyProcessed: existingTransaction.webhook_received_at
     })
+
+    // PREVENIR DUPLICACIÓN: Si el webhook ya fue procesado con el mismo estado, ignorar
+    if (existingTransaction.status === transactionStatus && existingTransaction.webhook_received_at) {
+      console.log('⚠️ Webhook duplicado detectado - mismo estado ya procesado:', {
+        orderId: reference,
+        status: transactionStatus,
+        webhookTime: existingTransaction.webhook_received_at
+      })
+      
+      return NextResponse.json({ 
+        received: true,
+        duplicate: true,
+        message: 'Webhook already processed with same status',
+        status: transactionStatus,
+        orderId: reference
+      })
+    }
 
     // Actualizar transacción en Supabase
     const { data, error } = await supabase
@@ -198,13 +216,15 @@ export async function POST(request) {
         if (!resultadoReserva.success) {
           console.error('Error o conflicto al crear reserva:', resultadoReserva.error)
           
-          // Si el error es de disponibilidad (otro usuario ya reservó)
-          if (resultadoReserva.error.includes('no está disponible')) {
+          // Si el error es de disponibilidad (código específico o mensaje)
+          if (resultadoReserva.code === 'SLOT_UNAVAILABLE' || resultadoReserva.error.includes('no está disponible')) {
             console.warn('⚠️ CONFLICTO DE RESERVA: La cancha ya fue reservada por otro usuario')
             console.warn('⚠️ ACCIÓN REQUERIDA: Reembolsar pago al usuario:', {
               orderId: reference,
               cliente: existingTransaction.buyer_email,
-              monto: existingTransaction.amount
+              monto: existingTransaction.amount,
+              errorCode: resultadoReserva.code,
+              dbError: resultadoReserva.dbError
             })
             
             // ENVIAR EMAIL AUTOMÁTICO DE REEMBOLSO AL CLIENTE
@@ -297,8 +317,8 @@ export async function POST(request) {
             reservaId: reservaData.id,
             orderId: reference,
             clienteNombre: cliente.nombre,
-            clienteEmail: cliente.email,
-            clienteTelefono: cliente.telefono,
+            clienteEmail: cliente.correo, // Campo correcto en BD
+            clienteTelefono: cliente.telefono || 'No proporcionado',
             canchaInfo: canchaInfo,
             fecha: new Date(reservaData.fecha).toLocaleDateString('es-CL', {
               weekday: 'long',
@@ -322,7 +342,7 @@ export async function POST(request) {
 
           // 2. Enviar email de confirmación al cliente (con PDF adjunto)
           const emailClienteResult = await sendReservationConfirmation({
-            clienteEmail: cliente.email,
+            clienteEmail: cliente.correo, // Campo correcto en BD
             clienteNombre: cliente.nombre,
             canchaInfo: canchaInfo,
             fecha: new Date(reservaData.fecha).toLocaleDateString('es-CL', {
@@ -340,7 +360,7 @@ export async function POST(request) {
           })
 
           if (emailClienteResult.success) {
-            console.log('✅ Email de confirmación enviado al cliente:', cliente.email)
+            console.log('✅ Email de confirmación enviado al cliente:', cliente.correo)
           } else {
             console.error('⚠️ No se pudo enviar email al cliente:', emailClienteResult.error)
           }
@@ -348,8 +368,8 @@ export async function POST(request) {
           // 3. Enviar notificación al administrador
           const emailAdminResult = await sendAdminReservationNotification({
             clienteNombre: cliente.nombre,
-            clienteEmail: cliente.email,
-            clienteTelefono: cliente.telefono,
+            clienteEmail: cliente.correo, // Campo correcto en BD
+            clienteTelefono: cliente.telefono || 'No proporcionado',
             canchaInfo: canchaInfo,
             fecha: new Date(reservaData.fecha).toLocaleDateString('es-CL', {
               weekday: 'long',

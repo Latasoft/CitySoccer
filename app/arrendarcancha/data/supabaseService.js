@@ -208,7 +208,8 @@ export const crearReserva = async (reservaData) => {
     if (!disponible) {
       return { 
         success: false, 
-        error: 'Este horario ya no está disponible. La reserva pudo haber sido tomada por otro usuario.' 
+        error: 'Este horario ya no está disponible. La reserva pudo haber sido tomada por otro usuario.',
+        code: 'SLOT_UNAVAILABLE'
       };
     }
 
@@ -217,11 +218,28 @@ export const crearReserva = async (reservaData) => {
       .insert([reservaData])
       .select();
 
-    if (error) throw error;
+    if (error) {
+      // Detectar violación de unique constraint (doble reserva)
+      if (error.code === '23505') {
+        console.error('⚠️ Violación de unique constraint detectada:', error);
+        return { 
+          success: false, 
+          error: 'Este horario ya no está disponible. La reserva fue tomada por otro usuario.',
+          code: 'SLOT_UNAVAILABLE',
+          dbError: error.message
+        };
+      }
+      throw error;
+    }
+    
     return { success: true, data };
   } catch (error) {
     console.error('Error creando reserva:', error);
-    return { success: false, error: error.message };
+    return { 
+      success: false, 
+      error: error.message,
+      code: 'DATABASE_ERROR'
+    };
   }
 };
 

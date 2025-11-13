@@ -21,7 +21,12 @@
 /build
 
 # uploaded files (not versioned)
-/public/uploads/
+# Excluir uploads dinámicos pero incluir carousel existentes
+/public/uploads/images/
+/public/uploads/videos/
+# Permitir archivos del carousel que ya existen
+# (comentar la línea siguiente si quieres trackear el carousel)
+# /public/uploads/carousel/
 
 # misc
 .DS_Store

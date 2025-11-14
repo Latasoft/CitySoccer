@@ -1,6 +1,7 @@
 import { writeFile } from 'fs/promises';
 import { NextResponse } from 'next/server';
 import path from 'path';
+import { logger } from '@/lib/logger';
 
 // Caché en memoria del servidor (se limpia al reiniciar)
 const serverCache = new Map();

@@ -16,7 +16,8 @@ const ArrendamientoBase = ({
   tipoCancha, 
   titulo,
   colorPrimario = "#eeff00",
-  requiereSeleccionCancha = true 
+  requiereSeleccionCancha = true,
+  tarifasPreCargadas = null // Tarifas pasadas desde CanchaPageBase
 }) => {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
@@ -78,6 +79,14 @@ const ArrendamientoBase = ({
 
   // Obtener tarifas reales al cargar el componente
   useEffect(() => {
+    // Si ya vienen tarifas pre-cargadas, usarlas directamente
+    if (tarifasPreCargadas) {
+      console.log('✅ ArrendamientoBase: Usando tarifas pre-cargadas (sin consulta adicional)');
+      setTarifasReales(tarifasPreCargadas);
+      return;
+    }
+
+    // Si no hay tarifas pre-cargadas, cargarlas desde BD
     let mounted = true;
 
     const fetchTarifas = async () => {
@@ -111,7 +120,7 @@ const ArrendamientoBase = ({
     return () => {
       mounted = false;
     };
-  }, [tipoCancha]);
+  }, [tipoCancha, tarifasPreCargadas]);
 
   // Cargar días bloqueados al montar
   useEffect(() => {

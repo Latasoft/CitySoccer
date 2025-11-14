@@ -30,6 +30,7 @@ const CanchaPageBase = ({
       <ArrendamientoComponent 
         onBack={() => setShowReservation(false)} 
         tipoCancha={tipoCancha}
+        tarifasPreCargadas={tarifas}
       />
     );
   }

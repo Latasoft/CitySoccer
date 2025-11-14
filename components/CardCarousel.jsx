@@ -31,7 +31,7 @@ const CardCarousel = () => {
               descKey: 'card1_description',
               imageKey: 'card1_image',
               ctaKey: 'card1_cta_text',
-              ctaLink: "/arrendarcancha/futbol7",
+              ctaLink: "/arrendarcancha", // Redirige a /arrendarcancha
               defaultTitle: "Arrienda Cancha Fútbol",
               defaultDesc: "Canchas profesionales con césped sintético de última generación.",
               defaultImage: "/Cancha1.jpeg",
@@ -43,7 +43,7 @@ const CardCarousel = () => {
               descKey: 'card2_description',
               imageKey: 'card2_image',
               ctaKey: 'card2_cta_text',
-              ctaLink: "/arrendarcancha/pickleball-individual",
+              ctaLink: "/arrendarcancha", // Redirige a /arrendarcancha
               defaultTitle: "Arrienda Cancha Pickleball",
               defaultDesc: "Canchas de Pickleball con superficies profesionales.",
               defaultImage: "/Pickleball2.jpeg",

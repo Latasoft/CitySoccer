@@ -83,10 +83,15 @@ const ArrendamientoBase = ({
     const fetchTarifas = async () => {
       try {
         const tipoBD = mapTipoCancha(tipoCancha);
+        console.log(`🔄 ArrendamientoBase: Cargando tarifas para ${tipoBD}...`);
         const tarifas = await obtenerTarifasPorTipo(tipoBD);
         
         if (mounted) {
           if (tarifas && Object.keys(tarifas.weekdays || {}).length > 0) {
+            console.log(`✅ ArrendamientoBase: Tarifas cargadas para ${tipoBD}:`, {
+              weekdays: Object.keys(tarifas.weekdays).length,
+              primerasHoras: Object.keys(tarifas.weekdays).slice(0, 3)
+            });
             setTarifasReales(tarifas);
           } else {
             console.error('❌ No se encontraron tarifas en la BD para:', tipoBD);
@@ -214,6 +219,11 @@ const ArrendamientoBase = ({
       } else { // Lunes a Viernes
         horarios = Object.entries(tarifasReales.weekdays);
       }
+
+      console.log(`📅 Horarios para ${tipoBD} el ${selectedDate} (día ${diaSemana}):`, {
+        totalHorarios: horarios.length,
+        primerasHoras: horarios.slice(0, 3).map(([h, d]) => `${h}: $${d.price}`)
+      });
 
       const horariosFormateados = await Promise.all(
         horarios.map(async ([hora, data]) => {

@@ -148,6 +148,14 @@ const EditableContent = ({
         localStorage.setItem(cacheKey, editedValue);
       }
       
+      // CRÍTICO: Invalidar cache del ContentContext para forzar recarga
+      // Esto asegura que otros componentes vean el valor actualizado
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('content-updated', { 
+          detail: { pageKey, fieldKey, newValue: editedValue } 
+        }));
+      }
+      
       // Llamar callback opcional después de guardar
       if (onSave && typeof onSave === 'function') {
         onSave(editedValue);

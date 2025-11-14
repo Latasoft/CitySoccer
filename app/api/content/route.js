@@ -8,14 +8,17 @@ const serverCache = new Map();
 const CACHE_TTL = 5000; // 5 segundos
 
 // Función auxiliar para obtener contenido (con caché)
-function getContentFromFile(pageKey) {
+function getContentFromFile(pageKey, bypassCache = false) {
   const now = Date.now();
   const cached = serverCache.get(pageKey);
   
-  // Si hay caché válido, usarlo
-  if (cached && (now - cached.timestamp) < CACHE_TTL) {
+  // Si hay caché válido Y no se solicita bypass, usarlo
+  if (!bypassCache && cached && (now - cached.timestamp) < CACHE_TTL) {
+    logger.log('🔍🧭 Usando CACHE para', pageKey);
     return cached.data;
   }
+  
+  logger.log('🔍🧭 Leyendo DISCO para', pageKey, bypassCache ? '(bypass cache)' : '(cache expirado)');
   
   // Leer del disco
   const filePath = path.join(process.cwd(), 'public', 'content', `${pageKey}.json`);
@@ -124,10 +127,14 @@ export async function GET(request) {
       );
     }
     
-    const content = getContentFromFile(pageKey);
+    // Verificar si se solicita bypass de cache
+    const fresh = searchParams.get('fresh') === 'true';
+    
+    const content = getContentFromFile(pageKey, fresh);
     
     console.log('🔍🧭 Contenido cargado OK:', {
       pageKey,
+      fresh,
       hasContent: !!content,
       keys: Object.keys(content || {}),
       menuItemsCount: content?.menu_items?.length

@@ -30,13 +30,11 @@ services:
 
     # PERSISTENT DISK - Monta en /var/data (única ruta persistente en Render Standard)
     # El script setup-persistent-storage.sh crea symlinks desde /var/data → /public
+    # Solo usamos UN disco para uploads y content
     disks:
       - name: citysoccer-uploads
         mountPath: /var/data/uploads
-        sizeGB: 3
-      - name: citysoccer-content
-        mountPath: /var/data/content
-        sizeGB: 1
+        sizeGB: 5
 
     # Auto-Deploy
     autoDeploy: true

@@ -38,16 +38,15 @@ else
   exit 1
 fi
 
-# Content en su propio disco persistente
-PERSISTENT_CONTENT="/var/data/content"
+# Content dentro del disco de uploads (solo tenemos un disco persistente)
+PERSISTENT_CONTENT="$PERSISTENT_DIR/content"
 mkdir -p "$PERSISTENT_CONTENT"
 
-# Copiar contenido inicial si el disco persistente está vacío
-if [ ! "$(ls -A $PERSISTENT_CONTENT)" ]; then
-  echo "📦 Copiando contenido inicial a disco persistente..."
-  if [ -d "$PUBLIC_DIR/content" ]; then
-    cp -r "$PUBLIC_DIR/content/"* "$PERSISTENT_CONTENT/" 2>/dev/null || true
-  fi
+# Copiar contenido inicial del build al disco persistente
+# Usar -n para NO sobrescribir archivos existentes (preserva edits del usuario)
+if [ -d "$PUBLIC_DIR/content" ]; then
+  echo "📦 Copiando archivos JSON nuevos/actualizados a disco persistente..."
+  cp -n "$PUBLIC_DIR/content/"*.json "$PERSISTENT_CONTENT/" 2>/dev/null || true
 fi
 
 # Crear symlink
@@ -59,7 +58,8 @@ echo "✅ Symlink de content creado: $PUBLIC_DIR/content -> $PERSISTENT_CONTENT"
 # Verificar
 if [ -L "$PUBLIC_DIR/content" ]; then
   echo "✅ Symlink de content verificado"
-  ls -la "$PUBLIC_DIR/content"
+  ls -la "$PUBLIC_DIR/content" | head -5
+  echo "Total archivos: $(ls -1 $PERSISTENT_CONTENT/*.json 2>/dev/null | wc -l)"
 else
   echo "❌ Error creando symlink de content"
 fi

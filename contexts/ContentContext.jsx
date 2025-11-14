@@ -11,6 +11,21 @@ const pendingRequests = new Map();
 export function ContentProvider({ children }) {
   const [cache, setCache] = useState(contentCache);
 
+  // Listener para invalidar cache cuando hay actualizaciones
+  useEffect(() => {
+    const handleContentUpdate = (event) => {
+      const { pageKey } = event.detail;
+      console.log(`[ContentContext] 🗑️ Invalidando cache de: ${pageKey}`);
+      contentCache.delete(pageKey);
+      setCache(new Map(contentCache));
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('content-updated', handleContentUpdate);
+      return () => window.removeEventListener('content-updated', handleContentUpdate);
+    }
+  }, []);
+
   // Función optimizada para obtener contenido con caché
   const getPageContent = useCallback(async (pageKey) => {
     // Validar y limpiar pageKey

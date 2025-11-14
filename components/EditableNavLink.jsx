@@ -60,17 +60,39 @@ const EditableNavLink = ({
 
   const handleEdit = (e) => {
     if (!isAdminMode) return;
+    // CRÍTICO: Prevenir navegación del link padre
     e.preventDefault();
     e.stopPropagation();
+    
+    // Advertir si es item dinámico
+    if (itemId === 999) {
+      console.log('🔍🧭 ⚠️  Editando item dinámico (Login/Dashboard) - cambios no se guardan');
+    }
+    
     setEditedText(text);
     setIsEditing(true);
   };
 
-  const handleSave = async () => {
+  const handleSave = async (e) => {
+    // CRÍTICO: Prevenir navegación del link padre
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     try {
       setSaving(true);
       
       console.log('🔍🧭 EditableNavLink: Iniciando guardado...', { itemId, editedText });
+      
+      // Detectar items dinámicos que no están en JSON (Login/Dashboard)
+      if (itemId === 999) {
+        console.log('🔍🧭 ⚠️  Item dinámico (id: 999) no se guarda en JSON');
+        setText(editedText);
+        setIsEditing(false);
+        setSaving(false);
+        return;
+      }
       
       // Leer todo el navigation.json
       const { data } = await localContentService.getContent('navigation');
@@ -122,16 +144,18 @@ const EditableNavLink = ({
         throw result.error;
       }
       
-      console.log('🔍🧭 ✅ Guardado exitoso! Disparando evento navigation-updated');
+      console.log('🔍🧭 ✅ Guardado exitoso!');
       
-      // Si llegamos aquí, el guardado fue exitoso
-      // Forzar recarga del componente Navigation
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new Event('navigation-updated'));
-      }
-      
+      // Actualizar solo el estado local - NO recargar toda la navegación
       setText(editedText);
       setIsEditing(false);
+      
+      // Disparar evento SOLO para otros componentes que necesiten saber (no Navigation mismo)
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('navigation-updated', { 
+          detail: { itemId, newText: editedText } 
+        }));
+      }
       
     } catch (error) {
       console.error('🔍🧭 ERROR CRÍTICO guardando navbar:', error.message, error);
@@ -142,7 +166,12 @@ const EditableNavLink = ({
     }
   };
 
-  const handleCancel = () => {
+  const handleCancel = (e) => {
+    // CRÍTICO: Prevenir navegación del link padre
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setEditedText('');
     setIsEditing(false);
   };

@@ -55,12 +55,13 @@ export default function Navigation() {
 
     // Cargar items del menú desde archivo JSON local
     useEffect(() => {
-    const loadMenuItems = async () => {
-        try {
-            console.log('🔍🧭 Navigation: Iniciando carga de menú...');
-            const response = await fetch('/api/content?pageKey=navigation');
-            
-            console.log('🔍🧭 Response status:', response.status, response.statusText);
+        const loadMenuItems = async (forceRefresh = false) => {
+            try {
+                console.log('🔍🧭 Navigation: Iniciando carga de menú...', { forceRefresh });
+                const url = forceRefresh 
+                    ? '/api/content?pageKey=navigation&fresh=true'
+                    : '/api/content?pageKey=navigation';
+                const response = await fetch(url);            console.log('🔍🧭 Response status:', response.status, response.statusText);
             
             if (!response.ok) {
                 const errorText = await response.text();
@@ -124,8 +125,15 @@ export default function Navigation() {
         loadMenuItems();
         
         // Escuchar evento de actualización desde EditableNavLink
-        const handleNavigationUpdate = () => {
-            loadMenuItems();
+        const handleNavigationUpdate = (event) => {
+            console.log('🔍🧭 Evento navigation-updated recibido!', event.detail);
+            
+            // NO recargar desde servidor - solo actualizar estado local si es necesario
+            // El EditableNavLink ya actualizó su propio texto localmente
+            // Este evento es para otros componentes que lo necesiten
+            
+            // Si en el futuro necesitas recargar, usa:
+            // loadMenuItems(true); // Forzar recarga sin cache
         };
         
         window.addEventListener('navigation-updated', handleNavigationUpdate);

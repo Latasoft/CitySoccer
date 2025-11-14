@@ -113,9 +113,12 @@ export async function POST(request) {
 }
 
 export async function GET(request) {
+  // Extraer pageKey ANTES del try-catch para acceso en catch
+  let pageKey = null;
+  
   try {
     const { searchParams } = new URL(request.url);
-    const pageKey = searchParams.get('pageKey');
+    pageKey = searchParams.get('pageKey');
     
     console.log('🔍🧭 API GET /api/content - pageKey:', pageKey);
     
@@ -153,7 +156,7 @@ export async function GET(request) {
     console.error('🔍🧭 ERROR en GET:', error.message, error.stack);
     
     if (error.message === 'Página no encontrada') {
-      console.log('🔍🧭 Archivo no encontrado:', pageKey);
+      console.log('🔍🧭 Archivo no encontrado para pageKey:', pageKey || 'undefined');
       return NextResponse.json(
         { error: 'Página no encontrada' },
         { status: 404 }

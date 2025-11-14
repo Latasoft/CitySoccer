@@ -38,16 +38,31 @@ else
   exit 1
 fi
 
-# Content dentro del mismo disco que uploads
-PERSISTENT_CONTENT="/var/data/uploads/content"
+# Content en su propio disco persistente
+PERSISTENT_CONTENT="/var/data/content"
 mkdir -p "$PERSISTENT_CONTENT"
 
-if [ -d "$PUBLIC_DIR/content" ] && [ ! -L "$PUBLIC_DIR/content" ]; then
-  mv "$PUBLIC_DIR/content" "$PERSISTENT_CONTENT" 2>/dev/null || true
+# Copiar contenido inicial si el disco persistente está vacío
+if [ ! "$(ls -A $PERSISTENT_CONTENT)" ]; then
+  echo "📦 Copiando contenido inicial a disco persistente..."
+  if [ -d "$PUBLIC_DIR/content" ]; then
+    cp -r "$PUBLIC_DIR/content/"* "$PERSISTENT_CONTENT/" 2>/dev/null || true
+  fi
 fi
 
+# Crear symlink
 rm -rf "$PUBLIC_DIR/content" 2>/dev/null || true
 ln -sf "$PERSISTENT_CONTENT" "$PUBLIC_DIR/content"
+
+echo "✅ Symlink de content creado: $PUBLIC_DIR/content -> $PERSISTENT_CONTENT"
+
+# Verificar
+if [ -L "$PUBLIC_DIR/content" ]; then
+  echo "✅ Symlink de content verificado"
+  ls -la "$PUBLIC_DIR/content"
+else
+  echo "❌ Error creando symlink de content"
+fi
 
 echo "✅ Symlink creado: $PUBLIC_DIR/content -> $PERSISTENT_CONTENT"
 echo "✅ Configuración de persistencia completada"

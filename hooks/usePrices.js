@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import { obtenerTarifasPorTipo } from '@/app/arrendarcancha/data/supabaseService';
 
-// Cache global para precios
+// Cache global con timestamp para evitar re-cargas innecesarias durante re-renders
 let pricesCache = {};
 let lastLoad = {};
-const CACHE_DURATION = 2 * 60 * 1000; // 2 minutos
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 
 /**
- * Hook para obtener precios de canchas con caché
- * Carga SOLO desde Supabase, sin fallbacks
+ * Hook para obtener precios de canchas CON CACHE INTELIGENTE
+ * Cache de 5 minutos para evitar parpadeo en re-renders
+ * Se invalida cuando admin actualiza precios desde dashboard
+ * Sin fallbacks - Error si no hay precios configurados
  * 
  * @param {string} tipoCancha - Tipo de cancha (futbol7, futbol9, pickleball, pickleball-dobles)
  * @returns {object} { precios, loading, error }
@@ -30,27 +32,35 @@ export const usePrices = (tipoCancha) => {
         return;
       }
 
-      // Verificar cache
-      const now = Date.now();
-      const cachedData = pricesCache[tipoCancha];
-      const lastLoadTime = lastLoad[tipoCancha] || 0;
-
-      if (cachedData && (now - lastLoadTime) < CACHE_DURATION) {
-        if (mounted) {
-          setPrecios(cachedData);
-          setLoading(false);
-          setError(null);
-        }
-        return;
-      }
-
       try {
+        // Verificar cache válido (menos de 5 minutos)
+        const now = Date.now();
+        const cached = pricesCache[tipoCancha];
+        const lastLoadTime = lastLoad[tipoCancha] || 0;
+        const cacheIsValid = cached && (now - lastLoadTime) < CACHE_DURATION;
+
+        if (cacheIsValid) {
+          console.log(`♻️ Usando cache para ${tipoCancha} (${Math.round((now - lastLoadTime) / 1000)}s de antigüedad)`);
+          if (mounted) {
+            setPrecios(cached);
+            setLoading(false);
+            setError(null);
+          }
+          return;
+        }
+
         if (mounted) {
           setLoading(true);
           setError(null);
         }
         
+        // Cargar desde BD y cachear
+        console.log(`🔄 Cargando precios FRESCOS para ${tipoCancha} desde BD`);
         const data = await obtenerTarifasPorTipo(tipoCancha);
+        
+        // Actualizar cache
+        pricesCache[tipoCancha] = data;
+        lastLoad[tipoCancha] = now;
         
         console.log(`📦 Datos recibidos de Supabase para ${tipoCancha}:`, {
           hasData: !!data,
@@ -66,10 +76,6 @@ export const usePrices = (tipoCancha) => {
         }
         
         if (mounted) {
-          // Guardar en cache SOLO si el componente está montado
-          pricesCache[tipoCancha] = data;
-          lastLoad[tipoCancha] = now;
-          
           setPrecios(data);
           setError(null);
         }
@@ -78,9 +84,6 @@ export const usePrices = (tipoCancha) => {
         if (mounted) {
           setError(err.message || 'Error cargando precios desde la base de datos');
           setPrecios(null);
-          // Limpiar cache corrupto
-          delete pricesCache[tipoCancha];
-          delete lastLoad[tipoCancha];
         }
       } finally {
         if (mounted) {
@@ -101,17 +104,17 @@ export const usePrices = (tipoCancha) => {
 };
 
 /**
- * Función para invalidar el cache de precios
- * Útil después de actualizar precios en el dashboard
+ * Función para invalidar cache cuando admin actualiza precios
+ * Se llama desde PricesAdminGrid después de guardar cambios
  */
-export const invalidatePricesCache = (tipoCancha) => {
+export const invalidatePricesCache = (tipoCancha = null) => {
   if (tipoCancha) {
+    console.log(`🗑️ Invalidando cache de precios para ${tipoCancha}`);
     delete pricesCache[tipoCancha];
     delete lastLoad[tipoCancha];
-    console.log(`🗑️ Cache invalidado para: ${tipoCancha}`);
   } else {
+    console.log('🗑️ Invalidando TODO el cache de precios');
     pricesCache = {};
     lastLoad = {};
-    console.log('🗑️ Todo el cache de precios ha sido invalidado');
   }
 };

@@ -90,29 +90,28 @@ export default function HorariosAdmin() {
   const handleSaveHorarios = async () => {
     setSaving(true);
     try {
-      // Actualizar horario de inicio
-      await supabase
-        .from('configuraciones')
-        .update({ valor: horarioInicio, actualizado_en: new Date().toISOString() })
-        .eq('clave', 'horario_inicio');
-
-      // Actualizar horario de fin
-      await supabase
-        .from('configuraciones')
-        .update({ valor: horarioFin, actualizado_en: new Date().toISOString() })
-        .eq('clave', 'horario_fin');
-
-      // Actualizar intervalo
-      await supabase
-        .from('configuraciones')
-        .update({ valor: intervaloMinutos.toString(), actualizado_en: new Date().toISOString() })
-        .eq('clave', 'intervalo_reserva_minutos');
-
-      // Actualizar días activos
-      await supabase
-        .from('configuraciones')
-        .update({ valor: JSON.stringify(diasActivos), actualizado_en: new Date().toISOString() })
-        .eq('clave', 'dias_semana_activos');
+      // Actualizar todas las configuraciones en paralelo (más rápido)
+      await Promise.all([
+        supabase
+          .from('configuraciones')
+          .update({ valor: horarioInicio, actualizado_en: new Date().toISOString() })
+          .eq('clave', 'horario_inicio'),
+        
+        supabase
+          .from('configuraciones')
+          .update({ valor: horarioFin, actualizado_en: new Date().toISOString() })
+          .eq('clave', 'horario_fin'),
+        
+        supabase
+          .from('configuraciones')
+          .update({ valor: intervaloMinutos.toString(), actualizado_en: new Date().toISOString() })
+          .eq('clave', 'intervalo_reserva_minutos'),
+        
+        supabase
+          .from('configuraciones')
+          .update({ valor: JSON.stringify(diasActivos), actualizado_en: new Date().toISOString() })
+          .eq('clave', 'dias_semana_activos')
+      ]);
 
       // Detectar cambios y enviar notificación
       const cambios = detectarCambiosHorarios();

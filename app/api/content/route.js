@@ -14,19 +14,25 @@ function getContentFromFile(pageKey, bypassCache = false) {
   
   // Si hay caché válido Y no se solicita bypass, usarlo
   if (!bypassCache && cached && (now - cached.timestamp) < CACHE_TTL) {
-    logger.log('🔍🧭 Usando CACHE para', pageKey);
+    console.log('🔍🧭 Usando CACHE para', pageKey);
     return cached.data;
   }
   
-  logger.log('🔍🧭 Leyendo DISCO para', pageKey, bypassCache ? '(bypass cache)' : '(cache expirado)');
+  console.log('🔍🧭 Leyendo DISCO para', pageKey, bypassCache ? '(bypass cache)' : '(cache expirado)');
+  console.log('🔍🧭 Ruta del archivo:', path.join(process.cwd(), 'public', 'content', `${pageKey}.json`));
+  console.log('🔍🧭 CWD:', process.cwd());
   
   // Leer del disco
   const filePath = path.join(process.cwd(), 'public', 'content', `${pageKey}.json`);
   const fs = require('fs');
   
   if (!fs.existsSync(filePath)) {
+    console.error('🔍🧭 ❌ Archivo NO existe:', filePath);
+    console.log('🔍🧭 Contenido de /public/content:', fs.existsSync(path.join(process.cwd(), 'public', 'content')) ? fs.readdirSync(path.join(process.cwd(), 'public', 'content')) : 'directorio no existe');
     throw new Error('Página no encontrada');
   }
+  
+  console.log('🔍🧭 ✅ Archivo existe, leyendo...');
   
   const fileContent = fs.readFileSync(filePath, 'utf-8');
   const content = JSON.parse(fileContent);

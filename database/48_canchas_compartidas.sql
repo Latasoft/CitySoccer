@@ -33,41 +33,39 @@ CREATE INDEX IF NOT EXISTS idx_cancha_grupo_miembros_cancha ON cancha_grupo_miem
 
 -- 4. Insertar grupos de canchas compartidas
 
--- Grupo para Fútbol (F7 y F9 comparten las mismas canchas físicas)
+-- IMPORTANTE: Solo agrupamos canchas que REALMENTE comparten el mismo espacio físico
+-- Si f7_1 y f9 usan la misma cancha física, van juntas
+-- Si f7_2 y f7_3 NO comparten espacio con f9, NO las agrupamos con nada
+
 INSERT INTO cancha_grupos (nombre, descripcion) VALUES
-  ('futbol_cancha_1', 'Cancha física 1 - Usada para F7_1 y F9'),
-  ('futbol_cancha_2', 'Cancha física 2 - Usada para F7_2 (solo F7)'),
-  ('futbol_cancha_3', 'Cancha física 3 - Usada para F7_3 (solo F7)')
+  ('cancha_fisica_principal', 'Cancha física compartida entre F7_1 y F9')
 ON CONFLICT (nombre) DO NOTHING;
 
 -- 5. Asignar canchas a sus grupos
 
--- Grupo 1: f7_1 y f9 comparten el mismo espacio físico
+-- GRUPO 1: Solo f7_1 y f9 que COMPARTEN el mismo espacio físico
+-- Si reservas f7_1, bloquea f9 (y viceversa) porque usan la misma cancha
 INSERT INTO cancha_grupo_miembros (grupo_id, cancha_id)
 SELECT 
-  (SELECT id FROM cancha_grupos WHERE nombre = 'futbol_cancha_1'),
+  (SELECT id FROM cancha_grupos WHERE nombre = 'cancha_fisica_principal'),
   id
 FROM canchas 
 WHERE nombre IN ('f7_1', 'f9')
 ON CONFLICT (cancha_id) DO NOTHING;
 
--- Grupo 2: f7_2 (solo esta cancha en este grupo)
-INSERT INTO cancha_grupo_miembros (grupo_id, cancha_id)
-SELECT 
-  (SELECT id FROM cancha_grupos WHERE nombre = 'futbol_cancha_2'),
-  id
-FROM canchas 
-WHERE nombre = 'f7_2'
-ON CONFLICT (cancha_id) DO NOTHING;
+-- f7_2 NO se agrega a ningún grupo (es independiente)
+-- f7_3 NO se agrega a ningún grupo (es independiente)
 
--- Grupo 3: f7_3 (solo esta cancha en este grupo)
-INSERT INTO cancha_grupo_miembros (grupo_id, cancha_id)
-SELECT 
-  (SELECT id FROM cancha_grupos WHERE nombre = 'futbol_cancha_3'),
-  id
-FROM canchas 
-WHERE nombre = 'f7_3'
-ON CONFLICT (cancha_id) DO NOTHING;
+-- Si tienes MÁS canchas compartidas, agrégalas aquí:
+-- Ejemplo si f7_2 comparte con otra cancha de f9:
+-- INSERT INTO cancha_grupos (nombre, descripcion) VALUES
+--   ('cancha_fisica_2', 'Cancha física compartida entre F7_2 y F9_2')
+-- ON CONFLICT (nombre) DO NOTHING;
+--
+-- INSERT INTO cancha_grupo_miembros (grupo_id, cancha_id)
+-- SELECT (SELECT id FROM cancha_grupos WHERE nombre = 'cancha_fisica_2'), id
+-- FROM canchas WHERE nombre IN ('f7_2', 'f9_2')
+-- ON CONFLICT (cancha_id) DO NOTHING;
 
 -- NOTA: Pickleball NO necesita estar en esta tabla porque ya usa
 -- el sistema de "mismo nombre físico" implementado anteriormente

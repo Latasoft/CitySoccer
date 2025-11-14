@@ -40,7 +40,16 @@ export async function POST(request) {
   try {
     const { pageKey, fieldKey, fieldValue } = await request.json();
     
+    console.log('🔍🧭 API POST /api/content - Datos recibidos:', {
+      pageKey,
+      fieldKey,
+      fieldValueType: typeof fieldValue,
+      isArray: Array.isArray(fieldValue),
+      length: Array.isArray(fieldValue) ? fieldValue.length : 'N/A'
+    });
+    
     if (!pageKey || !fieldKey || fieldValue === undefined) {
+      console.error('🔍🧭 ERROR: Faltan parámetros requeridos');
       return NextResponse.json(
         { error: 'pageKey, fieldKey y fieldValue son requeridos' },
         { status: 400 }
@@ -50,6 +59,8 @@ export async function POST(request) {
     // Ruta del archivo JSON
     const filePath = path.join(process.cwd(), 'public', 'content', `${pageKey}.json`);
     
+    console.log('🔍🧭 Ruta del archivo:', filePath);
+    
     // Leer el archivo actual
     const fs = require('fs');
     let content = {};
@@ -57,16 +68,24 @@ export async function POST(request) {
     if (fs.existsSync(filePath)) {
       const fileContent = fs.readFileSync(filePath, 'utf-8');
       content = JSON.parse(fileContent);
+      console.log('🔍🧭 Contenido actual del archivo:', Object.keys(content));
+    } else {
+      console.log('🔍🧭 Archivo no existe, creando nuevo');
     }
     
     // Actualizar el campo
     content[fieldKey] = fieldValue;
     
+    console.log('🔍🧭 Contenido actualizado, escribiendo archivo...');
+    
     // Guardar el archivo
     await writeFile(filePath, JSON.stringify(content, null, 2), 'utf-8');
     
+    console.log('🔍🧭 ✅ Archivo guardado exitosamente');
+    
     // Invalidar caché del servidor
     serverCache.delete(pageKey);
+    console.log('🔍🧭 Cache invalidado para:', pageKey);
     
     // Log seguro que maneja objetos/arrays
     const valuePreview = typeof fieldValue === 'object' 
@@ -94,7 +113,10 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const pageKey = searchParams.get('pageKey');
     
+    console.log('🔍🧭 API GET /api/content - pageKey:', pageKey);
+    
     if (!pageKey) {
+      console.log('🔍🧭 ERROR: pageKey no proporcionado');
       return NextResponse.json(
         { error: 'pageKey es requerido' },
         { status: 400 }
@@ -102,6 +124,13 @@ export async function GET(request) {
     }
     
     const content = getContentFromFile(pageKey);
+    
+    console.log('🔍🧭 Contenido cargado OK:', {
+      pageKey,
+      hasContent: !!content,
+      keys: Object.keys(content || {}),
+      menuItemsCount: content?.menu_items?.length
+    });
     
     return NextResponse.json({
       success: true,
@@ -113,14 +142,17 @@ export async function GET(request) {
     });
     
   } catch (error) {
+    console.error('🔍🧭 ERROR en GET:', error.message, error.stack);
+    
     if (error.message === 'Página no encontrada') {
+      console.log('🔍🧭 Archivo no encontrado:', pageKey);
       return NextResponse.json(
         { error: 'Página no encontrada' },
         { status: 404 }
       );
     }
     
-    console.error('Error leyendo contenido:', error);
+    console.error('🔍🧭 Error leyendo contenido:', error);
     return NextResponse.json(
       { error: 'Error al leer el contenido', details: error.message },
       { status: 500 }

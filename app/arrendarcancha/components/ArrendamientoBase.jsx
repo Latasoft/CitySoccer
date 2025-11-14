@@ -204,6 +204,15 @@ const ArrendamientoBase = ({
     try {
       const tipoBD = mapTipoCancha(tipoCancha);
       
+      console.log('🔍💰 ========== INICIO fetchAvailableTimes ==========');
+      console.log('🔍💰 Fecha seleccionada:', selectedDate);
+      console.log('🔍💰 Tipo de cancha:', tipoBD);
+      console.log('🔍💰 Estado tarifasReales:', {
+        existe: !!tarifasReales,
+        weekdaysCount: tarifasReales?.weekdays ? Object.keys(tarifasReales.weekdays).length : 0,
+        primeras3Weekdays: tarifasReales?.weekdays ? Object.entries(tarifasReales.weekdays).slice(0, 3).map(([h, d]) => `${h}:$${d.price}`) : []
+      });
+      
       // Obtener reservas existentes para la fecha
       const reservas = await obtenerReservasPorFecha(selectedDate, tipoBD);
       setReservasExistentes(reservas);
@@ -234,8 +243,16 @@ const ArrendamientoBase = ({
         primerasHoras: horarios.slice(0, 3).map(([h, d]) => `${h}: $${d.price}`)
       });
 
+      // 🔍💰 DEBUG CRÍTICO: Log cada horario que se va a mostrar
+      console.log('🔍💰 DEBUG_PRECIOS - Horarios a renderizar:');
+      horarios.forEach(([hora, data], index) => {
+        console.log(`🔍💰 [${index}] ${hora} -> $${data.price} (source: tarifasReales.${diaSemana === 0 ? 'sunday' : diaSemana === 6 ? 'saturday' : 'weekdays'})`);
+      });
+
       const horariosFormateados = await Promise.all(
         horarios.map(async ([hora, data]) => {
+          console.log(`🔍💰 Procesando ${hora}: precio=$${data.price}`);
+
           let disponible = true;
           
           if (requiereSeleccionCancha) {
@@ -265,6 +282,11 @@ const ArrendamientoBase = ({
           };
         })
       );
+
+      console.log('🔍💰 DEBUG_PRECIOS - Horarios formateados finales:');
+      horariosFormateados.forEach((h, index) => {
+        console.log(`🔍💰 [${index}] ${h.hora} -> $${h.precio} (disponible: ${h.disponible})`);
+      });
 
       setAvailableTimes(horariosFormateados);
     } catch (error) {
@@ -578,7 +600,11 @@ const ArrendamientoBase = ({
                 <p className="text-red-400">No hay horarios disponibles para esta fecha</p>
               ) : (
                 <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
-                  {availableTimes.map((time) => (
+                  {availableTimes.map((time) => {
+                    // 🔍💰 DEBUG: Log del precio que se va a RENDERIZAR en pantalla
+                    console.log(`🔍💰 RENDER ${time.hora}: $${time.precio} (disponible: ${time.disponible})`);
+                    
+                    return (
                     <button
                       key={time.hora}
                       onClick={() => time.disponible && handleTimeSelect(time.hora)}
@@ -602,7 +628,8 @@ const ArrendamientoBase = ({
                         {time.disponible ? `$${time.precio?.toLocaleString()}` : 'Ocupado'}
                       </span>
                     </button>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
               {selectedTime && (

@@ -160,30 +160,46 @@ const PricesAdminGrid = () => {
 
   const savePrecios = async () => {
     try {
+      console.log('🔍💰 savePrecios: Iniciando guardado...');
       setSaving(true);
+      
+      console.log('🔍💰 Invalidando cachés...');
       invalidatePricesCache();
       
+      console.log('🔍💰 Llamando a pricesService.updateBatch con', precios.length, 'precios');
       const { error } = await pricesService.updateBatch(precios);
-      if (error) throw error;
       
-      // Detectar cambios y enviar notificación
+      console.log('🔍💰 Respuesta de updateBatch:', { hasError: !!error, errorMsg: error?.message });
+      
+      if (error) {
+        console.error('🔍💰 ERROR en updateBatch:', error);
+        throw error;
+      }
+      
+      console.log('🔍💰 Detectando cambios...');
       const cambios = detectarCambios();
+      console.log('🔍💰 Cambios detectados:', cambios.length);
+      
       if (cambios.length > 0) {
+        console.log('🔍💰 Enviando notificación...');
         await notifyPriceChange({
           adminNombre: user?.email || 'Administrador',
           tipoCancha: tiposCanchas.find(t => t.id === activeTab)?.name || activeTab,
           cambiosRealizados: cambios
         });
+        console.log('🔍💰 Notificación enviada');
       }
       
+      console.log('🔍💰 ✅ Guardado exitoso, recargando precios...');
       setMessage({ type: 'success', text: 'Precios actualizados correctamente' });
       await loadPrecios();
       
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     } catch (error) {
-      console.error('Error guardando precios:', error);
+      console.error('🔍💰 ERROR CRÍTICO guardando precios:', error.message, error);
       setMessage({ type: 'error', text: `Error al guardar: ${error.message}` });
     } finally {
+      console.log('🔍💰 Finally: Reseteando estado de guardado');
       setSaving(false);
     }
   };

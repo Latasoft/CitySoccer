@@ -55,28 +55,42 @@ export default function Navigation() {
 
     // Cargar items del menú desde archivo JSON local
     useEffect(() => {
-        const loadMenuItems = async () => {
-            try {
-                const response = await fetch('/api/content?pageKey=navigation');
+    const loadMenuItems = async () => {
+        try {
+            console.log('🔍🧭 Navigation: Iniciando carga de menú...');
+            const response = await fetch('/api/content?pageKey=navigation');
+            
+            console.log('🔍🧭 Response status:', response.status, response.statusText);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('🔍🧭 ERROR Response:', errorText);
+                throw new Error('No se pudo cargar navigation.json');
+            }
+            
+            const result = await response.json();
+            console.log('🔍🧭 Result recibido:', {
+                success: result.success,
+                hasData: !!result.data,
+                dataKeys: result.data ? Object.keys(result.data) : []
+            });
+            
+            const data = result.data;
+            
+            if (data && data.menu_items && data.menu_items.length > 0) {
+                const itemsWithAuth = [...data.menu_items];
                 
-                if (!response.ok) {
-                    throw new Error('No se pudo cargar navigation.json');
+                console.log('🔍🧭 Menu items cargados:', itemsWithAuth.length, itemsWithAuth.map(i => i.text));
+                
+                // Agregar Login o Dashboard al final según autenticación
+                if (user) {
+                    itemsWithAuth.push({ id: 999, text: "Dashboard", href: "/dashboard" });
+                } else {
+                    itemsWithAuth.push({ id: 999, text: "Login", href: "/login" });
                 }
                 
-                const result = await response.json();
-                const data = result.data;
-                
-                if (data && data.menu_items && data.menu_items.length > 0) {
-                    const itemsWithAuth = [...data.menu_items];
-                    
-                    // Agregar Login o Dashboard al final según autenticación
-                    if (user) {
-                        itemsWithAuth.push({ id: 999, text: "Dashboard", href: "/dashboard" });
-                    } else {
-                        itemsWithAuth.push({ id: 999, text: "Login", href: "/login" });
-                    }
-                    
-                    setNavItems(itemsWithAuth);
+                console.log('🔍🧭 Items finales con auth:', itemsWithAuth.map(i => i.text));
+                setNavItems(itemsWithAuth);
                 } else {
                     // Usar fallback
                     const itemsWithAuth = [...fallbackNavItems];
@@ -90,7 +104,8 @@ export default function Navigation() {
                     setNavItems(itemsWithAuth);
                 }
             } catch (error) {
-                console.error('Error cargando menú desde JSON:', error);
+                console.error('🔍🧭 ERROR CRÍTICO cargando menú:', error.message);
+                console.error('🔍🧭 Stack:', error.stack);
                 // Usar fallback con Login/Dashboard correcto
                 const itemsWithAuth = [...fallbackNavItems];
                 

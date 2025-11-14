@@ -70,8 +70,16 @@ const EditableNavLink = ({
     try {
       setSaving(true);
       
+      console.log('🔍🧭 EditableNavLink: Iniciando guardado...', { itemId, editedText });
+      
       // Leer todo el navigation.json
       const { data } = await localContentService.getContent('navigation');
+      
+      console.log('🔍🧭 Contenido actual cargado:', {
+        hasData: !!data,
+        hasMenuItems: !!data?.menu_items,
+        menuItemsCount: data?.menu_items?.length
+      });
       
       if (!data || !data.menu_items) {
         throw new Error('No se pudo cargar el menú');
@@ -81,6 +89,7 @@ const EditableNavLink = ({
       const updateItem = (items) => {
         return items.map(item => {
           if (item.id === itemId) {
+            console.log('🔍🧭 Item encontrado! Actualizando:', item.text, '->', editedText);
             return { ...item, text: editedText };
           }
           if (item.submenu) {
@@ -92,17 +101,28 @@ const EditableNavLink = ({
       
       const updatedMenuItems = updateItem(data.menu_items);
       
+      console.log('🔍🧭 Menu items actualizados:', {
+        totalItems: updatedMenuItems.length,
+        itemModificado: updatedMenuItems.find(i => i.id === itemId || i.submenu?.find(s => s.id === itemId))
+      });
+      
       // Guardar usando updateField (actualiza todo menu_items)
+      console.log('🔍🧭 Llamando a updateField...');
       const result = await localContentService.updateField(
         'navigation',
         'menu_items',
         updatedMenuItems
       );
       
+      console.log('🔍🧭 Resultado de updateField:', result);
+      
       // Verificar si realmente hubo un error
       if (result.error) {
+        console.error('🔍🧭 ERROR en result:', result.error);
         throw result.error;
       }
+      
+      console.log('🔍🧭 ✅ Guardado exitoso! Disparando evento navigation-updated');
       
       // Si llegamos aquí, el guardado fue exitoso
       // Forzar recarga del componente Navigation
@@ -112,11 +132,12 @@ const EditableNavLink = ({
       
       setText(editedText);
       setIsEditing(false);
-      setSaving(false); // ✅ Marcar como guardado antes del catch
       
     } catch (error) {
-      console.error('Error guardando navbar:', error);
+      console.error('🔍🧭 ERROR CRÍTICO guardando navbar:', error.message, error);
       alert(`Error al guardar: ${error.message || 'Intenta nuevamente'}`);
+    } finally {
+      console.log('🔍🧭 Finally: Reseteando estado de guardado');
       setSaving(false);
     }
   };

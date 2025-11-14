@@ -8,6 +8,7 @@ import { notifyPriceChange } from '@/lib/notificationService';
 import { useScheduleConfig } from '@/hooks/useScheduleConfig';
 import { useAuth } from '@/hooks/useAuth';
 import { DollarSign, Save, Loader2, AlertCircle, CheckCircle2, Plus, X, Trash2 } from 'lucide-react';
+import serverLog from '@/utils/serverLog';
 import { CURRENCY } from '@/lib/constants';
 
 // Función helper para invalidar todos los cachés de precios
@@ -46,6 +47,14 @@ const PricesAdminGrid = () => {
     { id: 'pickleball', name: 'Pickleball Individual', color: 'bg-purple-500' },
     { id: 'pickleball-dobles', name: 'Pickleball Dobles', color: 'bg-pink-500' }
   ];
+
+  // Mapeo de IDs a nombres para logs
+  const tiposCanchaMap = {
+    'futbol7': 'Fútbol 7',
+    'futbol9': 'Fútbol 9',
+    'pickleball': 'Pickleball Individual',
+    'pickleball-dobles': 'Pickleball Dobles'
+  };
 
   const diasSemana = [
     { id: 'weekdays', name: 'Lun-Vie' },
@@ -159,47 +168,122 @@ const PricesAdminGrid = () => {
   };
 
   const savePrecios = async () => {
+    // Log ÚNICO para detectar llamadas duplicadas
+    const callId = Date.now();
+    serverLog.debug(`======== savePrecios LLAMADO (ID: ${callId}) ========`, null, 'PricesAdminGrid');
+    
+    // Prevenir múltiples guardados simultáneos
+    if (saving) {
+      serverLog.warn(`[${callId}] ⚠️  Guardado ya en progreso, ignorando...`, null, 'PricesAdminGrid');
+      return;
+    }
+    
     try {
-      console.log('🔍💰 savePrecios: Iniciando guardado...');
+      serverLog.info(`[${callId}] Iniciando guardado...`, null, 'PricesAdminGrid');
       setSaving(true);
       
-      console.log('🔍💰 Invalidando cachés...');
+      // Detectar solo precios modificados (optimización)
+      const preciosModificados = precios.filter((precio, idx) => {
+        const original = preciosOriginales[idx];
+        return !original || 
+               precio.precio !== original.precio || 
+               precio.activo !== original.activo;
+      });
+      
+      serverLog.info('Precios modificados detectados', {
+        modificados: preciosModificados.length,
+        total: precios.length,
+        tipo: tiposCanchaMap[activeTab]
+      }, 'PricesAdminGrid');
+      
+      if (preciosModificados.length === 0) {
+        serverLog.info('No hay cambios para guardar', null, 'PricesAdminGrid');
+        setMessage({ type: 'info', text: 'No hay cambios para guardar' });
+        setSaving(false);
+        setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+        return;
+      }
+      
+      serverLog.debug('Invalidando cachés...', null, 'PricesAdminGrid');
       invalidatePricesCache();
       
-      console.log('🔍💰 Llamando a pricesService.updateBatch con', precios.length, 'precios');
-      const { error } = await pricesService.updateBatch(precios);
+      serverLog.info('Guardando en Supabase', { 
+        preciosModificados: preciosModificados.length 
+      }, 'PricesAdminGrid');
       
-      console.log('🔍💰 Respuesta de updateBatch:', { hasError: !!error, errorMsg: error?.message });
+      // Timeout de seguridad: si updateBatch no responde en 30 seg, abortar
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout: La operación tardó más de 30 segundos')), 30000)
+      );
+      
+      const updatePromise = pricesService.updateBatch(preciosModificados);
+      const { error } = await Promise.race([updatePromise, timeoutPromise]);
+      
+      serverLog.debug('Respuesta de updateBatch', { 
+        hasError: !!error, 
+        errorMsg: error?.message 
+      }, 'PricesAdminGrid');
       
       if (error) {
-        console.error('🔍💰 ERROR en updateBatch:', error);
+        serverLog.error('ERROR en updateBatch', error, 'PricesAdminGrid');
         throw error;
       }
       
-      console.log('🔍💰 Detectando cambios...');
+      serverLog.debug('Detectando cambios para notificación...', null, 'PricesAdminGrid');
       const cambios = detectarCambios();
-      console.log('🔍💰 Cambios detectados:', cambios.length);
+      serverLog.info('Cambios detectados para notificación', { 
+        count: cambios.length 
+      }, 'PricesAdminGrid');
       
-      if (cambios.length > 0) {
-        console.log('🔍💰 Enviando notificación...');
-        await notifyPriceChange({
-          adminNombre: user?.email || 'Administrador',
-          tipoCancha: tiposCanchas.find(t => t.id === activeTab)?.name || activeTab,
-          cambiosRealizados: cambios
-        });
-        console.log('🔍💰 Notificación enviada');
+      // Ejecutar notificación y recarga EN PARALELO (no bloquear UI)
+      serverLog.success('✅ Guardado completado, ejecutando tareas finales...', null, 'PricesAdminGrid');
+      setMessage({ type: 'success', text: 'Precios actualizados correctamente' });
+      
+      // Promise.allSettled permite que ambas se ejecuten en paralelo
+      // y no se bloqueen mutuamente
+      const [notifResult, recargaResult] = await Promise.allSettled([
+        // Notificación (solo si hay cambios)
+        cambios.length > 0 
+          ? Promise.race([
+              notifyPriceChange({
+                adminNombre: user?.email || 'Administrador',
+                tipoCancha: tiposCanchas.find(t => t.id === activeTab)?.name || activeTab,
+                cambiosRealizados: cambios
+              }),
+              new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout notificación')), 10000)
+              )
+            ])
+          : Promise.resolve(),
+        
+        // Recarga de precios (en paralelo)
+        loadPrecios()
+      ]);
+      
+      // Log de resultados (no críticos)
+      if (notifResult.status === 'fulfilled') {
+        serverLog.success('Notificación enviada exitosamente', null, 'PricesAdminGrid');
+      } else if (notifResult.status === 'rejected') {
+        serverLog.warn('Error en notificación (no crítico)', { 
+          error: notifResult.reason?.message 
+        }, 'PricesAdminGrid');
       }
       
-      console.log('🔍💰 ✅ Guardado exitoso, recargando precios...');
-      setMessage({ type: 'success', text: 'Precios actualizados correctamente' });
-      await loadPrecios();
+      if (recargaResult.status === 'rejected') {
+        serverLog.warn('Error recargando precios', { 
+          error: recargaResult.reason?.message 
+        }, 'PricesAdminGrid');
+      }
       
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     } catch (error) {
-      console.error('🔍💰 ERROR CRÍTICO guardando precios:', error.message, error);
+      serverLog.error('ERROR CRÍTICO guardando precios', { 
+        message: error.message, 
+        stack: error.stack 
+      }, 'PricesAdminGrid');
       setMessage({ type: 'error', text: `Error al guardar: ${error.message}` });
     } finally {
-      console.log('🔍💰 Finally: Reseteando estado de guardado');
+      serverLog.debug('Finally: Reseteando estado de guardado', null, 'PricesAdminGrid');
       setSaving(false);
     }
   };

@@ -18,27 +18,27 @@ app.prepare().then(() => {
     try {
       const parsedUrl = parse(req.url, true);
       
-      // Servir archivos de /uploads directamente desde el disco persistente
+      // Servir archivos de /uploads desde múltiples ubicaciones
       if (parsedUrl.pathname.startsWith('/uploads/')) {
-        const filePath = path.join(process.cwd(), 'public', parsedUrl.pathname);
+        const contentTypes = {
+          '.jpg': 'image/jpeg',
+          '.jpeg': 'image/jpeg',
+          '.png': 'image/png',
+          '.webp': 'image/webp',
+          '.gif': 'image/gif',
+          '.mp4': 'video/mp4',
+          '.webm': 'video/webm',
+        };
         
-        if (existsSync(filePath)) {
-          const stat = statSync(filePath);
+        // Intentar primero desde /var/data/uploads (archivos del admin)
+        const persistentPath = path.join('/var/data', parsedUrl.pathname);
+        
+        if (existsSync(persistentPath)) {
+          const stat = statSync(persistentPath);
           
           if (stat.isFile()) {
-            // Determinar content-type
-            const ext = path.extname(filePath).toLowerCase();
-            const contentTypes = {
-              '.jpg': 'image/jpeg',
-              '.jpeg': 'image/jpeg',
-              '.png': 'image/png',
-              '.webp': 'image/webp',
-              '.gif': 'image/gif',
-              '.mp4': 'video/mp4',
-              '.webm': 'video/webm',
-            };
+            const ext = path.extname(persistentPath).toLowerCase();
             
-            // Cache más corto para uploads (5 minutos con revalidación)
             res.writeHead(200, {
               'Content-Type': contentTypes[ext] || 'application/octet-stream',
               'Content-Length': stat.size,
@@ -46,12 +46,33 @@ app.prepare().then(() => {
               'ETag': `"${stat.mtime.getTime()}-${stat.size}"`,
             });
             
-            createReadStream(filePath).pipe(res);
+            createReadStream(persistentPath).pipe(res);
             return;
           }
         }
         
-        // Si no existe, devolver 404
+        // Si no está en /var/data, intentar desde public/ (fallback de Git)
+        const publicPath = path.join(process.cwd(), 'public', parsedUrl.pathname);
+        
+        if (existsSync(publicPath)) {
+          const stat = statSync(publicPath);
+          
+          if (stat.isFile()) {
+            const ext = path.extname(publicPath).toLowerCase();
+            
+            res.writeHead(200, {
+              'Content-Type': contentTypes[ext] || 'application/octet-stream',
+              'Content-Length': stat.size,
+              'Cache-Control': 'public, max-age=300, must-revalidate',
+              'ETag': `"${stat.mtime.getTime()}-${stat.size}"`,
+            });
+            
+            createReadStream(publicPath).pipe(res);
+            return;
+          }
+        }
+        
+        // Si no existe en ninguna ubicación, devolver 404
         res.writeHead(404);
         res.end('File not found');
         return;

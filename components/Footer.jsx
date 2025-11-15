@@ -1,26 +1,17 @@
 "use client";
 import React from "react";
-import { useContactInfo } from "@/hooks/useContactInfo";
-import { useWhatsApp } from "@/hooks/useWhatsApp";
 import { useAdminMode } from "@/contexts/AdminModeContext";
 import EditableContent from "./EditableContent";
 import EditableImage from "./EditableImage";
 
 export default function Footer() {
   const { isAdminMode } = useAdminMode();
-  const { 
-    loading, 
-    getPhoneNumber, 
-    getSchedule, 
-    getAddress,
-    getInstagramUrl 
-  } = useContactInfo();
-
-  const { openWhatsApp, getWhatsAppNumber } = useWhatsApp();
 
   const handleWhatsAppClick = () => {
     const message = "¡Hola! Me gustaría saber más sobre City Soccer.";
-    openWhatsApp(message);
+    const phoneNumber = '56974265020'; // Extraído del footer content
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   // Prevenir navegación en modo admin
@@ -29,14 +20,6 @@ export default function Footer() {
       e.preventDefault();
     }
   };
-
-  if (loading) {
-    return (
-      <footer className="bg-[#23262C] h-96 flex items-center justify-center">
-        <div className="text-white">Cargando...</div>
-      </footer>
-    );
-  }
 
   return (
     <>
@@ -72,9 +55,9 @@ export default function Footer() {
                   pageKey="footer" 
                   fieldKey="contact_phone" 
                   fieldType="text"
-                  defaultValue={getPhoneNumber()}
+                  defaultValue="+56 9 7426 5020"
                   as="a"
-                  href={`tel:${getPhoneNumber()}`}
+                  href="tel:+56974265020"
                   onClick={handleLinkClick}
                   className="block text-2xl font-bold text-white hover:text-yellow-100 sm:text-3xl transition-colors duration-300 drop-shadow-lg"
                 />
@@ -93,7 +76,7 @@ export default function Footer() {
                     pageKey="footer" 
                     fieldKey="hours_weekdays" 
                     fieldType="text"
-                    defaultValue={getSchedule('weekdays')}
+                    defaultValue="Lunes a Viernes: 9:00 - 23:00"
                     as="span"
                   />
                 </li>
@@ -109,7 +92,11 @@ export default function Footer() {
                     pageKey="footer" 
                     fieldKey="hours_saturday" 
                     fieldType="text"
-                    defaultValue={getSchedule('saturday')}
+                  <EditableContent 
+                    pageKey="footer" 
+                    fieldKey="hours_saturday" 
+                    fieldType="text"
+                    defaultValue="Sábados: 9:00 - 23:00"
                     as="span"
                   />
                 </li>
@@ -125,7 +112,7 @@ export default function Footer() {
                     pageKey="footer" 
                     fieldKey="hours_sunday" 
                     fieldType="text"
-                    defaultValue="Reservas online 24/7"
+                    defaultValue="Domingos: 9:00 - 23:00"
                     as="span"
                   />
                 </li>
@@ -148,7 +135,7 @@ export default function Footer() {
                       pageKey="footer" 
                       fieldKey="contact_address" 
                       fieldType="text"
-                      defaultValue={getAddress()}
+                      defaultValue="Tiltil 2569, Macul"
                       as="span"
                       onClick={handleLinkClick}
                     />
@@ -158,8 +145,12 @@ export default function Footer() {
 
               <ul className="mt-8 flex gap-6">
                 <li>
-                  <a
-                    href="#"
+                  <EditableContent 
+                    pageKey="footer" 
+                    fieldKey="social_facebook_url" 
+                    fieldType="text"
+                    defaultValue="#"
+                    as="a"
                     rel="noreferrer"
                     target="_blank"
                     onClick={handleLinkClick}
@@ -178,12 +169,16 @@ export default function Footer() {
                         clipRule="evenodd"
                       />
                     </svg>
-                  </a>
+                  </EditableContent>
                 </li>
 
                 <li>
-                  <a
-                    href={getInstagramUrl()}
+                  <EditableContent 
+                    pageKey="footer" 
+                    fieldKey="social_instagram_url" 
+                    fieldType="text"
+                    defaultValue="https://www.instagram.com/citysoccersantiago"
+                    as="a"
                     rel="noreferrer"
                     target="_blank"
                     onClick={handleLinkClick}
@@ -202,7 +197,7 @@ export default function Footer() {
                         clipRule="evenodd"
                       />
                     </svg>
-                  </a>
+                  </EditableContent>
                 </li>
 
                 <li>

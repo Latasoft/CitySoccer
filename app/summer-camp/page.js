@@ -3,10 +3,6 @@ import HeroSection from "@/components/HeroSection";
 import EditableContent from "@/components/EditableContent";
 import { useWhatsApp } from '@/hooks/useWhatsApp';
 
-// ISR: Regenerar cada 60 segundos
-export const revalidate = 60;
-
-
 export default function SummerCamp() {
   const { openWhatsApp } = useWhatsApp();
 

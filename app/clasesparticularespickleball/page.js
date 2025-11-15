@@ -4,12 +4,9 @@ import HeroSection from '@/components/HeroSection';
 import SchedulePricingSection from '@/components/SchedulePricingSection';
 import CTASection from '@/components/CTASection';
 import { useWhatsApp } from '@/hooks/useWhatsApp';
+import EditableContent from '@/components/EditableContent';
 
-// ISR: Regenerar cada 60 segundos
-export const revalidate = 60;
-
-
-export default function ClasesParticularePickleball() {
+export default function ClasesParticularesPickleball() {
   const { openWhatsApp, getWhatsAppNumber } = useWhatsApp();
 
   const classData = {

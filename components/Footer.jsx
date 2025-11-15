@@ -92,10 +92,6 @@ export default function Footer() {
                     pageKey="footer" 
                     fieldKey="hours_saturday" 
                     fieldType="text"
-                  <EditableContent 
-                    pageKey="footer" 
-                    fieldKey="hours_saturday" 
-                    fieldType="text"
                     defaultValue="Sábados: 9:00 - 23:00"
                     as="span"
                   />

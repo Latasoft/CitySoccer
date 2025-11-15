@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import EditableContent from '@/components/EditableContent'
 import EditableImage from '@/components/EditableImage'
+import { useAdminMode } from '@/contexts/AdminModeContext'
 import { localContentService } from '@/lib/localContentService'
 
 export default function ArriendaCanchaSelector() {
   const router = useRouter()
+  const { isAdminMode } = useAdminMode()
   const [content, setContent] = useState({})
   const [loading, setLoading] = useState(true)
 
@@ -106,6 +108,12 @@ export default function ArriendaCanchaSelector() {
               key={cancha.id} 
               href={cancha.href}
               className="group block"
+              onClick={(e) => {
+                // Prevenir navegación en modo admin para permitir edición
+                if (isAdminMode) {
+                  e.preventDefault();
+                }
+              }}
             >
               <div className="relative h-96 rounded-lg overflow-hidden shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
                 {/* Background Image - Editable */}

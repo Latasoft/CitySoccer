@@ -24,6 +24,11 @@ async function getContentFromStorage(pageKey, bypassCache = false) {
   
   if (!content) {
     console.error('🔍🧭 ❌ Contenido NO encontrado en Supabase Storage:', pageKey);
+    console.error('🔍🧭 ℹ️ Esto puede significar:');
+    console.error('🔍🧭    1. El archivo no existe en el bucket');
+    console.error('🔍🧭    2. Variables de entorno no configuradas (SUPABASE_SERVICE_KEY)');
+    console.error('🔍🧭    3. Permisos RLS incorrectos');
+    console.error('🔍🧭 Los componentes usarán defaultValues como fallback');
     throw new Error('Página no encontrada');
   }
   

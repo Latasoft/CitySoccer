@@ -8,8 +8,8 @@ services:
     region: oregon # o usa 'singapore' si prefieres
     plan: standard # $25/mes - 2GB RAM, 1 CPU
 
-    # Build Command - Solo construir
-    buildCommand: npm run build
+    # Build Command - Instalar dependencias y construir
+    buildCommand: npm install && npm run build
 
     # Start Command - Configurar symlinks y arrancar
     startCommand: chmod +x scripts/setup-persistent-storage.sh && scripts/setup-persistent-storage.sh && npm run start

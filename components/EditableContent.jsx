@@ -37,7 +37,7 @@ const EditableContent = ({
   
   const [editedValue, setEditedValue] = useState('');
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Cambiar a false - mostrar defaultValue inmediatamente
   const [saving, setSaving] = useState(false);
 
   // Cargar valor desde caché compartido al montar el componente
@@ -63,8 +63,7 @@ const EditableContent = ({
         
         if (error) {
           console.error(`[EditableContent] ❌ Error loading ${pageKey}.${fieldKey}:`, error);
-          setLoading(false);
-          return;
+          return; // Mantener defaultValue
         }
         
         // getField ya devuelve solo el valor del campo
@@ -79,22 +78,11 @@ const EditableContent = ({
           if (typeof window !== 'undefined') {
             localStorage.setItem(cacheKey, data);
           }
-        } else {
-          if (debugMode) {
-            console.warn(`[EditableContent] ⚠️ Campo NO encontrado: ${pageKey}.${fieldKey} - usando defaultValue`);
-          }
-          setValue(defaultValue);
         }
+        // Si no hay data, mantener defaultValue
       } catch (error) {
         console.error(`[EditableContent] 💥 Exception cargando ${pageKey}.${fieldKey}:`, error);
-        setValue(defaultValue);
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-          if (debugMode) {
-            console.log(`[EditableContent] ✓ Carga completada para ${pageKey}.${fieldKey}`);
-          }
-        }
+        // Mantener defaultValue
       }
     };
 
@@ -103,7 +91,7 @@ const EditableContent = ({
     return () => {
       isMounted = false;
     };
-  }, [pageKey, fieldKey, defaultValue, cacheKey]);
+  }, [pageKey, fieldKey, defaultValue, cacheKey, getField]);
 
   const handleEdit = () => {
     setEditedValue(value);

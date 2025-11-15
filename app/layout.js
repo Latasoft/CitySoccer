@@ -1,17 +1,11 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navigation from "../components/Navigation";
-import dynamic from "next/dynamic";
+import Footer from "../components/Footer";
 import { AdminModeProvider } from "../contexts/AdminModeContext";
 import { EditModeProvider } from "../contexts/EditModeContext";
 import { ContentProvider } from "../contexts/ContentContext";
 import EditModeToggle from "../components/EditModeToggle";
-
-// Lazy load Footer (está below-the-fold)
-const Footer = dynamic(() => import("../components/Footer"), {
-  loading: () => <div className="bg-[#23262C] h-96" />,
-  ssr: true
-});
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],

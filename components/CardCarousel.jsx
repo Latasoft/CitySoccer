@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useDynamicImages } from '@/lib/dynamicImageService';
 import EditableImage from './EditableImage';
@@ -9,8 +9,6 @@ import CardBackgroundImage from './CardBackgroundImage';
 const CardCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  const [visibleCards, setVisibleCards] = useState(new Set([0, 1, 2])); // Cargar primeras 3 cards
-  const carouselRef = useRef(null);
   
   // Definir cards con valores por defecto (SIEMPRE se muestran)
   const defaultCards = [
@@ -135,25 +133,6 @@ const CardCarousel = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Lazy load cards: cargar cards adyacentes cuando el usuario navega
-  useEffect(() => {
-    const cardsToLoad = new Set(visibleCards);
-    
-    // Cargar card actual y las adyacentes
-    cardsToLoad.add(currentIndex);
-    if (currentIndex > 0) cardsToLoad.add(currentIndex - 1);
-    if (currentIndex < cardsData.length - 1) cardsToLoad.add(currentIndex + 1);
-    
-    // En desktop, cargar las 3 cards visibles
-    if (!isMobile) {
-      cardsToLoad.add(currentIndex);
-      cardsToLoad.add(currentIndex + 1);
-      cardsToLoad.add(currentIndex + 2);
-    }
-    
-    setVisibleCards(cardsToLoad);
-  }, [currentIndex, isMobile]);
-
   // Maximum slides (4 positions for desktop: 0,1,2,3 - 6 positions for mobile: 0,1,2,3,4,5)
   const maxSlides = isMobile ? cardsData.length - 1 : 3;
   
@@ -225,70 +204,64 @@ const CardCarousel = () => {
           </button>
 
           {/* Cards Container */}
-          <div className="overflow-hidden rounded-lg" ref={carouselRef}>
+          <div className="overflow-hidden rounded-lg">
             <div
               className="flex transition-transform duration-300 ease-in-out"
               style={{
                 transform: `translateX(-${currentIndex * (100 / (isMobile ? 1 : 3))}%)`
               }}
             >
-              {cardsData.map((card, index) => (
+              {cardsData.map((card) => (
                 <div
                   key={card.id}
                   className={`flex-none ${isMobile ? 'w-full' : 'w-1/3'} px-3`}
                 >
-                  {/* Solo renderizar contenido de cards visibles o cercanas */}
-                  {visibleCards.has(index) ? (
-                    <div className="relative h-96 rounded-lg overflow-hidden shadow-lg">
-                      {/* Background Image Editable */}
-                      <CardBackgroundImage
-                        pageKey="home"
-                        fieldKey={card.imageKey}
-                        defaultValue={card.defaultImage}
-                        className="absolute inset-0 bg-cover bg-center"
-                      />
-                      
-                      {/* Overlay */}
-                      <div className="absolute inset-0 bg-black/50" />
+                  <div className="relative h-96 rounded-lg overflow-hidden shadow-lg">
+                    {/* Background Image Editable */}
+                    <CardBackgroundImage
+                      pageKey="home"
+                      fieldKey={card.imageKey}
+                      defaultValue={card.defaultImage}
+                      className="absolute inset-0 bg-cover bg-center"
+                    />
+                    
+                    {/* Overlay */}
+                    <div className="absolute inset-0 bg-black/50" />
 
-                      {/* Content */}
-                      <div className="absolute inset-0 p-6 flex flex-col justify-between text-white">
-                        <div>
-                          <EditableContent
-                            pageKey="home"
-                            fieldKey={card.titleKey}
-                            fieldType="text"
-                            defaultValue={card.defaultTitle}
-                            as="h3"
-                            className="text-2xl font-bold mb-4"
-                          />
-                          <EditableContent
-                            pageKey="home"
-                            fieldKey={card.descKey}
-                            fieldType="textarea"
-                            defaultValue={card.defaultDesc}
-                            as="p"
-                            className="text-sm opacity-90"
-                          />
-                        </div>
-
-                        <Link href={card.ctaLink}>
-                          <button className="w-full py-4 px-6 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white rounded-xl font-bold text-lg tracking-wide uppercase shadow-lg transform transition-all duration-200 hover:scale-105 hover:shadow-xl border-2 border-transparent hover:border-green-300">
-                            <EditableContent
-                              pageKey="home"
-                              fieldKey={card.ctaKey}
-                              fieldType="text"
-                              defaultValue={card.defaultCta}
-                              as="span"
-                            />
-                          </button>
-                        </Link>
+                    {/* Content */}
+                    <div className="absolute inset-0 p-6 flex flex-col justify-between text-white">
+                      <div>
+                        <EditableContent
+                          pageKey="home"
+                          fieldKey={card.titleKey}
+                          fieldType="text"
+                          defaultValue={card.defaultTitle}
+                          as="h3"
+                          className="text-2xl font-bold mb-4"
+                        />
+                        <EditableContent
+                          pageKey="home"
+                          fieldKey={card.descKey}
+                          fieldType="textarea"
+                          defaultValue={card.defaultDesc}
+                          as="p"
+                          className="text-sm opacity-90"
+                        />
                       </div>
+
+                      <Link href={card.ctaLink}>
+                        <button className="w-full py-4 px-6 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white rounded-xl font-bold text-lg tracking-wide uppercase shadow-lg transform transition-all duration-200 hover:scale-105 hover:shadow-xl border-2 border-transparent hover:border-green-300">
+                          <EditableContent
+                            pageKey="home"
+                            fieldKey={card.ctaKey}
+                            fieldType="text"
+                            defaultValue={card.defaultCta}
+                            as="span"
+                          />
+                        </button>
+                      </Link>
                     </div>
-                  ) : (
-                    // Placeholder para cards no cargadas
-                    <div className="relative h-96 rounded-lg bg-gray-800 animate-pulse" />
-                  )}
+                  </div>
                 </div>
               ))}
             </div>

@@ -26,7 +26,7 @@ const EditableImage = ({
   const [dragOver, setDragOver] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
   const [currentSrc, setCurrentSrc] = useState(src);
-  const [loading, setLoading] = useState(true); // Empezar en true para cargar desde JSON
+  const [loading, setLoading] = useState(false); // Cambiar a false - mostrar imagen inmediatamente
   const [cacheBuster, setCacheBuster] = useState(Date.now()); // Para forzar recarga de imagen
 
   // Generar fieldKey automático si no se proporciona
@@ -45,7 +45,7 @@ const EditableImage = ({
 
     const loadImageUrl = async () => {
       try {
-        setLoading(true);
+        // No mostrar loading - la imagen ya se muestra con src
         const { data, error } = await getField(pageKey, imageFieldKey);
         
         if (!isMounted) return;
@@ -54,7 +54,7 @@ const EditableImage = ({
           if (debugMode) {
             console.error(`[EditableImage] Error cargando ${pageKey}.${imageFieldKey}:`, error);
           }
-          setCurrentSrc(src); // Fallback al src original
+          // Mantener src original
           return;
         }
         
@@ -64,19 +64,11 @@ const EditableImage = ({
           }
           setCurrentSrc(data);
           setCacheBuster(Date.now()); // Forzar recarga al cargar desde JSON
-        } else {
-          if (debugMode) {
-            console.log(`[EditableImage] ℹ️ No hay valor en JSON para ${pageKey}.${imageFieldKey}, usando src prop:`, src);
-          }
-          setCurrentSrc(src);
         }
+        // Si no hay data, mantener src original
       } catch (error) {
         console.error(`[EditableImage] Error en loadImageUrl:`, error);
-        setCurrentSrc(src);
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+        // Mantener src original
       }
     };
 

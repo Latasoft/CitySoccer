@@ -5,7 +5,7 @@ import { logger } from '@/lib/logger';
 
 // Caché en memoria del servidor (se limpia al reiniciar)
 const serverCache = new Map();
-const CACHE_TTL = 5000; // 5 segundos
+const CACHE_TTL = 3600000; // 1 hora (contenido cambia raramente)
 
 // Función auxiliar para obtener contenido (con caché)
 function getContentFromFile(pageKey, bypassCache = false) {

@@ -109,7 +109,7 @@ const Hero = () => {
           loop
           muted
           playsInline
-          preload="auto"
+          preload="metadata"
           poster={backgroundUrl}
           key={videoUrl}
           onLoadedData={() => {

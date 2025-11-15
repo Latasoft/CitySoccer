@@ -162,3 +162,6 @@ export function useContent() {
   }
   return context;
 }
+
+// Export default para compatibilidad
+export default ContentProvider;

@@ -40,45 +40,56 @@ const Hero = () => {
   }, []);
 
   useEffect(() => {
+    let playAttempts = 0;
+    const maxAttempts = 3;
+    
     // Asegurar que el video se reproduzca automáticamente
     const playVideo = async () => {
-      if (videoRef.current) {
+      if (videoRef.current && playAttempts < maxAttempts) {
         try {
-          // Forzar muted antes de reproducir
+          // Forzar configuración antes de reproducir
           videoRef.current.muted = true;
           videoRef.current.playsInline = true;
+          videoRef.current.setAttribute('playsinline', '');
+          videoRef.current.setAttribute('webkit-playsinline', '');
           
           await videoRef.current.play();
-          console.log('✅ Video reproduciendo correctamente');
+          setVideoError(false);
         } catch (error) {
-          console.error("❌ Error al reproducir el video:", error);
-          // Si falla, intentar de nuevo después de 100ms
-          setTimeout(() => {
-            if (videoRef.current) {
-              videoRef.current.play().catch(e => console.error('Reintento fallido:', e));
-            }
-          }, 100);
+          playAttempts++;
+          // No mostrar error, solo reintentar silenciosamente
+          if (playAttempts < maxAttempts) {
+            setTimeout(() => playVideo(), 200 * playAttempts);
+          }
         }
       }
     };
 
-    playVideo();
-
+    // Intentar reproducir cuando el video cargue
+    const handleLoadedData = () => playVideo();
+    
     // Observar cuando el video se pausa y volverlo a reproducir
     const handlePause = () => {
       if (videoRef.current && !videoRef.current.ended) {
-        console.log('🔄 Video pausado, reiniciando...');
-        videoRef.current.play().catch(e => console.error('Error al reiniciar:', e));
+        setTimeout(() => {
+          if (videoRef.current) {
+            videoRef.current.play().catch(() => {});
+          }
+        }, 100);
       }
     };
 
     const video = videoRef.current;
     if (video) {
+      video.addEventListener('loadeddata', handleLoadedData);
       video.addEventListener('pause', handlePause);
+      // Intentar reproducir inmediatamente
+      playVideo();
     }
 
     return () => {
       if (video) {
+        video.removeEventListener('loadeddata', handleLoadedData);
         video.removeEventListener('pause', handlePause);
       }
     };

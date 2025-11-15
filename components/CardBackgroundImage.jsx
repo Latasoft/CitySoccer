@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAdminMode } from '@/contexts/AdminModeContext';
+import { useContent } from '@/contexts/ContentContext'; // ✅ Usar ContentContext
 import { localContentService } from '@/lib/localContentService';
 import { Edit2, Save, X, Loader2, Upload } from 'lucide-react';
 
@@ -16,57 +17,46 @@ const CardBackgroundImage = ({
   showPlaceholder = true
 }) => {
   const { isAdminMode } = useAdminMode();
+  const { getField } = useContent(); // ✅ Usar hook de ContentContext
   
-  // Inicializar con defaultValue, el servidor tiene prioridad
+  // Inicializar con defaultValue
   const cacheKey = `content_${pageKey}_${fieldKey}`;
   const [value, setValue] = useState(defaultValue);
   
   const [editedValue, setEditedValue] = useState('');
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // ✅ Cambiar a false - mostrar inmediatamente
   const [saving, setSaving] = useState(false);
   const [fieldId, setFieldId] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
 
-  // Cargar valor desde archivo JSON y actualizar localStorage
+  // ✅ Cargar usando getField (con deduplicación)
   useEffect(() => {
     let isMounted = true;
     
     const loadValue = async () => {
       try {
-        const { data, error } = await localContentService.getPageContent(pageKey);
+        const { data, error } = await getField(pageKey, fieldKey); // ✅ Usa ContentContext
         
         if (!isMounted) return;
         
         if (error) {
           console.error(`Error loading ${pageKey}.${fieldKey}:`, error);
-          setLoading(false);
-          return;
+          return; // Mantener defaultValue
         }
         
-        if (data && data[fieldKey] !== undefined) {
-          const newValue = data[fieldKey];
-          setValue(newValue);
+        if (data !== undefined && data !== null) {
+          setValue(data);
           // Guardar en localStorage como backup
           if (typeof window !== 'undefined') {
-            localStorage.setItem(cacheKey, newValue);
-          }
-        } else {
-          // Si no hay valor en servidor, intentar localStorage
-          if (typeof window !== 'undefined') {
-            const cached = localStorage.getItem(cacheKey);
-            if (cached) {
-              setValue(cached);
-            }
+            localStorage.setItem(cacheKey, data);
           }
         }
+        // Si no hay data, mantener defaultValue
       } catch (error) {
         console.error(`Error cargando ${pageKey}.${fieldKey}:`, error);
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+        // Mantener defaultValue
       }
     };
 
@@ -75,7 +65,7 @@ const CardBackgroundImage = ({
     return () => {
       isMounted = false;
     };
-  }, [pageKey, fieldKey, defaultValue, cacheKey]);
+  }, [pageKey, fieldKey, defaultValue, cacheKey, getField]);
 
   const handleEdit = () => {
     setEditedValue(value);

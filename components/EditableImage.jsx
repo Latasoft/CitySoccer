@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useAdminMode } from '@/contexts/AdminModeContext';
 import { useContent } from '@/contexts/ContentContext';
-import { imageService } from '@/lib/adminService';
+import { localContentService } from '@/lib/localContentService';
 import { dynamicImageService } from '@/lib/dynamicImageService';
 import { Upload, X, Check, Loader2 } from 'lucide-react';
 
@@ -94,10 +94,8 @@ const EditableImage = ({
       setUploading(true);
       setUploadProgress('Subiendo imagen...');
 
-      // Generar nombre único con timestamp
-      const fileName = `${categoria}_${Date.now()}`;
-      
-      const { data, error } = await imageService.upload(file, categoria, fileName);
+      // ✅ Usar localContentService directamente (no pasa por Supabase)
+      const { data, error } = await localContentService.uploadFile(file, categoria);
       
       if (error) throw error;
 

@@ -1,7 +1,5 @@
-import { writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
 import { NextResponse } from 'next/server';
-import path from 'path';
+import { uploadFile } from '@/lib/contentStorage';
 
 export async function POST(request) {
   try {
@@ -24,58 +22,38 @@ export async function POST(request) {
       );
     }
 
-    // Obtener buffer del archivo
+    console.log('📤 Subiendo archivo a Supabase Storage:', {
+      nombre: file.name,
+      tamaño: `${(file.size / 1024).toFixed(2)} KB`,
+      tipo: file.type,
+      categoría: category
+    });
+    
+    // Convertir File a Buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     
-    // Generar nombre único
-    const timestamp = Date.now();
-    const originalName = file.name.replace(/\s+/g, '_');
-    const fileName = `${category}_${timestamp}_${originalName}`;
+    // Subir a Supabase Storage
+    const result = await uploadFile(buffer, category, file.name);
     
-    // Determinar directorio de upload
-    // En Render: /opt/render/project/src/public/uploads
-    // En local: {cwd}/public/uploads
-    const publicDir = path.join(process.cwd(), 'public');
-    const uploadDir = path.join(publicDir, 'uploads', category);
-    
-    console.log('📁 Directorio de upload:', uploadDir);
-    console.log('📂 Public dir:', publicDir);
-    console.log('🔍 Public dir existe:', existsSync(publicDir));
-    
-    // Crear directorio si no existe
-    if (!existsSync(uploadDir)) {
-      console.log('🏗️  Creando directorio:', uploadDir);
-      await mkdir(uploadDir, { recursive: true });
+    if (!result.success) {
+      throw new Error(result.error || 'Error subiendo a Supabase Storage');
     }
     
-    // Guardar archivo
-    const filePath = path.join(uploadDir, fileName);
-    console.log('💾 Guardando en:', filePath);
-    
-    await writeFile(filePath, buffer);
-    
-    // Verificar que se guardó
-    if (!existsSync(filePath)) {
-      throw new Error('Archivo no se guardó correctamente');
-    }
-    
-    // URL pública del archivo
-    const publicUrl = `/uploads/${category}/${fileName}`;
-    
-    console.log(`✅ Archivo subido exitosamente: ${publicUrl}`);
-    console.log(`   Tamaño: ${(file.size / 1024).toFixed(2)} KB`);
-    console.log(`   Tipo: ${file.type}`);
+    console.log(`✅ Archivo subido exitosamente a Supabase Storage`);
+    console.log(`   URL: ${result.url}`);
+    console.log(`   Path: ${result.path}`);
     
     return NextResponse.json({
       success: true,
       data: {
-        url: publicUrl,
-        fileName: fileName,
+        url: result.url,
+        fileName: result.fileName,
+        path: result.path,
         size: file.size,
         type: file.type
       },
-      message: 'Archivo subido exitosamente'
+      message: 'Archivo subido exitosamente a Supabase Storage'
     });
     
   } catch (error) {

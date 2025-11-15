@@ -1,14 +1,13 @@
-import { writeFile } from 'fs/promises';
 import { NextResponse } from 'next/server';
-import path from 'path';
-import { logger } from '@/lib/logger';
+import { revalidatePath } from 'next/cache';
+import { saveContent, getContent } from '@/lib/contentStorage';
 
 // Caché en memoria del servidor (se limpia al reiniciar)
 const serverCache = new Map();
 const CACHE_TTL = 300000; // 5 minutos (balance entre performance y freshness)
 
-// Función auxiliar para obtener contenido (con caché)
-function getContentFromFile(pageKey, bypassCache = false) {
+// Función auxiliar para obtener contenido desde Supabase Storage (con caché)
+async function getContentFromStorage(pageKey, bypassCache = false) {
   const now = Date.now();
   const cached = serverCache.get(pageKey);
   
@@ -18,24 +17,17 @@ function getContentFromFile(pageKey, bypassCache = false) {
     return cached.data;
   }
   
-  console.log('🔍🧭 Leyendo DISCO para', pageKey, bypassCache ? '(bypass cache)' : '(cache expirado)');
-  console.log('🔍🧭 Ruta del archivo:', path.join(process.cwd(), 'public', 'content', `${pageKey}.json`));
-  console.log('🔍🧭 CWD:', process.cwd());
+  console.log('🔍🧭 Leyendo desde SUPABASE STORAGE para', pageKey, bypassCache ? '(bypass cache)' : '(cache expirado)');
   
-  // Leer del disco
-  const filePath = path.join(process.cwd(), 'public', 'content', `${pageKey}.json`);
-  const fs = require('fs');
+  // Leer desde Supabase Storage
+  const content = await getContent(pageKey);
   
-  if (!fs.existsSync(filePath)) {
-    console.error('🔍🧭 ❌ Archivo NO existe:', filePath);
-    console.log('🔍🧭 Contenido de /public/content:', fs.existsSync(path.join(process.cwd(), 'public', 'content')) ? fs.readdirSync(path.join(process.cwd(), 'public', 'content')) : 'directorio no existe');
+  if (!content) {
+    console.error('🔍🧭 ❌ Contenido NO encontrado en Supabase Storage:', pageKey);
     throw new Error('Página no encontrada');
   }
   
-  console.log('🔍🧭 ✅ Archivo existe, leyendo...');
-  
-  const fileContent = fs.readFileSync(filePath, 'utf-8');
-  const content = JSON.parse(fileContent);
+  console.log('🔍🧭 ✅ Contenido cargado desde Supabase Storage');
   
   // Guardar en caché
   serverCache.set(pageKey, {
@@ -66,36 +58,37 @@ export async function POST(request) {
       );
     }
 
-    // Ruta del archivo JSON
-    const filePath = path.join(process.cwd(), 'public', 'content', `${pageKey}.json`);
+    // Obtener contenido actual desde Supabase Storage
+    console.log('🔍🧭 Obteniendo contenido actual desde Supabase Storage...');
+    let content = await getContent(pageKey) || {};
     
-    console.log('🔍🧭 Ruta del archivo:', filePath);
-    
-    // Leer el archivo actual
-    const fs = require('fs');
-    let content = {};
-    
-    if (fs.existsSync(filePath)) {
-      const fileContent = fs.readFileSync(filePath, 'utf-8');
-      content = JSON.parse(fileContent);
-      console.log('🔍🧭 Contenido actual del archivo:', Object.keys(content));
-    } else {
-      console.log('🔍🧭 Archivo no existe, creando nuevo');
-    }
+    console.log('🔍🧭 Contenido actual:', Object.keys(content));
     
     // Actualizar el campo
     content[fieldKey] = fieldValue;
     
-    console.log('🔍🧭 Contenido actualizado, escribiendo archivo...');
+    console.log('🔍🧭 Contenido actualizado, guardando en Supabase Storage...');
     
-    // Guardar el archivo
-    await writeFile(filePath, JSON.stringify(content, null, 2), 'utf-8');
+    // Guardar en Supabase Storage
+    const result = await saveContent(pageKey, content);
     
-    console.log('🔍🧭 ✅ Archivo guardado exitosamente');
+    if (!result.success) {
+      throw new Error(result.error || 'Error guardando en Supabase Storage');
+    }
+    
+    console.log('🔍🧭 ✅ Contenido guardado exitosamente en:', result.url);
     
     // Invalidar caché del servidor
     serverCache.delete(pageKey);
     console.log('🔍🧭 Cache invalidado para:', pageKey);
+    
+    // Revalidar páginas que usan este contenido (ISR)
+    try {
+      revalidatePath(`/${pageKey === 'home' ? '' : pageKey}`);
+      console.log('🔍🧭 ✅ ISR revalidado para:', pageKey);
+    } catch (revalidateError) {
+      console.warn('⚠️ Error revalidando ruta:', revalidateError.message);
+    }
     
     // Log seguro que maneja objetos/arrays
     const valuePreview = typeof fieldValue === 'object' 
@@ -106,7 +99,8 @@ export async function POST(request) {
     return NextResponse.json({
       success: true,
       data: { pageKey, fieldKey, fieldValue },
-      message: 'Campo actualizado exitosamente'
+      message: 'Campo actualizado exitosamente',
+      storageUrl: result.url
     });
     
   } catch (error) {
@@ -139,7 +133,7 @@ export async function GET(request) {
     // Verificar si se solicita bypass de cache
     const fresh = searchParams.get('fresh') === 'true';
     
-    const content = getContentFromFile(pageKey, fresh);
+    const content = await getContentFromStorage(pageKey, fresh);
     
     console.log('🔍🧭 Contenido cargado OK:', {
       pageKey,
@@ -154,7 +148,7 @@ export async function GET(request) {
       data: content
     }, {
       headers: {
-        'Cache-Control': 'public, max-age=5, s-maxage=5, stale-while-revalidate=10'
+        'Cache-Control': 'public, max-age=60, s-maxage=60, stale-while-revalidate=300'
       }
     });
     
@@ -162,7 +156,7 @@ export async function GET(request) {
     console.error('🔍🧭 ERROR en GET:', error.message, error.stack);
     
     if (error.message === 'Página no encontrada') {
-      console.log('🔍🧭 Archivo no encontrado para pageKey:', pageKey || 'undefined');
+      console.log('🔍🧭 Contenido no encontrado para pageKey:', pageKey || 'undefined');
       return NextResponse.json(
         { error: 'Página no encontrada' },
         { status: 404 }

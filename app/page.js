@@ -1,6 +1,7 @@
 import HomePageClient from '@/components/HomePageClient';
 
-export const revalidate = 3600; // Revalidar cada hora
+// ISR: Regenerar cada 60 segundos
+export const revalidate = 60;
 
 export default async function HomePage() {
   // NO usamos CMS - renderizamos directamente el componente estático

@@ -28,7 +28,7 @@ export default function Footer() {
 
         <div className="relative block h-32 lg:col-span-2 lg:h-full">
           <EditableImage
-            src="/uploads/images/footer-1.jpg"
+            src="https://ckbebftjgqearfubmgus.supabase.co/storage/v1/object/public/images/footer/footer_1763220945462_footer_1763176402282_ecf49f75-db67-4aad-80e2-289cc4ead146-1_all_21702.jpg"
             categoria="footer"
             pageKey="footer"
             fieldKey="footer_image"

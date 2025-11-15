@@ -8,9 +8,6 @@ import EditableImage from '@/components/EditableImage'
 import { useAdminMode } from '@/contexts/AdminModeContext'
 import { localContentService } from '@/lib/localContentService'
 
-// ISR: Regenerar cada 60 segundos
-export const revalidate = 60;
-
 export default function ArriendaCanchaSelector() {
   const router = useRouter()
   const { isAdminMode } = useAdminMode()

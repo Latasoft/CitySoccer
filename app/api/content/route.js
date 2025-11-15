@@ -170,6 +170,14 @@ export async function GET(request) {
     
     const content = await getContentFromStorage(pageKey, fresh);
     
+    // Log especial para footer
+    if (pageKey === 'footer') {
+      console.log('🔍🧭 🎯 FOOTER CONTENT LOADED:');
+      console.log('   Keys:', Object.keys(content || {}));
+      console.log('   footer_image:', content?.footer_image ? content.footer_image.substring(0, 100) + '...' : 'NO EXISTE');
+      console.log('   footer_image tipo:', typeof content?.footer_image);
+    }
+    
     console.log('🔍🧭 Contenido cargado OK:', {
       pageKey,
       fresh,

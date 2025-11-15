@@ -1,7 +1,7 @@
 # Script para ejecutar migracion de imagenes en Render
 # Uso: Actualiza el token y ejecuta este script despues de hacer deploy
 
-$token = "TU_TOKEN_AQUI"
+$token = "fcca09dca4e98ae50296006f7e6ce91feb255b9cc2dca2e01db0d4f3cfb12b56"
 $url = "https://citysoccer.onrender.com/api/migrate-images"
 
 Write-Host "Iniciando migracion de imagenes en Render..." -ForegroundColor Yellow

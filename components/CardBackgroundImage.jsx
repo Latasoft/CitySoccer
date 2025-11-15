@@ -46,7 +46,8 @@ const CardBackgroundImage = ({
           return; // Mantener defaultValue
         }
         
-        if (data !== undefined && data !== null) {
+        if (data !== undefined && data !== null && data !== defaultValue && data !== value) {
+          // Solo actualizar si el valor es diferente
           setValue(data);
           // Guardar en localStorage como backup
           if (typeof window !== 'undefined') {

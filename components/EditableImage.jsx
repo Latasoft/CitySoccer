@@ -27,7 +27,6 @@ const EditableImage = ({
   const [uploadProgress, setUploadProgress] = useState('');
   const [currentSrc, setCurrentSrc] = useState(src);
   const [loading, setLoading] = useState(false); // Cambiar a false - mostrar imagen inmediatamente
-  const [cacheBuster, setCacheBuster] = useState(Date.now()); // Para forzar recarga de imagen
 
   // Generar fieldKey automático si no se proporciona
   const imageFieldKey = fieldKey || `${categoria}_image`;
@@ -58,12 +57,12 @@ const EditableImage = ({
           return;
         }
         
-        if (data) {
+        if (data && data !== src && data !== currentSrc) {
           if (debugMode) {
-            console.log(`[EditableImage] ✅ Cargando desde JSON: ${pageKey}.${imageFieldKey} =`, data);
+            console.log(`[EditableImage] ✅ Actualizando desde JSON: ${pageKey}.${imageFieldKey} =`, data);
           }
+          // Solo actualizar si la URL es diferente
           setCurrentSrc(data);
-          setCacheBuster(Date.now()); // Forzar recarga al cargar desde JSON
         }
         // Si no hay data, mantener src original
       } catch (error) {
@@ -118,9 +117,13 @@ const EditableImage = ({
 
       setUploadProgress('¡Imagen subida exitosamente! 🎉');
       
-      // Actualizar el estado local inmediatamente con cache-busting
-      setCurrentSrc(newImageUrl);
-      setCacheBuster(Date.now()); // Forzar recarga de la imagen
+      // Agregar timestamp para forzar recarga SOLO después de upload
+      const urlWithCacheBust = newImageUrl.includes('?') 
+        ? `${newImageUrl}&t=${Date.now()}` 
+        : `${newImageUrl}?t=${Date.now()}`;
+      
+      // Actualizar el estado local con cache-busting
+      setCurrentSrc(urlWithCacheBust);
       
       // Disparar recarga de imágenes dinámicas
       dynamicImageService.forceReload();
@@ -182,16 +185,12 @@ const EditableImage = ({
     );
   }
 
-  // Añadir cache-busting a la URL de la imagen
-  const getSrcWithCacheBusting = (url) => {
-    if (!url) return url;
-    const separator = url.includes('?') ? '&' : '?';
-    return `${url}${separator}t=${cacheBuster}`;
-  };
+  // Solo agregar cache-busting cuando la URL cambia (no en cada render)
+  const finalSrc = currentSrc;
 
-  const imgElement = currentSrc ? (
+  const imgElement = finalSrc ? (
     <img
-      src={getSrcWithCacheBusting(currentSrc)}
+      src={finalSrc}
       alt={alt}
       className={`${className} ${
         isAdminMode 
@@ -206,6 +205,7 @@ const EditableImage = ({
         e.target.onerror = null; // Prevenir loop infinito
         setCurrentSrc(null); // Forzar a mostrar el placeholder
       }}
+      key={finalSrc} // Key cambia solo cuando URL cambia
     />
   ) : (
     <div

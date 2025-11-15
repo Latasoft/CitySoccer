@@ -8,9 +8,11 @@
     "dev:turbo": "next dev --turbopack",
     "prebuild": "node scripts/ensure-directories.js",
     "build": "next build",
+    "postbuild": "echo '✅ Build completado. Las páginas se regenerarán automáticamente cada 60s'",
     "start": "cross-env NODE_ENV=production node server.js",
     "start:next": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "regenerate": "node scripts/regenerate-all-pages.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.55.0",

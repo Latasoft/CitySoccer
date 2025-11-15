@@ -48,6 +48,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# documentation (internal use only)
+*.md
+!README.md
+
 # backups
 /backups/
 

@@ -89,8 +89,38 @@ export async function POST(request) {
     
     // Revalidar páginas que usan este contenido (ISR)
     try {
-      revalidatePath(`/${pageKey === 'home' ? '' : pageKey}`);
-      console.log('🔍🧭 ✅ ISR revalidado para:', pageKey);
+      const routeMap = {
+        'home': '/',
+        'quienessomos': '/quienessomos',
+        'servicios': '/servicios',
+        'eventos': '/eventos',
+        'contacto': '/contacto',
+        'summer-camp': '/summer-camp',
+        'academiadefutbol': '/academiadefutbol',
+        'academiadepickleball': '/academiadepickleball',
+        'clasesparticularesfutbol': '/clasesparticularesfutbol',
+        'clasesparticularespickleball': '/clasesparticularespickleball',
+        'arrendarcancha': '/arrendarcancha',
+        'footer': '/', // Footer está en todas las páginas
+        'navigation': '/', // Navigation está en todas las páginas
+      };
+
+      const routeToRevalidate = routeMap[pageKey] || `/${pageKey}`;
+      revalidatePath(routeToRevalidate);
+      console.log('🔍🧭 ✅ ISR revalidado para:', routeToRevalidate);
+
+      // Si es footer o navigation, revalidar todas las páginas públicas
+      if (pageKey === 'footer' || pageKey === 'navigation') {
+        const allRoutes = Object.values(routeMap).filter((r, i, arr) => arr.indexOf(r) === i);
+        allRoutes.forEach(route => {
+          try {
+            revalidatePath(route);
+            console.log('🔍🧭 ✅ ISR revalidado (global):', route);
+          } catch (e) {
+            console.warn('⚠️ Error revalidando', route, ':', e.message);
+          }
+        });
+      }
     } catch (revalidateError) {
       console.warn('⚠️ Error revalidando ruta:', revalidateError.message);
     }

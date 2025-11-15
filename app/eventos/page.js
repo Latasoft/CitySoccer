@@ -7,6 +7,10 @@ import CTASection from '@/components/CTASection';
 import EditableContent from '@/components/EditableContent';
 import { useWhatsApp } from '@/hooks/useWhatsApp';
 
+// ISR: Regenerar cada 60 segundos
+export const revalidate = 60;
+
+
 export default function Eventos() {
   const { openWhatsApp, getWhatsAppNumber } = useWhatsApp();
 

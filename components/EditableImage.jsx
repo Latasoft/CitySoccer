@@ -34,6 +34,7 @@ const EditableImage = ({
   // Cargar imagen desde JSON al montar (solo una vez)
   useEffect(() => {
     if (!pageKey || !imageFieldKey) {
+      console.log(`[EditableImage] Sin pageKey o fieldKey, usando src directamente:`, src);
       setCurrentSrc(src);
       setLoading(false);
       return;
@@ -44,29 +45,36 @@ const EditableImage = ({
 
     const loadImageUrl = async () => {
       try {
+        console.log(`[EditableImage] Cargando ${pageKey}.${imageFieldKey}...`);
+        
         // No mostrar loading - la imagen ya se muestra con src
         const { data, error } = await getField(pageKey, imageFieldKey);
         
-        if (!isMounted) return;
+        if (!isMounted) {
+          console.log(`[EditableImage] Componente desmontado antes de cargar`);
+          return;
+        }
         
         if (error) {
-          if (debugMode) {
-            console.error(`[EditableImage] Error cargando ${pageKey}.${imageFieldKey}:`, error);
-          }
+          console.error(`[EditableImage] Error cargando ${pageKey}.${imageFieldKey}:`, error);
           // Mantener src original
           return;
         }
         
+        console.log(`[EditableImage] Data recibida para ${pageKey}.${imageFieldKey}:`, data);
+        
         if (data && data !== src && data !== currentSrc) {
-          if (debugMode) {
-            console.log(`[EditableImage] ✅ Actualizando desde JSON: ${pageKey}.${imageFieldKey} =`, data);
-          }
+          console.log(`[EditableImage] ✅ Actualizando imagen desde JSON:`, data);
           // Solo actualizar si la URL es diferente
           setCurrentSrc(data);
+        } else if (!data) {
+          console.log(`[EditableImage] No hay data en JSON, manteniendo src:`, src);
+        } else {
+          console.log(`[EditableImage] Data es igual a src actual, no actualizar`);
         }
         // Si no hay data, mantener src original
       } catch (error) {
-        console.error(`[EditableImage] Error en loadImageUrl:`, error);
+        console.error(`[EditableImage] Exception en loadImageUrl:`, error);
         // Mantener src original
       }
     };
@@ -189,7 +197,7 @@ const EditableImage = ({
   const finalSrc = currentSrc;
 
   const imgElement = finalSrc ? (
-    <div className="relative group/editable-image">
+    <div className="relative group/editable-image w-full h-full">
       <img
         src={finalSrc}
         alt={alt}
@@ -201,7 +209,9 @@ const EditableImage = ({
         style={style}
         onClick={handleImageClick}
         title={isAdminMode ? `Clic para cambiar imagen (${categoria})` : alt}
+        onLoad={() => console.log(`[EditableImage] ✅ Imagen cargada:`, finalSrc)}
         onError={(e) => {
+          console.error(`[EditableImage] ❌ Error cargando imagen:`, finalSrc);
           // Si la imagen falla al cargar, mostrar placeholder gris
           e.target.onerror = null; // Prevenir loop infinito
           setCurrentSrc(null); // Forzar a mostrar el placeholder
@@ -209,7 +219,7 @@ const EditableImage = ({
         key={finalSrc} // Key cambia solo cuando URL cambia
       />
       {isAdminMode && (
-        <div className="absolute top-2 right-2 bg-[#ffee00] text-black p-2 rounded-full shadow-lg opacity-0 group-hover/editable-image:opacity-100 transition-opacity pointer-events-none">
+        <div className="absolute top-2 right-2 bg-[#ffee00] text-black p-2 rounded-full shadow-lg opacity-0 group-hover/editable-image:opacity-100 transition-opacity pointer-events-none z-10">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
           </svg>
@@ -227,9 +237,17 @@ const EditableImage = ({
       onClick={handleImageClick}
       title={isAdminMode ? `Clic para agregar imagen (${categoria})` : alt}
     >
-      <svg className="w-1/3 h-1/3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>
+      {isAdminMode && (
+        <div className="text-center">
+          <Upload className="w-12 h-12 mx-auto text-gray-400 mb-2" />
+          <p className="text-gray-600 text-sm">Clic para agregar imagen</p>
+        </div>
+      )}
+      {!isAdminMode && (
+        <svg className="w-1/3 h-1/3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      )}
     </div>
   );
 

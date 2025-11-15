@@ -9,100 +9,110 @@ import CardBackgroundImage from './CardBackgroundImage';
 const CardCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  const [cardsData, setCardsData] = useState([]);
+  
+  // Definir cards con valores por defecto (SIEMPRE se muestran)
+  const defaultCards = [
+    {
+      id: 1,
+      titleKey: 'card1_title',
+      descKey: 'card1_description',
+      imageKey: 'card1_image',
+      ctaKey: 'card1_cta_text',
+      ctaLink: "/arrendarcancha",
+      defaultTitle: "Cargando...",
+      defaultDesc: "",
+      defaultImage: null, // Sin imagen: mostrará placeholder gris
+      defaultCta: "..."
+    },
+    {
+      id: 2,
+      titleKey: 'card2_title',
+      descKey: 'card2_description',
+      imageKey: 'card2_image',
+      ctaKey: 'card2_cta_text',
+      ctaLink: "/arrendarcancha",
+      defaultTitle: "Cargando...",
+      defaultDesc: "",
+      defaultImage: null,
+      defaultCta: "..."
+    },
+    {
+      id: 3,
+      titleKey: 'card3_title',
+      descKey: 'card3_description',
+      imageKey: 'card3_image',
+      ctaKey: 'card3_cta_text',
+      ctaLink: "/clasesparticularesfutbol",
+      defaultTitle: "Cargando...",
+      defaultDesc: "",
+      defaultImage: null,
+      defaultCta: "..."
+    },
+    {
+      id: 4,
+      titleKey: 'card4_title',
+      descKey: 'card4_description',
+      imageKey: 'card4_image',
+      ctaKey: 'card4_cta_text',
+      ctaLink: "/academiadefutbol",
+      defaultTitle: "Cargando...",
+      defaultDesc: "",
+      defaultImage: null,
+      defaultCta: "..."
+    },
+    {
+      id: 5,
+      titleKey: 'card5_title',
+      descKey: 'card5_description',
+      imageKey: 'card5_image',
+      ctaKey: 'card5_cta_text',
+      ctaLink: "/eventos",
+      defaultTitle: "Cargando...",
+      defaultDesc: "",
+      defaultImage: null,
+      defaultCta: "..."
+    },
+    {
+      id: 6,
+      titleKey: 'card6_title',
+      descKey: 'card6_description',
+      imageKey: 'card6_image',
+      ctaKey: 'card6_cta_text',
+      ctaLink: "/summer-camp",
+      defaultTitle: "Cargando...",
+      defaultDesc: "",
+      defaultImage: null,
+      defaultCta: "..."
+    }
+  ];
+  
+  const [cardsData, setCardsData] = useState(defaultCards);
   
   // Cargar imágenes dinámicas de canchas desde admin
   const { images: imagenesCanchas, loading: loadingCanchas } = useDynamicImages('canchas');
   const { images: imagenesEventos, loading: loadingEventos } = useDynamicImages('eventos');
 
-  // Cargar datos de las tarjetas desde BD
+  // Cargar datos de las tarjetas desde BD (con timeout de seguridad)
   useEffect(() => {
     const loadCardsData = async () => {
       try {
+        // Timeout de seguridad: si no carga en 3s, mantener defaults
+        const timeoutId = setTimeout(() => {
+          console.warn('⚠️ Timeout cargando contenido de cards, usando valores por defecto');
+        }, 3000);
+        
         const { editableContentService } = await import('@/lib/adminService');
         const { data } = await editableContentService.getPageContent('home');
         
+        clearTimeout(timeoutId);
+        
         if (data) {
-          // Construir array de tarjetas desde los datos
-          const cards = [
-            {
-              id: 1,
-              titleKey: 'card1_title',
-              descKey: 'card1_description',
-              imageKey: 'card1_image',
-              ctaKey: 'card1_cta_text',
-              ctaLink: "/arrendarcancha", // Redirige a /arrendarcancha
-              defaultTitle: "Arrienda Cancha Fútbol",
-              defaultDesc: "Canchas profesionales con césped sintético de última generación.",
-              defaultImage: "/Cancha1.jpeg",
-              defaultCta: "RESERVAR FÚTBOL"
-            },
-            {
-              id: 2,
-              titleKey: 'card2_title',
-              descKey: 'card2_description',
-              imageKey: 'card2_image',
-              ctaKey: 'card2_cta_text',
-              ctaLink: "/arrendarcancha", // Redirige a /arrendarcancha
-              defaultTitle: "Arrienda Cancha Pickleball",
-              defaultDesc: "Canchas de Pickleball con superficies profesionales.",
-              defaultImage: "/Pickleball2.jpeg",
-              defaultCta: "RESERVAR PICKLEBALL"
-            },
-            {
-              id: 3,
-              titleKey: 'card3_title',
-              descKey: 'card3_description',
-              imageKey: 'card3_image',
-              ctaKey: 'card3_cta_text',
-              ctaLink: "/clasesparticularesfutbol",
-              defaultTitle: "Clases Particulares",
-              defaultDesc: "Entrenamiento personalizado con profesionales certificados.",
-              defaultImage: "/Entrenamiento4.jpeg",
-              defaultCta: "VER CLASES"
-            },
-            {
-              id: 4,
-              titleKey: 'card4_title',
-              descKey: 'card4_description',
-              imageKey: 'card4_image',
-              ctaKey: 'card4_cta_text',
-              ctaLink: "/academiadefutbol",
-              defaultTitle: "Academia Deportiva",
-              defaultDesc: "Programas de formación deportiva para niños y jóvenes.",
-              defaultImage: "/Entrenamiento2.jpeg",
-              defaultCta: "CONOCER MÁS"
-            },
-            {
-              id: 5,
-              titleKey: 'card5_title',
-              descKey: 'card5_description',
-              imageKey: 'card5_image',
-              ctaKey: 'card5_cta_text',
-              ctaLink: "/eventos",
-              defaultTitle: "Eventos Deportivos",
-              defaultDesc: "Organiza cumpleaños, torneos y eventos corporativos.",
-              defaultImage: "/Cancha2.jpeg",
-              defaultCta: "VER EVENTOS"
-            },
-            {
-              id: 6,
-              titleKey: 'card6_title',
-              descKey: 'card6_description',
-              imageKey: 'card6_image',
-              ctaKey: 'card6_cta_text',
-              ctaLink: "/summer-camp",
-              defaultTitle: "Summer Camp",
-              defaultDesc: "Vacaciones llenas de deporte, diversión y aprendizaje.",
-              defaultImage: "/SummerCamp1.jpeg",
-              defaultCta: "MÁS INFO"
-            }
-          ];
-          
-          setCardsData(cards);
+          // Cards ya tienen valores por defecto, solo confirmamos que se cargaron
+          // Los EditableContent dentro usarán los valores de 'data' automáticamente
+          console.log('✅ Contenido de cards cargado desde API');
         }
       } catch (error) {
-        console.error('Error cargando datos de tarjetas:', error);
+        console.error('⚠️ Error cargando datos de tarjetas, usando valores por defecto:', error);
       }
     };
     

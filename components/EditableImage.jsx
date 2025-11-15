@@ -212,9 +212,9 @@ const EditableImage = ({
       onClick={handleImageClick}
       title={isAdminMode ? `Clic para cambiar imagen (${categoria})` : alt}
       onError={(e) => {
-        // Si la imagen falla al cargar, usar placeholder
+        // Si la imagen falla al cargar, mostrar placeholder gris
         e.target.onerror = null; // Prevenir loop infinito
-        e.target.src = '/Logo2.png';
+        setCurrentSrc(null); // Forzar a mostrar el placeholder
       }}
     />
   ) : (

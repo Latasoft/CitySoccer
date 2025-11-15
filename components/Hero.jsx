@@ -10,13 +10,14 @@ import { useAdminMode } from '@/contexts/AdminModeContext';
 const Hero = () => {
   const videoRef = useRef(null);
   const [videoUrl, setVideoUrl] = useState('/videofutbol.mp4');
+  const [videoError, setVideoError] = useState(false);
   const { isAdminMode } = useAdminMode();
   
-  // Cargar imagen principal del logo desde admin
-  const { imageUrl: logoUrl, loading: logoLoading } = usePrimaryImage('logos', '/Logo2.png');
+  // Cargar imagen principal del logo desde admin (sin fallback específico)
+  const { imageUrl: logoUrl, loading: logoLoading } = usePrimaryImage('logos', null);
   
-  // Cargar imagen de fondo desde admin (categoría hero)
-  const { imageUrl: backgroundUrl, loading: bgLoading } = usePrimaryImage('hero', '/imgPrincipal.jpeg');
+  // Cargar imagen de fondo desde admin (sin fallback específico)
+  const { imageUrl: backgroundUrl, loading: bgLoading } = usePrimaryImage('hero', null);
 
   // Cargar URL del video desde archivo JSON
   useEffect(() => {
@@ -26,9 +27,13 @@ const Hero = () => {
         const { data } = await localContentService.getPageContent('home');
         if (data && data.hero_video_url) {
           setVideoUrl(data.hero_video_url);
+          setVideoError(false);
         }
       } catch (error) {
         console.error('Error cargando video URL:', error);
+        // Mantener video por defecto
+        setVideoUrl('/videofutbol.mp4');
+        setVideoError(false);
       }
     };
     loadVideoUrl();
@@ -36,11 +41,47 @@ const Hero = () => {
 
   useEffect(() => {
     // Asegurar que el video se reproduzca automáticamente
-    if (videoRef.current) {
-      videoRef.current.play().catch((error) => {
-        console.log("Error al reproducir el video:", error);
-      });
+    const playVideo = async () => {
+      if (videoRef.current) {
+        try {
+          // Forzar muted antes de reproducir
+          videoRef.current.muted = true;
+          videoRef.current.playsInline = true;
+          
+          await videoRef.current.play();
+          console.log('✅ Video reproduciendo correctamente');
+        } catch (error) {
+          console.error("❌ Error al reproducir el video:", error);
+          // Si falla, intentar de nuevo después de 100ms
+          setTimeout(() => {
+            if (videoRef.current) {
+              videoRef.current.play().catch(e => console.error('Reintento fallido:', e));
+            }
+          }, 100);
+        }
+      }
+    };
+
+    playVideo();
+
+    // Observar cuando el video se pausa y volverlo a reproducir
+    const handlePause = () => {
+      if (videoRef.current && !videoRef.current.ended) {
+        console.log('🔄 Video pausado, reiniciando...');
+        videoRef.current.play().catch(e => console.error('Error al reiniciar:', e));
+      }
+    };
+
+    const video = videoRef.current;
+    if (video) {
+      video.addEventListener('pause', handlePause);
     }
+
+    return () => {
+      if (video) {
+        video.removeEventListener('pause', handlePause);
+      }
+    };
   }, [videoUrl]);
 
   return (
@@ -57,8 +98,15 @@ const Hero = () => {
           loop
           muted
           playsInline
+          preload="auto"
           poster={backgroundUrl}
           key={videoUrl}
+          onLoadedData={() => {
+            // Intentar reproducir apenas cargue
+            if (videoRef.current) {
+              videoRef.current.play().catch(e => console.error('Error en onLoadedData:', e));
+            }
+          }}
         >
           <source src={videoUrl} type="video/mp4" />
           {/* Fallback para navegadores que no soportan video */}

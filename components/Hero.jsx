@@ -162,19 +162,19 @@ const Hero = () => {
       <div className="relative z-10 container mx-auto px-4 text-center text-white">
         {/* Logo dinámico desde admin */}
         {!logoLoading && (
-          <div className="mx-auto mb-8 w-[150px] h-[150px] relative" style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.5))" }}>
+          <div className="mx-auto mb-8 w-full max-w-md h-[400px] relative" style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.5))" }}>
             <EditableImage
               src={logoUrl}
               alt="City Soccer Logo"
               categoria="logos"
               pageKey="home"
               fieldKey="home_logo"
-              width={150}
-              height={150}
+              fill={true}
               priority={true}
               quality={90}
               objectFit="contain"
               className="object-contain"
+              sizes="(max-width: 768px) 100vw, 448px"
             />
           </div>
         )}

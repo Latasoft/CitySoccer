@@ -1,19 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
-
-/**
- * Wrapper inteligente sobre next/image que maneja:
- * - URLs de Supabase (remotas)
- * - URLs locales (/uploads/, /public/)
- * - Fallbacks automáticos
- * - Dimensiones responsive
- * - Compatibilidad con sistema editable
- */
-
-'use client';
-import Image from 'next/image';
 import { useState, useEffect } from 'react';
 
 /**
@@ -22,6 +9,7 @@ import { useState, useEffect } from 'react';
  * - Soporte para fill (antiguos objectFit)
  * - Lazy loading por defecto
  * - Blur placeholder opcional
+ * - Compatibilidad con sistema editable
  */
 const OptimizedImage = ({
   src,

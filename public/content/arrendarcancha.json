@@ -26,5 +26,9 @@
   "feature2_title": "Instalaciones Premium",
   "feature2_description": "Canchas profesionales con la mejor tecnología",
   "feature3_title": "Soporte 24/7",
-  "feature3_description": "Atención personalizada para todas tus consultas"
+  "feature3_description": "Atención personalizada para todas tus consultas",
+  "card1_image": "https://ckbebftjgqearfubmgus.supabase.co/storage/v1/object/public/images/carousel/carousel_1763220695738_Cancha1.jpeg",
+  "card2_image": "https://ckbebftjgqearfubmgus.supabase.co/storage/v1/object/public/images/carousel/carousel_1763220791220_Cancha2.jpeg",
+  "card3_image": "https://ckbebftjgqearfubmgus.supabase.co/storage/v1/object/public/images/carousel/carousel_1763220723581_imgPickleball.jpeg",
+  "card4_image": "https://ckbebftjgqearfubmgus.supabase.co/storage/v1/object/public/images/carousel/carousel_1763220723581_imgPickleball.jpeg"
 }

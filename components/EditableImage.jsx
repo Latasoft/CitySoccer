@@ -217,15 +217,26 @@ const EditableImage = ({
   if (loading || !finalSrc) {
     return (
       <div 
-        className={`${className} ${fill ? 'w-full h-full' : ''} bg-gray-300/20 animate-pulse flex items-center justify-center`}
+        className={`relative group/editable-image ${className} ${fill ? 'w-full h-full' : ''} bg-gray-300/20 animate-pulse flex items-center justify-center ${
+          isAdminMode 
+            ? 'cursor-pointer hover:ring-4 hover:ring-[#ffee00] hover:ring-opacity-70 transition-all duration-200' 
+            : ''
+        }`}
         style={style}
         onClick={handleWrapperClick}
       >
         {isAdminMode && (
-          <div className="text-center">
-            <Upload className="w-12 h-12 mx-auto text-gray-400 mb-2" />
-            <p className="text-gray-600 text-sm">Cargando...</p>
-          </div>
+          <>
+            <div className="text-center">
+              <Upload className="w-12 h-12 mx-auto text-gray-400 mb-2" />
+              <p className="text-gray-600 text-sm">Cargando...</p>
+            </div>
+            <div className="absolute top-2 right-2 bg-[#ffee00] text-black p-2 rounded-full shadow-lg opacity-0 group-hover/editable-image:opacity-100 transition-opacity pointer-events-none z-10">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+            </div>
+          </>
         )}
       </div>
     );

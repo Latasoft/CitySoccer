@@ -31,6 +31,7 @@ export default function ArriendaCanchaSelector() {
       playersKey: 'card1_players',
       durationKey: 'card1_duration',
       buttonKey: 'card1_button_text',
+      imageKey: 'card1_image',
       image: '/Cancha1.jpeg',
       href: '/arrendarcancha/futbol7',
       categoria: 'cancha-futbol7'
@@ -42,6 +43,7 @@ export default function ArriendaCanchaSelector() {
       playersKey: 'card2_players',
       durationKey: 'card2_duration',
       buttonKey: 'card2_button_text',
+      imageKey: 'card2_image',
       image: '/Cancha1.jpeg',
       href: '/arrendarcancha/futbol9',
       categoria: 'cancha-futbol9'
@@ -53,6 +55,7 @@ export default function ArriendaCanchaSelector() {
       playersKey: 'card3_players',
       durationKey: 'card3_duration',
       buttonKey: 'card3_button_text',
+      imageKey: 'card3_image',
       image: '/Pickleball2.jpeg',
       href: '/arrendarcancha/pickleball-individual',
       categoria: 'cancha-pickleball-single'
@@ -64,6 +67,7 @@ export default function ArriendaCanchaSelector() {
       playersKey: 'card4_players',
       durationKey: 'card4_duration',
       buttonKey: 'card4_button_text',
+      imageKey: 'card4_image',
       image: '/Pickleball2.jpeg',
       href: '/arrendarcancha/pickleball-dobles',
       categoria: 'cancha-pickleball-dobles'
@@ -117,8 +121,10 @@ export default function ArriendaCanchaSelector() {
             >
               <div className="relative h-96 rounded-lg overflow-hidden shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
                 {/* Background Image - Editable */}
-                <div className="absolute inset-0">
+                <div className="absolute inset-0 z-10">
                   <EditableImage
+                    pageKey="arrendarcancha"
+                    fieldKey={cancha.imageKey}
                     src={cancha.image}
                     alt={content[cancha.titleKey] || cancha.titleKey}
                     categoria={cancha.categoria}
@@ -127,11 +133,11 @@ export default function ArriendaCanchaSelector() {
                 </div>
                 
                 {/* Overlay */}
-                <div className="absolute inset-0 bg-black/60 group-hover:bg-black/50 transition-colors duration-300" />
+                <div className="absolute inset-0 z-20 bg-black/60 group-hover:bg-black/50 transition-colors duration-300 pointer-events-none" />
 
                 {/* Content */}
-                <div className="absolute inset-0 p-6 flex flex-col justify-between text-white">
-                  <div>
+                <div className="absolute inset-0 z-30 p-6 flex flex-col justify-between text-white pointer-events-none">
+                  <div className="pointer-events-auto">{/* Permitir clicks en elementos editables */}
                     <EditableContent
                       pageKey="arrendarcancha"
                       fieldKey={cancha.titleKey}
@@ -178,7 +184,7 @@ export default function ArriendaCanchaSelector() {
                     </div>
                   </div>
 
-                  <div className="mt-auto">
+                  <div className="mt-auto pointer-events-auto">
                     <button className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors group-hover:bg-green-500">
                       <EditableContent
                         pageKey="arrendarcancha"

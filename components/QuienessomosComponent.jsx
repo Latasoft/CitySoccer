@@ -100,7 +100,7 @@ const QuienessomosComponent = () => {
                 <div className="col-span-1 sm:col-span-2">
                   <div className="w-full h-[250px] sm:h-[300px] relative rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl overflow-hidden">
                     <EditableImage
-                      src="/uploads/images/quienes-somos-1.jpg"
+                      src=""
                       alt="Instalaciones City Soccer"
                       categoria="quienes-somos"
                       pageKey="quienessomos"
@@ -116,7 +116,7 @@ const QuienessomosComponent = () => {
                 {/* Segunda y tercera imagen - apiladas en móvil, lado a lado en desktop */}
                 <div className="w-full h-[200px] sm:h-[300px] relative rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl overflow-hidden">
                   <EditableImage
-                    src="/uploads/images/quienes-somos-2.jpg"
+                    src=""
                     alt="Pasión por el fútbol"
                     categoria="quienes-somos"
                     pageKey="quienessomos"
@@ -129,7 +129,7 @@ const QuienessomosComponent = () => {
                 </div>
                 <div className="w-full h-[200px] sm:h-[300px] relative rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl overflow-hidden">
                   <EditableImage
-                    src="/uploads/images/quienes-somos-3.jpg"
+                    src=""
                     alt="Entrenamiento profesional"
                     categoria="quienes-somos"
                     pageKey="quienessomos"

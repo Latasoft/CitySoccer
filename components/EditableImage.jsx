@@ -139,7 +139,7 @@ const EditableImage = ({
       
       if (error) throw error;
 
-      const newImageUrl = data.url;
+      const newImageUrl = data.url; // Ya incluye ?v=timestamp
       setUploadProgress('Guardando en contenido...');
 
       // Guardar la nueva URL en el JSON de contenido usando contexto compartido
@@ -147,7 +147,7 @@ const EditableImage = ({
         const { error: saveError } = await updateFieldRef.current(
           pageKey, 
           imageFieldKey, 
-          newImageUrl
+          newImageUrl // Guardar con ?v=timestamp incluido
         );
         
         if (saveError) {
@@ -158,13 +158,8 @@ const EditableImage = ({
 
       setUploadProgress('¡Imagen subida exitosamente! 🎉');
       
-      // Agregar timestamp para forzar recarga SOLO después de upload
-      const urlWithCacheBust = newImageUrl.includes('?') 
-        ? `${newImageUrl}&t=${Date.now()}` 
-        : `${newImageUrl}?t=${Date.now()}`;
-      
-      // Actualizar el estado local con cache-busting
-      setCurrentSrc(urlWithCacheBust);
+      // Actualizar el estado local directamente (ya tiene cache-busting)
+      setCurrentSrc(newImageUrl);
       
       // Disparar recarga de imágenes dinámicas
       dynamicImageService.forceReload();

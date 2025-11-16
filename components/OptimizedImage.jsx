@@ -12,6 +12,17 @@ import { useState } from 'react';
  * - Compatibilidad con sistema editable
  */
 
+'use client';
+import Image from 'next/image';
+import { useState, useEffect } from 'react';
+
+/**
+ * Wrapper de next/image con optimizaciones y fallback
+ * - Maneja errores con fallback automático
+ * - Soporte para fill (antiguos objectFit)
+ * - Lazy loading por defecto
+ * - Blur placeholder opcional
+ */
 const OptimizedImage = ({
   src,
   alt = '',
@@ -33,6 +44,14 @@ const OptimizedImage = ({
 }) => {
   const [imgSrc, setImgSrc] = useState(src);
   const [hasError, setHasError] = useState(false);
+
+  // Actualizar imgSrc cuando cambia el prop src (importante para cache-busting con ?v=)
+  useEffect(() => {
+    if (src !== imgSrc) {
+      setImgSrc(src);
+      setHasError(false); // Reset error state
+    }
+  }, [src]);
 
   // Determinar si la imagen es remota (Supabase) o local
   const isRemote = imgSrc?.startsWith('http://') || imgSrc?.startsWith('https://');

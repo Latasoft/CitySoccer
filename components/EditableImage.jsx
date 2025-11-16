@@ -5,6 +5,7 @@ import { useContent } from '@/contexts/ContentContext';
 import { localContentService } from '@/lib/localContentService';
 import { dynamicImageService } from '@/lib/dynamicImageService';
 import { Upload, X, Check, Loader2 } from 'lucide-react';
+import OptimizedImage from './OptimizedImage';
 
 const EditableImage = ({ 
   src, 
@@ -15,6 +16,13 @@ const EditableImage = ({
   onImageChange,
   pageKey = 'default',
   fieldKey,
+  width,
+  height,
+  fill = false,
+  priority = false,
+  sizes,
+  quality = 75,
+  objectFit = 'cover',
   children, // Capturar y descartar (no permitido en img)
   dangerouslySetInnerHTML, // Capturar y descartar (no permitido en img)
   ...props 
@@ -26,7 +34,7 @@ const EditableImage = ({
   const [dragOver, setDragOver] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
   const [currentSrc, setCurrentSrc] = useState(src);
-  const [loading, setLoading] = useState(false); // Cambiar a false - mostrar imagen inmediatamente
+  const [loading, setLoading] = useState(false);
 
   // Generar fieldKey automático si no se proporciona
   const imageFieldKey = fieldKey || `${categoria}_image`;
@@ -196,27 +204,44 @@ const EditableImage = ({
   // Solo agregar cache-busting cuando la URL cambia (no en cada render)
   const finalSrc = currentSrc;
 
+  // Wrapper para manejar clicks en modo admin
+  const handleWrapperClick = (e) => {
+    if (isAdminMode) {
+      e.preventDefault();
+      e.stopPropagation();
+      handleImageClick(e);
+    }
+  };
+
   const imgElement = finalSrc ? (
-    <div className="relative group/editable-image w-full h-full">
-      <img
+    <div 
+      className={`relative group/editable-image ${fill ? 'w-full h-full' : ''}`}
+      onClick={handleWrapperClick}
+      style={{ cursor: isAdminMode ? 'pointer' : 'default' }}
+    >
+      <OptimizedImage
         src={finalSrc}
         alt={alt}
+        width={width}
+        height={height}
+        fill={fill}
         className={`${className} ${
           isAdminMode 
-            ? 'cursor-pointer hover:ring-4 hover:ring-[#ffee00] hover:ring-opacity-70 transition-all duration-200' 
+            ? 'hover:ring-4 hover:ring-[#ffee00] hover:ring-opacity-70 transition-all duration-200' 
             : ''
         }`}
         style={style}
-        onClick={handleImageClick}
+        priority={priority}
+        quality={quality}
+        sizes={sizes}
+        objectFit={objectFit}
         title={isAdminMode ? `Clic para cambiar imagen (${categoria})` : alt}
         onLoad={() => console.log(`[EditableImage] ✅ Imagen cargada:`, finalSrc)}
         onError={(e) => {
           console.error(`[EditableImage] ❌ Error cargando imagen:`, finalSrc);
-          // Si la imagen falla al cargar, mostrar placeholder gris
-          e.target.onerror = null; // Prevenir loop infinito
-          setCurrentSrc(null); // Forzar a mostrar el placeholder
+          // OptimizedImage maneja fallback automáticamente
         }}
-        key={finalSrc} // Key cambia solo cuando URL cambia
+        {...props}
       />
       {isAdminMode && (
         <div className="absolute top-2 right-2 bg-[#ffee00] text-black p-2 rounded-full shadow-lg opacity-0 group-hover/editable-image:opacity-100 transition-opacity pointer-events-none z-10">

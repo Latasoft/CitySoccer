@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useAdminMode } from '@/contexts/AdminModeContext';
-import { useContent } from '@/contexts/ContentContext'; // ✅ Usar ContentContext
+import { useContent } from '@/contexts/ContentContext';
 import { localContentService } from '@/lib/localContentService';
 import { Edit2, Save, X, Loader2, Upload } from 'lucide-react';
+import OptimizedImage from './OptimizedImage';
 
 /**
  * Componente especial para imágenes de fondo editables en CardCarousel
+ * Ahora usa OptimizedImage con fill para mejor rendimiento
  */
 const CardBackgroundImage = ({ 
   pageKey, 
@@ -252,16 +254,23 @@ const CardBackgroundImage = ({
   if (isAdminMode) {
     return (
       <div className="group relative w-full h-full">
-        <div
-          className={`${className} ${!hasImage ? 'bg-gray-200 flex items-center justify-center' : ''}`}
-          style={hasImage ? { backgroundImage: `url(${displayValue})` } : {}}
-        >
-          {!hasImage && (
+        {hasImage ? (
+          <OptimizedImage
+            src={displayValue}
+            alt="Card Background"
+            fill={true}
+            className={className}
+            sizes="(max-width: 768px) 100vw, 33vw"
+            quality={75}
+            objectFit="cover"
+          />
+        ) : (
+          <div className={`${className} bg-gray-200 flex items-center justify-center absolute inset-0`}>
             <svg className="w-1/4 h-1/4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-          )}
-        </div>
+          </div>
+        )}
         <div className="absolute inset-0 border-2 border-dashed border-yellow-400/0 group-hover:border-yellow-400/60 transition-all pointer-events-none" />
         <button
           onClick={handleEdit}
@@ -276,16 +285,25 @@ const CardBackgroundImage = ({
 
   // Vista normal
   return (
-    <div
-      className={`${className} ${!hasImage ? 'bg-gray-200 flex items-center justify-center' : ''}`}
-      style={hasImage ? { backgroundImage: `url(${displayValue})` } : {}}
-    >
-      {!hasImage && (
-        <svg className="w-1/4 h-1/4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
+    <>
+      {hasImage ? (
+        <OptimizedImage
+          src={displayValue}
+          alt="Card Background"
+          fill={true}
+          className={className}
+          sizes="(max-width: 768px) 100vw, 33vw"
+          quality={75}
+          objectFit="cover"
+        />
+      ) : (
+        <div className={`${className} bg-gray-200 flex items-center justify-center absolute inset-0`}>
+          <svg className="w-1/4 h-1/4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </div>
       )}
-    </div>
+    </>
   );
 };
 

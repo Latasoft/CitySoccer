@@ -39,7 +39,10 @@ const CTASection = ({
           pageKey={pageKey}
           fieldKey={`${imageCategory}_background`}
           alt="Background"
-          className="w-full h-full object-cover opacity-30"
+          fill={true}
+          sizes="100vw"
+          quality={70}
+          className="opacity-30"
         />
       </div>
       

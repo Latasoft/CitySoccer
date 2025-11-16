@@ -11,8 +11,19 @@ const nextConfig = {
   poweredByHeader: false,
   
   images: {
-    unoptimized: true,
+    // ✅ OPTIMIZACIÓN HABILITADA - Next.js generará versiones responsive y optimizadas
+    unoptimized: false,
+    
+    // Formatos modernos con fallback automático
     formats: ['image/avif', 'image/webp'],
+    
+    // Tamaños de dispositivo para responsive images
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    
+    // Tamaños de imagen para layout="responsive"
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    
+    // Configuración de dominios remotos permitidos
     remotePatterns: [
       {
         protocol: 'https',
@@ -20,6 +31,11 @@ const nextConfig = {
         pathname: '/storage/v1/object/public/**',
       },
     ],
+    
+    // Permitir optimización de imágenes externas (SVG)
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   
   // Configuración específica para Render

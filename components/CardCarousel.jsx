@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useDynamicImages } from '@/lib/dynamicImageService';
+import localStorageService from '@/lib/localStorageService';
 import EditableImage from './EditableImage';
 import EditableContent from './EditableContent';
 import CardBackgroundImage from './CardBackgroundImage';
@@ -92,7 +93,7 @@ const CardCarousel = () => {
   const { images: imagenesCanchas, loading: loadingCanchas } = useDynamicImages('canchas');
   const { images: imagenesEventos, loading: loadingEventos } = useDynamicImages('eventos');
 
-  // Cargar datos de las tarjetas desde JSON (con timeout de seguridad)
+  // Cargar datos de las tarjetas desde localStorage service
   useEffect(() => {
     const loadCardsData = async () => {
       try {
@@ -103,8 +104,7 @@ const CardCarousel = () => {
           }
         }, 3000);
         
-        const { localContentService } = await import('@/lib/localContentService');
-        const { data } = await localContentService.getPageContent('home');
+        const { data } = await localStorageService.getPageContent('home');
         
         clearTimeout(timeoutId);
         
@@ -112,7 +112,7 @@ const CardCarousel = () => {
           // Cards ya tienen valores por defecto, solo confirmamos que se cargaron
           // Los EditableContent dentro usarán los valores de 'data' automáticamente
           if (process.env.NEXT_PUBLIC_DEBUG_MODE === 'true') {
-            console.log('✅ Contenido de cards cargado desde JSON');
+            console.log('✅ Contenido de cards cargado desde localStorage');
           }
         }
       } catch (error) {
@@ -121,6 +121,25 @@ const CardCarousel = () => {
     };
     
     loadCardsData();
+    
+    // Escuchar actualizaciones de sincronización
+    const handleSync = (event) => {
+      const { pageKey, changes } = event.detail;
+      if (pageKey === 'home') {
+        const cardChanges = changes?.filter(c => c.field.startsWith('card'));
+        if (cardChanges && cardChanges.length > 0) {
+          console.log('🎴 [CardCarousel] Cards actualizados:', cardChanges.length, 'cambios');
+          // Forzar re-render (los EditableContent se actualizarán automáticamente)
+          setCardsData([...defaultCards]);
+        }
+      }
+    };
+    
+    window.addEventListener('localstorage-sync', handleSync);
+    
+    return () => {
+      window.removeEventListener('localstorage-sync', handleSync);
+    };
   }, []);
 
   // Detect mobile

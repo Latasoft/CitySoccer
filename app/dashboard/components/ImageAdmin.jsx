@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { imageService } from '@/lib/adminService';
 import { Images, Upload, Trash2, Loader2, AlertCircle, CheckCircle2, Eye, Edit3, Plus } from 'lucide-react';
 
@@ -377,10 +377,13 @@ const ImageAdmin = () => {
                   </div>
                 )}
                 <div className="aspect-video relative overflow-hidden">
-                  <img
+                  <Image
                     src={imagen.url}
                     alt={imagen.nombre}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    quality={75}
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
                     <div className="flex gap-2">

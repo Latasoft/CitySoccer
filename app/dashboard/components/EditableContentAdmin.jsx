@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { editableContentService } from '@/lib/adminService';
 import { 
   FileText, 
@@ -192,10 +193,12 @@ const EditableContentAdmin = () => {
                 />
                 {currentValue && (
                   <div className="relative w-full h-32 bg-gray-800 rounded-lg overflow-hidden">
-                    <img
+                    <Image
                       src={currentValue}
                       alt={field.field_label}
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="(max-width: 768px) 100vw, 400px"
+                      className="object-cover"
                       onError={(e) => {
                         e.target.src = '/images/placeholder.jpg';
                       }}

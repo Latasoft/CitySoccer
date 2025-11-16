@@ -1,6 +1,6 @@
 'use client';
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { localContentService } from '@/lib/localContentService';
+import localStorageService from '@/lib/localStorageService';
 
 const ContentContext = createContext();
 
@@ -19,14 +19,26 @@ export function ContentProvider({ children }) {
       contentCache.delete(pageKey);
       setCache(new Map(contentCache));
     };
+    
+    // Listener para actualizaciones desde localStorage sync
+    const handleLocalStorageSync = (event) => {
+      const { pageKey } = event.detail;
+      console.log(`[ContentContext] 🔄 Sincronización de localStorage: ${pageKey}`);
+      contentCache.delete(pageKey);
+      setCache(new Map(contentCache));
+    };
 
     if (typeof window !== 'undefined') {
       window.addEventListener('content-updated', handleContentUpdate);
-      return () => window.removeEventListener('content-updated', handleContentUpdate);
+      window.addEventListener('localstorage-sync', handleLocalStorageSync);
+      return () => {
+        window.removeEventListener('content-updated', handleContentUpdate);
+        window.removeEventListener('localstorage-sync', handleLocalStorageSync);
+      };
     }
   }, []);
 
-  // Función optimizada para obtener contenido con caché
+  // Función optimizada para obtener contenido con caché (usa localStorage service)
   const getPageContent = useCallback(async (pageKey) => {
     // Validar y limpiar pageKey
     const cleanPageKey = String(pageKey).split(':')[0].trim();
@@ -53,12 +65,12 @@ export function ContentProvider({ children }) {
       return await pendingRequests.get(cleanPageKey);
     }
 
-    // 3. Crear nueva petición
+    // 3. Crear nueva petición usando localStorage service
     if (debugMode) {
       console.log(`[ContentContext] 🔄 Cargando contenido: ${cleanPageKey}`);
     }
 
-    const requestPromise = localContentService.getPageContent(cleanPageKey)
+    const requestPromise = localStorageService.getPageContent(cleanPageKey)
       .then(result => {
         if (!result.error && result.data) {
           contentCache.set(cleanPageKey, result.data);
@@ -88,7 +100,7 @@ export function ContentProvider({ children }) {
     return { data: value !== undefined ? value : null, error: null };
   }, [getPageContent]);
 
-  // Función para actualizar un campo (invalida caché)
+  // Función para actualizar un campo (invalida caché y usa localStorage service)
   const updateField = useCallback(async (pageKey, fieldKey, value) => {
     const cleanPageKey = String(pageKey).split(':')[0].trim();
     const cleanFieldKey = String(fieldKey).trim();
@@ -98,7 +110,7 @@ export function ContentProvider({ children }) {
       console.log(`[ContentContext] 💾 Actualizando: ${cleanPageKey}.${cleanFieldKey}`);
     }
 
-    const result = await localContentService.updateField(cleanPageKey, cleanFieldKey, value);
+    const result = await localStorageService.updateField(cleanPageKey, cleanFieldKey, value);
     
     if (!result.error) {
       // Actualizar caché local

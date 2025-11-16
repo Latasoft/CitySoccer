@@ -2,6 +2,7 @@
 
 import React from 'react';
 import EditableImage from './EditableImage';
+import OptimizedImage from './OptimizedImage';
 import EditableContent from './EditableContent';
 import { useConfig } from "@/lib/dynamicConfigService";
 
@@ -97,33 +98,48 @@ const QuienessomosComponent = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8 w-full max-w-2xl">
                 {/* Primera imagen - ocupa toda la fila superior */}
                 <div className="col-span-1 sm:col-span-2">
-                  <EditableImage
-                    src="/uploads/images/quienes-somos-1.jpg"
-                    alt="Instalaciones City Soccer"
-                    categoria="quienes-somos"
-                    pageKey="quienessomos"
-                    fieldKey="quienes_somos_image_1"
-                    className="w-full h-[250px] sm:h-[300px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
-                  />
+                  <div className="w-full h-[250px] sm:h-[300px] relative rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl overflow-hidden">
+                    <EditableImage
+                      src="/uploads/images/quienes-somos-1.jpg"
+                      alt="Instalaciones City Soccer"
+                      categoria="quienes-somos"
+                      pageKey="quienessomos"
+                      fieldKey="quienes_somos_image_1"
+                      fill={true}
+                      sizes="(max-width: 640px) 100vw, 672px"
+                      quality={80}
+                      objectFit="cover"
+                    />
+                  </div>
                 </div>
                 
                 {/* Segunda y tercera imagen - apiladas en móvil, lado a lado en desktop */}
-                <EditableImage
-                  src="/uploads/images/quienes-somos-2.jpg"
-                  alt="Pasión por el fútbol"
-                  categoria="quienes-somos"
-                  pageKey="quienessomos"
-                  fieldKey="quienes_somos_image_2"
-                  className="w-full h-[200px] sm:h-[300px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
-                />
-                <EditableImage
-                  src="/uploads/images/quienes-somos-3.jpg"
-                  alt="Entrenamiento profesional"
-                  categoria="quienes-somos"
-                  pageKey="quienessomos"
-                  fieldKey="quienes_somos_image_3"
-                  className="w-full h-[200px] sm:h-[300px] object-cover rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl"
-                />
+                <div className="w-full h-[200px] sm:h-[300px] relative rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl overflow-hidden">
+                  <EditableImage
+                    src="/uploads/images/quienes-somos-2.jpg"
+                    alt="Pasión por el fútbol"
+                    categoria="quienes-somos"
+                    pageKey="quienessomos"
+                    fieldKey="quienes_somos_image_2"
+                    fill={true}
+                    sizes="(max-width: 640px) 100vw, 336px"
+                    quality={80}
+                    objectFit="cover"
+                  />
+                </div>
+                <div className="w-full h-[200px] sm:h-[300px] relative rounded-xl shadow-2xl shadow-black/50 transition-transform duration-300 hover:scale-105 hover:shadow-3xl overflow-hidden">
+                  <EditableImage
+                    src="/uploads/images/quienes-somos-3.jpg"
+                    alt="Entrenamiento profesional"
+                    categoria="quienes-somos"
+                    pageKey="quienessomos"
+                    fieldKey="quienes_somos_image_3"
+                    fill={true}
+                    sizes="(max-width: 640px) 100vw, 336px"
+                    quality={80}
+                    objectFit="cover"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -157,14 +173,17 @@ const QuienessomosComponent = () => {
             {partnerships.map((partnership, index) => (
               <div key={index} className="bg-gray-700 rounded-xl p-6 hover:bg-gray-600 transition-all duration-300 hover:scale-105">
                 <div className="text-center">
-                  <div className="w-28 h-20 rounded-lg mx-auto mb-4 flex items-center justify-center overflow-hidden bg-white/10">
+                  <div className="w-28 h-20 rounded-lg mx-auto mb-4 flex items-center justify-center overflow-hidden bg-white/10 relative">
                     <EditableImage
                       src={partnership.url}
                       alt={partnership.country}
                       categoria={`alianza-${index + 1}`}
                       pageKey="quienessomos"
                       fieldKey={`partnership_${index + 1}_image`}
-                      className="w-16 h-12 object-contain"
+                      width={64}
+                      height={48}
+                      quality={90}
+                      objectFit="contain"
                     />
                   </div>
                   <h3 className="text-xl font-bold text-white mb-2">

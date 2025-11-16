@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePrimaryImage, useDynamicImages } from "@/lib/dynamicImageService";
+import localStorageService from "@/lib/localStorageService";
 import EditableImage from './EditableImage';
 import EditableContent from './EditableContent';
 import EditableVideo from './EditableVideo';
@@ -19,12 +20,11 @@ const Hero = () => {
   // Cargar imagen de fondo desde admin (sin fallback específico)
   const { imageUrl: backgroundUrl, loading: bgLoading } = usePrimaryImage('hero', null);
 
-  // Cargar URL del video desde archivo JSON
+  // Cargar URL del video desde localStorage service
   useEffect(() => {
     const loadVideoUrl = async () => {
       try {
-        const { localContentService } = await import('@/lib/localContentService');
-        const { data } = await localContentService.getPageContent('home');
+        const { data } = await localStorageService.getPageContent('home');
         if (data && data.hero_video_url) {
           setVideoUrl(data.hero_video_url);
           setVideoError(false);
@@ -37,6 +37,24 @@ const Hero = () => {
       }
     };
     loadVideoUrl();
+    
+    // Escuchar actualizaciones de sincronización
+    const handleSync = (event) => {
+      const { pageKey, changes } = event.detail;
+      if (pageKey === 'home') {
+        const videoChange = changes?.find(c => c.field === 'hero_video_url');
+        if (videoChange) {
+          console.log('🎥 [Hero] Video URL actualizado:', videoChange.newValue);
+          setVideoUrl(videoChange.newValue);
+        }
+      }
+    };
+    
+    window.addEventListener('localstorage-sync', handleSync);
+    
+    return () => {
+      window.removeEventListener('localstorage-sync', handleSync);
+    };
   }, []);
 
   useEffect(() => {
@@ -144,15 +162,21 @@ const Hero = () => {
       <div className="relative z-10 container mx-auto px-4 text-center text-white">
         {/* Logo dinámico desde admin */}
         {!logoLoading && (
-          <EditableImage
-            src={logoUrl}
-            alt="City Soccer Logo"
-            categoria="logos"
-            pageKey="home"
-            fieldKey="home_logo"
-            className="mx-auto mb-8 w-150 h-150 object-contain"
-            style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.5))" }}
-          />
+          <div className="mx-auto mb-8 w-[150px] h-[150px] relative" style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.5))" }}>
+            <EditableImage
+              src={logoUrl}
+              alt="City Soccer Logo"
+              categoria="logos"
+              pageKey="home"
+              fieldKey="home_logo"
+              width={150}
+              height={150}
+              priority={true}
+              quality={90}
+              objectFit="contain"
+              className="object-contain"
+            />
+          </div>
         )}
 
         {/* Título editable */}

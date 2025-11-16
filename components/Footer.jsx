@@ -1,11 +1,30 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { useAdminMode } from "@/contexts/AdminModeContext";
+import localStorageService from "@/lib/localStorageService";
 import EditableContent from "./EditableContent";
 import EditableImage from "./EditableImage";
 
 export default function Footer() {
   const { isAdminMode } = useAdminMode();
+
+  // Escuchar actualizaciones de sincronización para footer
+  useEffect(() => {
+    const handleSync = (event) => {
+      const { pageKey, changes } = event.detail;
+      if (pageKey === 'footer' && changes && changes.length > 0) {
+        console.log('👣 [Footer] Contenido actualizado:', changes.length, 'cambios');
+        // Los componentes EditableContent se actualizarán automáticamente
+        // Este log es solo para tracking
+      }
+    };
+    
+    window.addEventListener('localstorage-sync', handleSync);
+    
+    return () => {
+      window.removeEventListener('localstorage-sync', handleSync);
+    };
+  }, []);
 
   const handleWhatsAppClick = () => {
     const message = "¡Hola! Me gustaría saber más sobre City Soccer.";
@@ -33,7 +52,10 @@ export default function Footer() {
             pageKey="footer"
             fieldKey="footer_image"
             alt="Instalaciones City Soccer"
-            className="absolute inset-0 h-full w-full object-cover opacity-80"
+            fill={true}
+            sizes="(max-width: 1024px) 100vw, 40vw"
+            quality={75}
+            className="opacity-80"
           />
           {/* Sin gradiente overlay en la imagen */}
         </div>

@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAdminMode } from '@/contexts/AdminModeContext';
 import { useContent } from '@/contexts/ContentContext';
 import { localContentService } from '@/lib/localContentService';
@@ -29,6 +29,16 @@ const EditableImage = ({
 }) => {
   const { isAdminMode } = useAdminMode();
   const { getField, updateField } = useContent();
+  
+  // Usar refs para evitar re-renders
+  const getFieldRef = useRef(getField);
+  const updateFieldRef = useRef(updateField);
+  
+  useEffect(() => {
+    getFieldRef.current = getField;
+    updateFieldRef.current = updateField;
+  }, [getField, updateField]);
+  
   const [showUploader, setShowUploader] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -55,7 +65,7 @@ const EditableImage = ({
       try {
         console.log(`[EditableImage] Cargando ${pageKey}.${imageFieldKey}...`);
         
-        const { data, error } = await getField(pageKey, imageFieldKey);
+        const { data, error } = await getFieldRef.current(pageKey, imageFieldKey);
         
         if (!isMounted) {
           console.log(`[EditableImage] Componente desmontado antes de cargar`);
@@ -89,10 +99,25 @@ const EditableImage = ({
 
     loadImageUrl();
     
+    // Listener para recargar cuando se invalida el contenido
+    const handleContentInvalidated = (event) => {
+      if (event.detail.pageKey === pageKey && event.detail.fieldKey === imageFieldKey) {
+        console.log(`[EditableImage] 🔄 Recargando por invalidación: ${pageKey}.${imageFieldKey}`);
+        loadImageUrl();
+      }
+    };
+    
+    if (typeof window !== 'undefined') {
+      window.addEventListener('content-invalidated', handleContentInvalidated);
+    }
+    
     return () => {
       isMounted = false;
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('content-invalidated', handleContentInvalidated);
+      }
     };
-  }, [pageKey, imageFieldKey, src, getField]); // Agregado src y getField
+  }, [pageKey, imageFieldKey]); // Solo pageKey y imageFieldKey, NO getField
 
   const handleImageClick = (e) => {
     if (isAdminMode) {
@@ -119,7 +144,7 @@ const EditableImage = ({
 
       // Guardar la nueva URL en el JSON de contenido usando contexto compartido
       if (pageKey && imageFieldKey) {
-        const { error: saveError } = await updateField(
+        const { error: saveError } = await updateFieldRef.current(
           pageKey, 
           imageFieldKey, 
           newImageUrl
@@ -217,7 +242,7 @@ const EditableImage = ({
   if (loading || !finalSrc) {
     return (
       <div 
-        className={`relative group/editable-image ${className} ${fill ? 'w-full h-full' : ''} bg-gray-300/20 animate-pulse flex items-center justify-center ${
+        className={`relative group/editable-image ${className} ${fill ? 'w-full h-full' : ''} bg-gradient-to-br from-gray-800/40 to-gray-900/40 backdrop-blur-sm animate-pulse flex items-center justify-center ${
           isAdminMode 
             ? 'cursor-pointer hover:ring-4 hover:ring-[#ffee00] hover:ring-opacity-70 transition-all duration-200' 
             : ''
@@ -225,18 +250,24 @@ const EditableImage = ({
         style={style}
         onClick={handleWrapperClick}
       >
-        {isAdminMode && (
+        {isAdminMode ? (
           <>
             <div className="text-center">
-              <Upload className="w-12 h-12 mx-auto text-gray-400 mb-2" />
-              <p className="text-gray-600 text-sm">Cargando...</p>
+              <Upload className="w-16 h-16 mx-auto text-gray-500/50 mb-2" />
+              <p className="text-gray-500/70 text-sm font-medium">Clic para subir imagen</p>
             </div>
-            <div className="absolute top-2 right-2 bg-[#ffee00] text-black p-2 rounded-full shadow-lg opacity-0 group-hover/editable-image:opacity-100 transition-opacity pointer-events-none z-10">
+            <div className="absolute top-2 right-2 bg-[#ffee00] text-black p-2 rounded-full shadow-lg opacity-0 group-hover/editable-image:opacity-100 transition-opacity pointer-events-none z-50">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
             </div>
           </>
+        ) : (
+          <div className="text-center">
+            <svg className="w-20 h-20 mx-auto text-gray-600/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
         )}
       </div>
     );
@@ -244,7 +275,7 @@ const EditableImage = ({
 
   const imgElement = finalSrc ? (
     <div 
-      className={`relative group/editable-image ${fill ? 'w-full h-full' : ''}`}
+      className={`relative group/editable-image ${fill ? 'w-full h-full' : ''} z-40`}
       onClick={handleWrapperClick}
       style={{ cursor: isAdminMode ? 'pointer' : 'default' }}
     >
@@ -273,7 +304,7 @@ const EditableImage = ({
         {...props}
       />
       {isAdminMode && (
-        <div className="absolute top-2 right-2 bg-[#ffee00] text-black p-2 rounded-full shadow-lg opacity-0 group-hover/editable-image:opacity-100 transition-opacity pointer-events-none z-10">
+        <div className="absolute top-2 right-2 bg-[#ffee00] text-black p-2 rounded-full shadow-lg opacity-0 group-hover/editable-image:opacity-100 transition-opacity pointer-events-none z-50">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
           </svg>

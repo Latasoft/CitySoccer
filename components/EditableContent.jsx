@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAdminMode } from '@/contexts/AdminModeContext';
 import { useContent } from '@/contexts/ContentContext';
 import { Edit2, Save, X, Loader2 } from 'lucide-react';
@@ -31,6 +31,15 @@ const EditableContent = ({
   const { isAdminMode } = useAdminMode();
   const { getField, updateField } = useContent();
   
+  // Usar refs para evitar que cambios en getField causen re-renders
+  const getFieldRef = useRef(getField);
+  const updateFieldRef = useRef(updateField);
+  
+  useEffect(() => {
+    getFieldRef.current = getField;
+    updateFieldRef.current = updateField;
+  }, [getField, updateField]);
+  
   // Inicializar vacío, esperar a cargar el valor real
   const cacheKey = `content_${pageKey}_${fieldKey}`;
   const [value, setValue] = useState(null); // null = no cargado aún
@@ -52,7 +61,7 @@ const EditableContent = ({
       }
       
       try {
-        const { data, error } = await getField(pageKey, fieldKey);
+        const { data, error } = await getFieldRef.current(pageKey, fieldKey);
         
         if (!isMounted) {
           if (debugMode) {
@@ -91,10 +100,26 @@ const EditableContent = ({
 
     loadValue();
     
+    // Listener para recargar cuando se invalida el contenido
+    const handleContentInvalidated = (event) => {
+      if (event.detail.pageKey === pageKey && event.detail.fieldKey === fieldKey) {
+        console.log(`[EditableContent] 🔄 Recargando por invalidación: ${pageKey}.${fieldKey}`);
+        setLoading(true);
+        loadValue();
+      }
+    };
+    
+    if (typeof window !== 'undefined') {
+      window.addEventListener('content-invalidated', handleContentInvalidated);
+    }
+    
     return () => {
       isMounted = false;
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('content-invalidated', handleContentInvalidated);
+      }
     };
-  }, [pageKey, fieldKey, defaultValue, cacheKey, getField]);
+  }, [pageKey, fieldKey]); // Solo depender de pageKey y fieldKey, NO de getField
 
   const handleEdit = () => {
     setEditedValue(value);
@@ -120,7 +145,7 @@ const EditableContent = ({
         console.log('~'.repeat(60));
       }
       
-      const { data, error } = await updateField(pageKey, fieldKey, editedValue);
+      const { data, error } = await updateFieldRef.current(pageKey, fieldKey, editedValue);
       
       if (error) {
         console.error(`[EditableContent] ❌ Error del servicio:`, error);

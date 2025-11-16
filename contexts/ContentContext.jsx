@@ -113,14 +113,20 @@ export function ContentProvider({ children }) {
     const result = await localStorageService.updateField(cleanPageKey, cleanFieldKey, value);
     
     if (!result.error) {
-      // Actualizar caché local
-      const currentContent = contentCache.get(cleanPageKey) || {};
-      const updatedContent = { ...currentContent, [cleanFieldKey]: value };
-      contentCache.set(cleanPageKey, updatedContent);
-      setCache(new Map(contentCache)); // Trigger re-render
+      // INVALIDAR completamente el cache para esta página
+      contentCache.delete(cleanPageKey);
+      pendingRequests.delete(cleanPageKey);
       
-      if (debugMode) {
-        console.log(`[ContentContext] ✅ Caché actualizado para: ${cleanPageKey}.${cleanFieldKey}`);
+      // Recargar el contenido fresh desde el servidor
+      const freshResult = await localStorageService.getPageContent(cleanPageKey, true);
+      
+      if (!freshResult.error && freshResult.data) {
+        contentCache.set(cleanPageKey, freshResult.data);
+        setCache(new Map(contentCache)); // Trigger re-render
+        
+        if (debugMode) {
+          console.log(`[ContentContext] ✅ Contenido recargado fresh para: ${cleanPageKey}`);
+        }
       }
     }
     

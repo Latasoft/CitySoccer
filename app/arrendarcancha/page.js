@@ -1,27 +1,18 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import EditableContent from '@/components/EditableContent'
-import EditableImage from '@/components/EditableImage'
+import CardBackgroundImage from '@/components/CardBackgroundImage'
 import { useAdminMode } from '@/contexts/AdminModeContext'
-import { localContentService } from '@/lib/localContentService'
 
 export default function ArriendaCanchaSelector() {
   const router = useRouter()
   const { isAdminMode } = useAdminMode()
-  const [content, setContent] = useState({})
-  const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const loadContent = async () => {
-      const { data } = await localContentService.getPageContent('arrendarcancha')
-      if (data) setContent(data)
-      setLoading(false)
-    }
-    loadContent()
-  }, [])
+  // No necesitamos cargar contenido aquí, los componentes EditableContent/EditableImage
+  // lo hacen automáticamente usando ContentContext
 
   const canchaOptions = [
     {
@@ -32,7 +23,7 @@ export default function ArriendaCanchaSelector() {
       durationKey: 'card1_duration',
       buttonKey: 'card1_button_text',
       imageKey: 'card1_image',
-      image: '/Cancha1.jpeg',
+      image: '',  // Vacío para que cargue desde Supabase
       href: '/arrendarcancha/futbol7',
       categoria: 'cancha-futbol7'
     },
@@ -44,7 +35,7 @@ export default function ArriendaCanchaSelector() {
       durationKey: 'card2_duration',
       buttonKey: 'card2_button_text',
       imageKey: 'card2_image',
-      image: '/Cancha1.jpeg',
+      image: '',
       href: '/arrendarcancha/futbol9',
       categoria: 'cancha-futbol9'
     },
@@ -56,7 +47,7 @@ export default function ArriendaCanchaSelector() {
       durationKey: 'card3_duration',
       buttonKey: 'card3_button_text',
       imageKey: 'card3_image',
-      image: '/Pickleball2.jpeg',
+      image: '',
       href: '/arrendarcancha/pickleball-individual',
       categoria: 'cancha-pickleball-single'
     },
@@ -68,19 +59,14 @@ export default function ArriendaCanchaSelector() {
       durationKey: 'card4_duration',
       buttonKey: 'card4_button_text',
       imageKey: 'card4_image',
-      image: '/Pickleball2.jpeg',
+      image: '',
       href: '/arrendarcancha/pickleball-dobles',
       categoria: 'cancha-pickleball-dobles'
     }
   ]
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white">Cargando...</div>
-      </div>
-    )
-  }
+  // No necesitamos bloquear toda la página mientras carga
+  // Los componentes EditableContent/EditableImage muestran sus propios skeletons
 
   return (
     <div className="min-h-screen bg-black py-12">
@@ -108,36 +94,31 @@ export default function ArriendaCanchaSelector() {
         {/* Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {canchaOptions.map((cancha) => (
-            <Link 
-              key={cancha.id} 
-              href={cancha.href}
-              className="group block"
-              onClick={(e) => {
-                // Prevenir navegación en modo admin para permitir edición
-                if (isAdminMode) {
-                  e.preventDefault();
-                }
-              }}
-            >
-              <div className="relative h-96 rounded-lg overflow-hidden shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                {/* Background Image - Editable */}
-                <div className="absolute inset-0 z-10">
-                  <EditableImage
+            <div key={cancha.id} className="group">
+              <Link 
+                href={cancha.href}
+                className="block"
+                onClick={(e) => {
+                  if (isAdminMode) {
+                    e.preventDefault();
+                  }
+                }}
+              >
+                <div className="relative h-96 rounded-lg overflow-hidden shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                  {/* Background Image - Editable */}
+                  <CardBackgroundImage
                     pageKey="arrendarcancha"
                     fieldKey={cancha.imageKey}
-                    src={cancha.image}
-                    alt={content[cancha.titleKey] || cancha.titleKey}
-                    categoria={cancha.categoria}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    defaultValue={cancha.image}
+                    className="absolute inset-0 bg-cover bg-center"
                   />
-                </div>
-                
-                {/* Overlay */}
-                <div className="absolute inset-0 z-20 bg-black/60 group-hover:bg-black/50 transition-colors duration-300 pointer-events-none" />
+                  
+                  {/* Overlay */}
+                  <div className="absolute inset-0 bg-black/60 group-hover:bg-black/50 transition-colors duration-300 pointer-events-none" />
 
-                {/* Content */}
-                <div className="absolute inset-0 z-30 p-6 flex flex-col justify-between text-white pointer-events-none">
-                  <div className="pointer-events-auto">{/* Permitir clicks en elementos editables */}
+                  {/* Content */}
+                  <div className="absolute inset-0 p-6 flex flex-col justify-between text-white">
+                    <div>
                     <EditableContent
                       pageKey="arrendarcancha"
                       fieldKey={cancha.titleKey}
@@ -184,7 +165,7 @@ export default function ArriendaCanchaSelector() {
                     </div>
                   </div>
 
-                  <div className="mt-auto pointer-events-auto">
+                  <div className="mt-auto">
                     <button className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors group-hover:bg-green-500">
                       <EditableContent
                         pageKey="arrendarcancha"
@@ -201,6 +182,7 @@ export default function ArriendaCanchaSelector() {
                 </div>
               </div>
             </Link>
+            </div>
           ))}
         </div>
 

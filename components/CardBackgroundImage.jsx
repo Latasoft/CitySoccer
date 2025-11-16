@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAdminMode } from '@/contexts/AdminModeContext';
 import { useContent } from '@/contexts/ContentContext';
 import { localContentService } from '@/lib/localContentService';
@@ -19,56 +19,90 @@ const CardBackgroundImage = ({
   showPlaceholder = true
 }) => {
   const { isAdminMode } = useAdminMode();
-  const { getField } = useContent(); // ✅ Usar hook de ContentContext
+  const { getField } = useContent();
   
-  // Inicializar con defaultValue
+  // Usar ref para evitar re-renders
+  const getFieldRef = useRef(getField);
+  useEffect(() => {
+    getFieldRef.current = getField;
+  }, [getField]);
+  
+  // Inicializar con null para que cargue desde Supabase
   const cacheKey = `content_${pageKey}_${fieldKey}`;
-  const [value, setValue] = useState(defaultValue);
+  const [value, setValue] = useState(null); // null = aún no cargado
   
   const [editedValue, setEditedValue] = useState('');
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(false); // ✅ Cambiar a false - mostrar inmediatamente
+  const [loading, setLoading] = useState(true); // true hasta que cargue
   const [saving, setSaving] = useState(false);
   const [fieldId, setFieldId] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
 
-  // ✅ Cargar usando getField (con deduplicación)
+  // Cargar usando getField (con deduplicación)
   useEffect(() => {
     let isMounted = true;
     
     const loadValue = async () => {
       try {
-        const { data, error } = await getField(pageKey, fieldKey); // ✅ Usa ContentContext
+        const { data, error } = await getFieldRef.current(pageKey, fieldKey);
         
         if (!isMounted) return;
         
         if (error) {
           console.error(`Error loading ${pageKey}.${fieldKey}:`, error);
-          return; // Mantener defaultValue
+          // Solo actualizar si realmente cambió
+          if (value === null) {
+            setValue(defaultValue || '');
+          }
+          setLoading(false);
+          return;
         }
         
-        if (data !== undefined && data !== null && data !== defaultValue && data !== value) {
-          // Solo actualizar si el valor es diferente
-          setValue(data);
-          // Guardar en localStorage como backup
-          if (typeof window !== 'undefined') {
-            localStorage.setItem(cacheKey, data);
+        if (data !== undefined && data !== null) {
+          // Solo actualizar si el valor cambió
+          if (data !== value) {
+            setValue(data);
+            if (typeof window !== 'undefined') {
+              localStorage.setItem(cacheKey, data);
+            }
           }
+        } else if (value === null) {
+          // Solo usar defaultValue si aún no tenemos valor
+          setValue(defaultValue || '');
         }
-        // Si no hay data, mantener defaultValue
+        setLoading(false);
       } catch (error) {
         console.error(`Error cargando ${pageKey}.${fieldKey}:`, error);
-        // Mantener defaultValue
+        if (value === null) {
+          setValue(defaultValue || '');
+        }
+        setLoading(false);
       }
     };
 
     loadValue();
     
+    // Listener para recargar cuando se invalida el contenido
+    const handleContentInvalidated = (event) => {
+      if (event.detail.pageKey === pageKey && event.detail.fieldKey === fieldKey) {
+        console.log(`[CardBackgroundImage] 🔄 Recargando por invalidación: ${pageKey}.${fieldKey}`);
+        setLoading(true);
+        loadValue();
+      }
+    };
+    
+    if (typeof window !== 'undefined') {
+      window.addEventListener('content-invalidated', handleContentInvalidated);
+    }
+    
     return () => {
       isMounted = false;
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('content-invalidated', handleContentInvalidated);
+      }
     };
-  }, [pageKey, fieldKey, defaultValue, cacheKey, getField]);
+  }, [pageKey, fieldKey]); // Solo pageKey y fieldKey
 
   const handleEdit = () => {
     setEditedValue(value);
@@ -159,7 +193,10 @@ const CardBackgroundImage = ({
   // Modo edición
   if (isEditing) {
     return (
-      <div className="absolute inset-0 z-30 bg-black/95 p-4 flex flex-col gap-4 overflow-y-auto">
+      <div 
+        className="absolute inset-0 z-[100] bg-black/95 p-4 flex flex-col gap-4 overflow-y-auto"
+        onClick={(e) => e.stopPropagation()} // Evitar que clicks propaguen al Link
+      >
         {/* Zona de drag and drop para subir imagen */}
         <div
           onDrop={handleDrop}
@@ -247,7 +284,7 @@ const CardBackgroundImage = ({
     );
   }
 
-  const displayValue = loading ? defaultValue : value;
+  const displayValue = value || defaultValue || '';
   const hasImage = displayValue && displayValue.trim() !== '';
 
   // Modo admin - mostrar con botón editar
@@ -273,8 +310,12 @@ const CardBackgroundImage = ({
         )}
         <div className="absolute inset-0 border-2 border-dashed border-yellow-400/0 group-hover:border-yellow-400/60 transition-all pointer-events-none" />
         <button
-          onClick={handleEdit}
-          className="absolute top-2 right-2 bg-yellow-400 hover:bg-yellow-500 text-black p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-20"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleEdit();
+          }}
+          className="absolute top-2 right-2 bg-yellow-400 hover:bg-yellow-500 text-black p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-auto"
           title="Editar imagen de fondo"
         >
           <Edit2 className="w-4 h-4" />

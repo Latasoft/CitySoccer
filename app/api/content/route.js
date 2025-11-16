@@ -2,24 +2,11 @@ import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { saveContent, getContent } from '@/lib/contentStorage';
 
-// Caché en memoria del servidor (se limpia al reiniciar)
-const serverCache = new Map();
-const CACHE_TTL = 300000; // 5 minutos (balance entre performance y freshness)
-
-// Función auxiliar para obtener contenido desde Supabase Storage (con caché)
+// Función auxiliar para obtener contenido desde Supabase Storage (SIN CACHE)
 async function getContentFromStorage(pageKey, bypassCache = false) {
-  const now = Date.now();
-  const cached = serverCache.get(pageKey);
+  console.log('🔍🧭 Leyendo desde SUPABASE STORAGE (sin cache):', pageKey);
   
-  // Si hay caché válido Y no se solicita bypass, usarlo
-  if (!bypassCache && cached && (now - cached.timestamp) < CACHE_TTL) {
-    console.log('🔍🧭 Usando CACHE para', pageKey);
-    return cached.data;
-  }
-  
-  console.log('🔍🧭 Leyendo desde SUPABASE STORAGE para', pageKey, bypassCache ? '(bypass cache)' : '(cache expirado)');
-  
-  // Leer desde Supabase Storage
+  // Leer desde Supabase Storage con cache-busting
   const content = await getContent(pageKey);
   
   if (!content) {
@@ -32,13 +19,7 @@ async function getContentFromStorage(pageKey, bypassCache = false) {
     throw new Error('Página no encontrada');
   }
   
-  console.log('🔍🧭 ✅ Contenido cargado desde Supabase Storage');
-  
-  // Guardar en caché
-  serverCache.set(pageKey, {
-    data: content,
-    timestamp: now
-  });
+  console.log('🔍🧭 ✅ Contenido cargado fresh desde Supabase Storage');
   
   return content;
 }
@@ -82,10 +63,6 @@ export async function POST(request) {
     }
     
     console.log('🔍🧭 ✅ Contenido guardado exitosamente en:', result.url);
-    
-    // Invalidar caché del servidor
-    serverCache.delete(pageKey);
-    console.log('🔍🧭 Cache invalidado para:', pageKey);
     
     // Revalidar páginas que usan este contenido (ISR)
     try {
@@ -191,7 +168,10 @@ export async function GET(request) {
       data: content
     }, {
       headers: {
-        'Cache-Control': 'public, max-age=60, s-maxage=60, stale-while-revalidate=300'
+        // Sin cache del navegador para contenido editable
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
       }
     });
     

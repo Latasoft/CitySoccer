@@ -31,13 +31,13 @@ const EditableContent = ({
   const { isAdminMode } = useAdminMode();
   const { getField, updateField } = useContent();
   
-  // Inicializar con defaultValue, el servidor tiene prioridad
+  // Inicializar vacío, esperar a cargar el valor real
   const cacheKey = `content_${pageKey}_${fieldKey}`;
-  const [value, setValue] = useState(defaultValue);
+  const [value, setValue] = useState(null); // null = no cargado aún
   
   const [editedValue, setEditedValue] = useState('');
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(false); // Cambiar a false - mostrar defaultValue inmediatamente
+  const [loading, setLoading] = useState(true); // Mostrar loading hasta cargar el valor real
   const [saving, setSaving] = useState(false);
 
   // Cargar valor desde caché compartido al montar el componente
@@ -63,6 +63,7 @@ const EditableContent = ({
         
         if (error) {
           console.error(`[EditableContent] ❌ Error loading ${pageKey}.${fieldKey}:`, error);
+          setLoading(false); // Terminar loading aunque haya error
           return; // Mantener defaultValue
         }
         
@@ -80,8 +81,10 @@ const EditableContent = ({
           }
         }
         // Si no hay data, mantener defaultValue
+        setLoading(false); // Terminar loading
       } catch (error) {
         console.error(`[EditableContent] 💥 Exception cargando ${pageKey}.${fieldKey}:`, error);
+        setLoading(false); // Terminar loading aunque haya excepción
         // Mantener defaultValue
       }
     };
@@ -220,37 +223,41 @@ const EditableContent = ({
 
   // Vista normal (usuario no admin O modo admin desactivado)
   if (!isAdminMode) {
-    // Mientras carga, mostrar indicador
-    if (loading) {
-      // Filtrar children de props para elementos void
-      const { children: _, ...restProps } = props;
+    // Mientras carga, mostrar skeleton/placeholder
+    if (loading || value === null) {
+      // Skeleton con animación de pulso
+      const skeletonClass = 'animate-pulse bg-gray-300/20 rounded';
       
-      // Para elementos void (auto-cerrados) no usar children
+      if (fieldType === 'image' && Component === 'img') {
+        const { children: _, ...restProps } = props;
+        return <Component className={`${className} ${skeletonClass}`} alt="" {...restProps} />;
+      }
       if (Component === 'input') {
-        return <Component className={className} placeholder="⏳ Cargando..." {...restProps} />;
+        const { children: _, ...restProps } = props;
+        return <Component className={`${className} ${skeletonClass}`} disabled {...restProps} />;
       }
-      if (Component === 'img' || fieldType === 'image') {
-        return <Component className={className} alt="Cargando..." {...restProps} />;
-      }
-      return <Component className={className} {...props}>⏳ Cargando...</Component>;
+      // Para texto, mostrar skeleton con altura similar
+      return <Component className={`${className} ${skeletonClass} inline-block min-w-[100px] min-h-[1em]`} {...props}>&nbsp;</Component>;
     }
     
+    // Mostrar valor real con transición suave
     const displayValue = value || defaultValue;
+    const opacityClass = 'opacity-100 transition-opacity duration-300';
     
     if (fieldType === 'image' && Component === 'img') {
       const { children: _, ...restProps } = props;
-      return <Component src={displayValue} className={className} {...restProps} />;
+      return <Component src={displayValue} className={`${className} ${opacityClass}`} {...restProps} />;
     }
     if (Component === 'a') {
       // Usar children si existen, sino usar displayValue
       const linkContent = children || displayValue;
-      return <Component href={props.href} className={className} {...props}>{linkContent}</Component>;
+      return <Component href={props.href} className={`${className} ${opacityClass}`} {...props}>{linkContent}</Component>;
     }
     if (Component === 'input') {
       const { children: _, ...restProps } = props;
-      return <Component className={className} placeholder={displayValue} {...restProps} />;
+      return <Component className={`${className} ${opacityClass}`} placeholder={displayValue} {...restProps} />;
     }
-    return <Component className={className} {...props}>{displayValue}</Component>;
+    return <Component className={`${className} ${opacityClass}`} {...props}>{displayValue}</Component>;
   }
 
   // Vista admin con botón editar (SIEMPRE visible si modo admin está activo)

@@ -33,8 +33,8 @@ const EditableImage = ({
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
-  const [currentSrc, setCurrentSrc] = useState(src);
-  const [loading, setLoading] = useState(false);
+  const [currentSrc, setCurrentSrc] = useState(null); // null = no cargado aún
+  const [loading, setLoading] = useState(true);
 
   // Generar fieldKey automático si no se proporciona
   const imageFieldKey = fieldKey || `${categoria}_image`;
@@ -43,7 +43,7 @@ const EditableImage = ({
   useEffect(() => {
     if (!pageKey || !imageFieldKey) {
       console.log(`[EditableImage] Sin pageKey o fieldKey, usando src directamente:`, src);
-      setCurrentSrc(src);
+      setCurrentSrc(src || '');
       setLoading(false);
       return;
     }
@@ -55,7 +55,6 @@ const EditableImage = ({
       try {
         console.log(`[EditableImage] Cargando ${pageKey}.${imageFieldKey}...`);
         
-        // No mostrar loading - la imagen ya se muestra con src
         const { data, error } = await getField(pageKey, imageFieldKey);
         
         if (!isMounted) {
@@ -65,25 +64,26 @@ const EditableImage = ({
         
         if (error) {
           console.error(`[EditableImage] Error cargando ${pageKey}.${imageFieldKey}:`, error);
-          // Mantener src original
+          // Usar src como fallback
+          setCurrentSrc(src || '');
+          setLoading(false);
           return;
         }
         
         console.log(`[EditableImage] Data recibida para ${pageKey}.${imageFieldKey}:`, data);
         
-        if (data && data !== src && data !== currentSrc) {
-          console.log(`[EditableImage] ✅ Actualizando imagen desde JSON:`, data);
-          // Solo actualizar si la URL es diferente
+        if (data) {
+          console.log(`[EditableImage] ✅ Imagen cargada desde JSON:`, data);
           setCurrentSrc(data);
-        } else if (!data) {
-          console.log(`[EditableImage] No hay data en JSON, manteniendo src:`, src);
         } else {
-          console.log(`[EditableImage] Data es igual a src actual, no actualizar`);
+          console.log(`[EditableImage] No hay data en JSON, usando src:`, src);
+          setCurrentSrc(src || '');
         }
-        // Si no hay data, mantener src original
+        setLoading(false);
       } catch (error) {
         console.error(`[EditableImage] Exception en loadImageUrl:`, error);
-        // Mantener src original
+        setCurrentSrc(src || '');
+        setLoading(false);
       }
     };
 
@@ -92,7 +92,7 @@ const EditableImage = ({
     return () => {
       isMounted = false;
     };
-  }, [pageKey, imageFieldKey]); // Removido 'src' de dependencias
+  }, [pageKey, imageFieldKey, src, getField]); // Agregado src y getField
 
   const handleImageClick = (e) => {
     if (isAdminMode) {
@@ -212,6 +212,24 @@ const EditableImage = ({
       handleImageClick(e);
     }
   };
+
+  // Mostrar skeleton mientras carga
+  if (loading || !finalSrc) {
+    return (
+      <div 
+        className={`${className} ${fill ? 'w-full h-full' : ''} bg-gray-300/20 animate-pulse flex items-center justify-center`}
+        style={style}
+        onClick={handleWrapperClick}
+      >
+        {isAdminMode && (
+          <div className="text-center">
+            <Upload className="w-12 h-12 mx-auto text-gray-400 mb-2" />
+            <p className="text-gray-600 text-sm">Cargando...</p>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   const imgElement = finalSrc ? (
     <div 

@@ -206,11 +206,13 @@ async function main() {
     'eventos',
     'contacto',
     'home',
-    'academia-futbol',
-    'academia-pickleball',
-    'clases-particulares-futbol',
-    'clases-particulares-pickleball',
-    'footer'
+    'academiadefutbol',
+    'academiadepickleball',
+    'clasesparticularesfutbol',
+    'clasesparticularespickleball',
+    'footer',
+    'arriendo_pickleball-dobles',
+    'arriendo_pickleball'
   ];
   
   console.log('\n📝 Actualizando JSONs en Supabase Storage...\n');

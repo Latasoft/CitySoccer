@@ -211,22 +211,52 @@ const PricesAdminGrid = () => {
         preciosModificados: preciosModificados.length 
       }, 'PricesAdminGrid');
       
-      // Timeout de seguridad: si updateBatch no responde en 30 seg, abortar
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout: La operación tardó más de 30 segundos')), 30000)
-      );
+      // Retry logic: hasta 3 intentos con timeout de 60s cada uno
+      let lastError = null;
+      let result = null;
       
-      const updatePromise = pricesService.updateBatch(preciosModificados);
-      const { error } = await Promise.race([updatePromise, timeoutPromise]);
+      for (let intento = 1; intento <= 3; intento++) {
+        try {
+          serverLog.info(`Intento ${intento}/3 de guardar precios`, null, 'PricesAdminGrid');
+          
+          // Timeout de seguridad: 60 segundos para operaciones grandes
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error(`Timeout: La operación tardó más de 60 segundos (intento ${intento})`)), 60000)
+          );
+          
+          const updatePromise = pricesService.updateBatch(preciosModificados);
+          result = await Promise.race([updatePromise, timeoutPromise]);
+          
+          serverLog.debug('Respuesta de updateBatch', { 
+            hasError: !!result.error, 
+            errorMsg: result.error?.message,
+            intento
+          }, 'PricesAdminGrid');
+          
+          if (result.error) {
+            throw result.error;
+          }
+          
+          // Éxito - salir del loop
+          serverLog.success(`✅ Guardado exitoso en intento ${intento}`, null, 'PricesAdminGrid');
+          break;
+          
+        } catch (error) {
+          lastError = error;
+          serverLog.warn(`Intento ${intento}/3 falló`, { error: error.message }, 'PricesAdminGrid');
+          
+          // Si no es el último intento, esperar 2s antes de reintentar
+          if (intento < 3) {
+            serverLog.info('Esperando 2s antes de reintentar...', null, 'PricesAdminGrid');
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          }
+        }
+      }
       
-      serverLog.debug('Respuesta de updateBatch', { 
-        hasError: !!error, 
-        errorMsg: error?.message 
-      }, 'PricesAdminGrid');
-      
-      if (error) {
-        serverLog.error('ERROR en updateBatch', error, 'PricesAdminGrid');
-        throw error;
+      // Si después de 3 intentos sigue fallando, lanzar error
+      if (lastError) {
+        serverLog.error('ERROR: Todos los intentos fallaron', lastError, 'PricesAdminGrid');
+        throw lastError;
       }
       
       serverLog.debug('Detectando cambios para notificación...', null, 'PricesAdminGrid');

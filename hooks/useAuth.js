@@ -11,14 +11,23 @@ export const useAuth = () => {
   const router = useRouter();
 
   useEffect(() => {
+    let timeoutId = null;
+    
     // Verificar sesión existente
     const checkSession = async () => {
       try {
+        // Timeout de seguridad: forzar loading=false después de 10 segundos
+        timeoutId = setTimeout(() => {
+          console.error('⏱️ TIMEOUT verificando sesión (10s)');
+          setLoading(false);
+        }, 10000);
+        
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('Error obteniendo sesión:', error);
           clearLocalSession();
+          if (timeoutId) clearTimeout(timeoutId);
           setLoading(false);
           return;
         }
@@ -76,6 +85,8 @@ export const useAuth = () => {
         console.error('Error verificando sesión:', error);
         clearLocalSession();
       } finally {
+        // Cancelar timeout y SIEMPRE cambiar loading a false
+        if (timeoutId) clearTimeout(timeoutId);
         setLoading(false);
       }
     };

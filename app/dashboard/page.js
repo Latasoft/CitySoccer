@@ -41,16 +41,29 @@ export default function Dashboard() {
 
   // Función para cargar datos del dashboard
   const loadDashboardData = useCallback(async () => {
+    let timeoutId = null;
+    
     try {
+      // Timeout de seguridad: forzar loading=false después de 15 segundos
+      timeoutId = setTimeout(() => {
+        console.error('⏱️ TIMEOUT cargando dashboard (15s)');
+        setLoading(false);
+      }, 15000);
+      
       // Cargar estadísticas
       await Promise.all([
         loadGeneralStats(),
         loadTopClientes(),
         loadReservasRecientes()
       ]);
+      
+      // Cancelar timeout si terminó bien
+      if (timeoutId) clearTimeout(timeoutId);
     } catch (error) {
       console.error('Error cargando datos:', error);
+      if (timeoutId) clearTimeout(timeoutId);
     } finally {
+      // SIEMPRE cambiar loading a false
       setLoading(false);
     }
   }, []);

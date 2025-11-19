@@ -55,9 +55,45 @@ export default function Navigation() {
 
     // Cargar items del menú desde archivo JSON local
     useEffect(() => {
+        const CACHE_KEY = 'navigation_menu_cache';
+        const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+        
         const loadMenuItems = async (forceRefresh = false) => {
             try {
                 console.log('🔍🧭 Navigation: Iniciando carga de menú...', { forceRefresh });
+                
+                // Intentar usar cache si no se fuerza refresh
+                if (!forceRefresh && typeof window !== 'undefined') {
+                    try {
+                        const cached = localStorage.getItem(CACHE_KEY);
+                        if (cached) {
+                            const { data, timestamp } = JSON.parse(cached);
+                            const age = Date.now() - timestamp;
+                            
+                            if (age < CACHE_DURATION) {
+                                console.log(`🔍🧭 ✅ Usando cache (${Math.round(age / 1000)}s de antigüedad)`);
+                                
+                                // Aplicar los datos cacheados
+                                if (data && data.menu_items && data.menu_items.length > 0) {
+                                    const itemsWithAuth = [...data.menu_items];
+                                    if (user) {
+                                        itemsWithAuth.push({ id: 999, text: "Dashboard", href: "/dashboard" });
+                                    } else {
+                                        itemsWithAuth.push({ id: 999, text: "Login", href: "/login" });
+                                    }
+                                    setNavItems(itemsWithAuth);
+                                    setLoadingNav(false);
+                                    return; // Salir sin hacer fetch
+                                }
+                            } else {
+                                console.log(`🔍🧭 Cache expirado (${Math.round(age / 1000)}s), recargando...`);
+                            }
+                        }
+                    } catch (cacheError) {
+                        console.warn('🔍🧭 Error leyendo cache, continuando con fetch:', cacheError);
+                    }
+                }
+                
                 const url = forceRefresh 
                     ? '/api/content?pageKey=navigation&fresh=true'
                     : '/api/content?pageKey=navigation';
@@ -77,6 +113,19 @@ export default function Navigation() {
             });
             
             const data = result.data;
+            
+            // Guardar en cache
+            if (data && typeof window !== 'undefined') {
+                try {
+                    localStorage.setItem(CACHE_KEY, JSON.stringify({
+                        data,
+                        timestamp: Date.now()
+                    }));
+                    console.log('🔍🧭 ✅ Menu guardado en cache');
+                } catch (cacheError) {
+                    console.warn('🔍🧭 Error guardando cache:', cacheError);
+                }
+            }
             
             if (data && data.menu_items && data.menu_items.length > 0) {
                 const itemsWithAuth = [...data.menu_items];
@@ -128,12 +177,12 @@ export default function Navigation() {
         const handleNavigationUpdate = (event) => {
             console.log('🔍🧭 Evento navigation-updated recibido!', event.detail);
             
-            // NO recargar desde servidor - solo actualizar estado local si es necesario
-            // El EditableNavLink ya actualizó su propio texto localmente
-            // Este evento es para otros componentes que lo necesiten
-            
-            // Si en el futuro necesitas recargar, usa:
-            // loadMenuItems(true); // Forzar recarga sin cache
+            // Invalidar cache y recargar
+            if (typeof window !== 'undefined') {
+                localStorage.removeItem('navigation_menu_cache');
+                console.log('🔍🧭 Cache invalidado, recargando...');
+            }
+            loadMenuItems(true); // Forzar recarga sin cache
         };
         
         window.addEventListener('navigation-updated', handleNavigationUpdate);

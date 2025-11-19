@@ -21,12 +21,13 @@ export const usePrices = (tipoCancha) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    let mounted = true; // Prevenir updates en componentes desmontados
+    let mounted = true;
+    let timeoutId = null;
 
     const loadPrecios = async () => {
       if (!tipoCancha) {
+        setLoading(false);
         if (mounted) {
-          setLoading(false);
           setError('Tipo de cancha no especificado');
         }
         return;
@@ -43,9 +44,9 @@ export const usePrices = (tipoCancha) => {
           console.log(`♻️ Usando cache para ${tipoCancha} (${Math.round((now - lastLoadTime) / 1000)}s de antigüedad)`);
           if (mounted) {
             setPrecios(cached);
-            setLoading(false);
             setError(null);
           }
+          setLoading(false);
           return;
         }
 
@@ -54,9 +55,24 @@ export const usePrices = (tipoCancha) => {
           setError(null);
         }
         
+        // Timeout de seguridad: forzar loading=false después de 10 segundos
+        timeoutId = setTimeout(() => {
+          console.error(`⏱️ TIMEOUT cargando ${tipoCancha} (10s)`);
+          setLoading(false);
+          if (mounted) {
+            setError('La carga de precios tardó demasiado. Recarga la página.');
+          }
+        }, 10000);
+        
         // Cargar desde BD y cachear
         console.log(`🔄 Cargando precios FRESCOS para ${tipoCancha} desde BD`);
         const data = await obtenerTarifasPorTipo(tipoCancha);
+        
+        // Cancelar timeout si la carga fue exitosa
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+          timeoutId = null;
+        }
         
         // Actualizar cache
         pricesCache[tipoCancha] = data;
@@ -81,14 +97,20 @@ export const usePrices = (tipoCancha) => {
         }
       } catch (err) {
         console.error(`❌ Error cargando precios para ${tipoCancha}:`, err);
+        
+        // Cancelar timeout si hay error
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+          timeoutId = null;
+        }
+        
         if (mounted) {
           setError(err.message || 'Error cargando precios desde la base de datos');
           setPrecios(null);
         }
       } finally {
-        if (mounted) {
-          setLoading(false);
-        }
+        // CRÍTICO: SIEMPRE cambiar loading a false, sin depender de mounted
+        setLoading(false);
       }
     };
 
@@ -97,6 +119,9 @@ export const usePrices = (tipoCancha) => {
     // Cleanup function
     return () => {
       mounted = false;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
     };
   }, [tipoCancha]);
 

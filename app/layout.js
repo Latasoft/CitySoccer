@@ -6,6 +6,7 @@ import { AdminModeProvider } from "../contexts/AdminModeContext";
 import { EditModeProvider } from "../contexts/EditModeContext";
 import { ContentProvider } from "../contexts/ContentContext";
 import EditModeToggle from "../components/EditModeToggle";
+import CacheCleaner from "../components/CacheCleaner";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -27,6 +28,7 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <CacheCleaner />
         <AdminModeProvider>
           <EditModeProvider>
             <ContentProvider>

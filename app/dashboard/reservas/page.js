@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
+import { buscarOCrearClienteReserva, crearReservaConValidacion, actualizarEstadoReserva, eliminarReserva as eliminarReservaService } from '@/lib/reservaService';
 import CalendarioReservas from './components/CalendarioReservas';
 import * as XLSX from 'xlsx';
 import {
@@ -185,62 +186,33 @@ export default function ReservasPage() {
       setSaving(true);
       setError('');
 
-      // Buscar o crear cliente por correo o teléfono
-      let clienteId = null;
-      if (form.cliente_correo || form.cliente_telefono) {
-        const orParts = [];
-        if (form.cliente_correo) orParts.push(`correo.eq.${form.cliente_correo}`);
-        if (form.cliente_telefono) orParts.push(`telefono.eq.${form.cliente_telefono}`);
-        const { data: foundClients, error: findErr } = await supabase
-          .from('clientes')
-          .select('id')
-          .or(orParts.join(','))
-          .limit(1);
-        if (findErr) throw findErr;
-        if (foundClients && foundClients[0]) {
-          clienteId = foundClients[0].id;
-        }
-      }
-      if (!clienteId) {
-        const { data: newClient, error: insErr } = await supabase
-          .from('clientes')
-          .insert({
-            nombre: form.cliente_nombre,
-            correo: form.cliente_correo || null,
-            telefono: form.cliente_telefono || null
-          })
-          .select('id')
-          .single();
-        if (insErr) throw insErr;
-        clienteId = newClient.id;
-      }
+      // Buscar o crear cliente usando el servicio
+      const clienteResult = await buscarOCrearClienteReserva({
+        nombre: form.cliente_nombre,
+        correo: form.cliente_correo,
+        telefono: form.cliente_telefono
+      });
 
-      // Chequear conflicto sencillo: misma cancha/fecha/hora no cancelada
-      const { data: conflictos, error: confErr } = await supabase
-        .from('reservas')
-        .select('id, estado')
-        .eq('fecha', form.fecha)
-        .eq('cancha_id', Number(form.cancha_id))
-        .eq('hora_inicio', form.hora_inicio)
-        .neq('estado', 'cancelada');
-      if (confErr) throw confErr;
-      if (conflictos && conflictos.length > 0) {
-        setError('Ya existe una reserva en esa cancha, fecha y hora.');
-        setSaving(false);
+      if (!clienteResult.success) {
+        setError(clienteResult.error || 'Error al procesar datos del cliente.');
         return;
       }
 
-      // Crear reserva
-      const { error: resErr } = await supabase
-        .from('reservas')
-        .insert({
-          fecha: form.fecha,
-          hora_inicio: form.hora_inicio,
-          cancha_id: Number(form.cancha_id),
-          cliente_id: clienteId,
-          estado: 'pendiente'
-        });
-      if (resErr) throw resErr;
+      const clienteId = clienteResult.clienteId;
+
+      // Crear reserva con validación usando el servicio
+      const reservaResult = await crearReservaConValidacion({
+        fecha: form.fecha,
+        hora_inicio: form.hora_inicio,
+        cancha_id: Number(form.cancha_id),
+        cliente_id: clienteId,
+        estado: 'pendiente'
+      });
+
+      if (!reservaResult.success) {
+        setError(reservaResult.error || 'Error al crear la reserva.');
+        return;
+      }
 
       setOpenModal(false);
       await fetchReservas();
@@ -254,8 +226,11 @@ export default function ReservasPage() {
 
   const cambiarEstado = async (id, nuevo) => {
     try {
-      const { error } = await supabase.from('reservas').update({ estado: nuevo }).eq('id', id);
-      if (error) throw error;
+      const result = await actualizarEstadoReserva(id, nuevo);
+      if (!result.success) {
+        setError(result.error || 'No se pudo actualizar el estado.');
+        return;
+      }
       await fetchReservas();
     } catch (e) {
       console.error(e);
@@ -266,8 +241,11 @@ export default function ReservasPage() {
   const eliminarReserva = async (id) => {
     if (!confirm('¿Eliminar esta reserva?')) return;
     try {
-      const { error } = await supabase.from('reservas').delete().eq('id', id);
-      if (error) throw error;
+      const result = await eliminarReservaService(id);
+      if (!result.success) {
+        setError(result.error || 'No se pudo eliminar la reserva.');
+        return;
+      }
       await fetchReservas();
     } catch (e) {
       console.error(e);

@@ -145,40 +145,61 @@ export const verificarDisponibilidad = async (fecha, horaInicio, canchaId) => {
       // Verificar si CUALQUIERA de las modalidades (individual o dobles) tiene reserva
       condicionesConsulta = condicionesConsulta.in('cancha_id', idsRelacionados);
     } else if (esFutbol) {
-      // REGLA CRÍTICA: Las canchas de fútbol 7 y fútbol 9 comparten espacios físicos
-      // Si reservo F7_1, bloquea F9 (misma cancha física)
-      
-      // Buscar canchas que comparten el mismo grupo/espacio físico
-      const { data: grupoData, error: grupoError } = await supabase
+    // REGLA: Las canchas de fútbol 7 y fútbol 9 comparten espacios físicos.
+    
+    // 1. Buscar el grupo de la cancha actual
+    const { data: grupoData, error: grupoError } = await supabase
+      .from('cancha_grupo_miembros')
+      .select('grupo_id')
+      .eq('cancha_id', canchaId)
+      .single();
+
+    if (grupoError && grupoError.code !== 'PGRST116') {
+      throw grupoError;
+    }
+
+    let idsRelacionados = [canchaId];
+
+    if (grupoData) {
+      // 2. Obtener TODAS las canchas del grupo Y SU TIPO
+      // Se usa la relación con la tabla 'canchas' (verifica que se llame así en tu BD)
+      const { data: canchasGrupo, error: canchasGrupoError } = await supabase
         .from('cancha_grupo_miembros')
-        .select('grupo_id')
-        .eq('cancha_id', canchaId)
-        .single();
+        .select(`
+          cancha_id,
+          canchas (
+            tipo
+          )
+        `)
+        .eq('grupo_id', grupoData.grupo_id);
 
-      if (grupoError && grupoError.code !== 'PGRST116') {
-        // PGRST116 = no encontrado, es OK si la cancha no está en ningún grupo
-        throw grupoError;
-      }
+      if (canchasGrupoError) throw canchasGrupoError;
 
-      let idsRelacionados = [canchaId]; // Por defecto, solo la cancha actual
-
-      if (grupoData) {
-        // Si la cancha está en un grupo, obtener TODAS las canchas de ese grupo
-        const { data: canchasGrupo, error: canchasGrupoError } = await supabase
-          .from('cancha_grupo_miembros')
-          .select('cancha_id')
-          .eq('grupo_id', grupoData.grupo_id);
-
-        if (canchasGrupoError) throw canchasGrupoError;
-
-        if (canchasGrupo && canchasGrupo.length > 0) {
+      if (canchasGrupo && canchasGrupo.length > 0) {
+        
+        // 3. Lógica de filtrado inteligente
+        if (tipoCancha === 'futbol9') {
+          // Si soy F9 (Padre), me bloquea CUALQUIER cancha del grupo
           idsRelacionados = canchasGrupo.map(c => c.cancha_id);
-          console.log(`⚽ Verificando fútbol: Cancha ${canchaInfo.nombre} - IDs relacionados:`, idsRelacionados);
+        } else {
+          // Si soy F7 (Hijo), solo me bloquean: Yo misma O la cancha F9.
+          // NO me bloquean mis hermanas F7.
+          idsRelacionados = canchasGrupo
+            .filter(c => {
+              const esMismaCancha = c.cancha_id === canchaId;
+              // Verificar si es la cancha padre (F9)
+              const datosCancha = Array.isArray(c.canchas) ? c.canchas[0] : c.canchas;
+              const esCanchaPadre = datosCancha?.tipo === 'futbol9';
+              
+              return esMismaCancha || esCanchaPadre;
+            })
+            .map(c => c.cancha_id);
         }
       }
+    }
+    // Aplicar el filtro a la consulta final
+    condicionesConsulta = condicionesConsulta.in('cancha_id', idsRelacionados);
 
-      // Verificar si CUALQUIERA de las canchas del grupo tiene reserva
-      condicionesConsulta = condicionesConsulta.in('cancha_id', idsRelacionados);
     } else {
       // Para otras canchas, verificar normalmente solo la cancha específica
       condicionesConsulta = condicionesConsulta.eq('cancha_id', canchaId);

@@ -68,7 +68,7 @@ export default function ArriendaCanchaSelector() {
   // No necesitamos bloquear toda la página mientras carga
   // Los componentes EditableContent/EditableImage muestran sus propios skeletons
 
-  Dentro de este componente se lanza a reserva dentro de CitySoccer
+  //Dentro de este componente se lanza a reserva dentro de CitySoccer
 
   return (
     <div className="min-h-screen bg-black py-12">

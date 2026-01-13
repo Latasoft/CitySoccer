@@ -12,7 +12,7 @@ export default function ArriendaCanchaSelector() {
   const router = useRouter()
   const { isAdminMode } = useAdminMode()
   const { getField } = useContent()
-  const [reserveLink, setReserveLink] = useState('https://https://www.easycancha.com/book/clubs/1886/sports.com/')
+  const [reserveLink, setReserveLink] = useState('https://www.easycancha.com/book/clubs/1886/sports')
 
   useEffect(() => {
     let mounted = true
@@ -74,7 +74,7 @@ export default function ArriendaCanchaSelector() {
           {/* Botón de reserva (texto editable + link editable) */}
           <div className="mt-8 flex justify-center">
             <a
-              href={reserveLink || 'https://github.com/'}
+              href={reserveLink || 'https://www.easycancha.com/book/clubs/1886/sports'}
               target="_blank"
               rel="noopener noreferrer"
               className="px-8 py-3 rounded-lg font-bold shadow-lg hover:opacity-90 transition-all duration-200 flex items-center justify-center"

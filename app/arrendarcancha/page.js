@@ -8,8 +8,8 @@ import CardBackgroundImage from '@/components/CardBackgroundImage'
 import { useAdminMode } from '@/contexts/AdminModeContext'
 
 export default function ArriendaCanchaSelector() {
-  const router = useRouter()
-  const { isAdminMode } = useAdminMode()
+  // const router = useRouter()
+  // const { isAdminMode } = useAdminMode()
 
   // No necesitamos cargar contenido aquí, los componentes EditableContent/EditableImage
   // lo hacen automáticamente usando ContentContext

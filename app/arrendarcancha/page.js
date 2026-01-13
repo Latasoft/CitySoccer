@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { useAdminMode } from '@/contexts/AdminModeContext'
 import { useContent } from '@/contexts/ContentContext'
 

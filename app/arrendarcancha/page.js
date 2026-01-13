@@ -48,8 +48,8 @@ export default function ArriendaCanchaSelector() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Lado izquierdo - Gradient negro a blanco */}
-      <div className="w-1/2 bg-gradient-to-r from-black via-gray-700 to-white flex items-center justify-start p-12">
+      {/* Lado izquierdo - Gradient diagonal suave */}
+      <div className="w-1/2 bg-gradient-to-br from-slate-900 via-slate-700 to-slate-400 flex items-center justify-start p-12">
         <div className="w-full">
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 text-left drop-shadow-lg">
             Arrienda tu Cancha

@@ -47,19 +47,25 @@ export default function ArriendaCanchaSelector() {
   }, [getField])
 
   return (
-    <div className="min-h-screen bg-black py-12">
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
+    <div className="min-h-screen flex">
+      {/* Lado izquierdo - Gris oscuro */}
+      <div className="w-1/2 bg-gray-800 flex items-center justify-start p-12">
+        <div className="w-full">
+          <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 text-left">
             Arrienda tu Cancha
           </h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Elige el tipo de cancha que deseas reservar y disfruta de nuestras instalaciones de primer nivel
+        </div>
+      </div>
+
+      {/* Lado derecho - Negro */}
+      <div className="w-1/2 bg-black flex flex-col items-end justify-center p-12">
+        <div className="w-full max-w-md">
+          <p className="text-xl text-gray-300 mb-8 text-right">
+            Servicio de arriendo de canchas no disponible a través de CitySoccer. Favor dirigirse a EasyCancha para gestionar el arriendo.
           </p>
 
           {/* Botón de reserva */}
-          <div className="mt-8 flex justify-center">
+          <div className="flex justify-end">
             <a
               href={reserveLink || 'https://www.easycancha.com/book/clubs/1886/sports'}
               target="_blank"
@@ -67,7 +73,7 @@ export default function ArriendaCanchaSelector() {
               className="px-8 py-3 rounded-lg font-bold shadow-lg hover:opacity-90 transition-all duration-200 flex items-center justify-center uppercase"
               style={{ backgroundColor: '#F6C200', color: '#FFFFFF' }}
             >
-              Reservar aquí
+              Ir a EasyCancha
             </a>
           </div>
         </div>

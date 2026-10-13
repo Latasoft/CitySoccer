@@ -6,6 +6,7 @@ import localStorageService from '@/lib/localStorageService';
 import EditableImage from './EditableImage';
 import EditableContent from './EditableContent';
 import CardBackgroundImage from './CardBackgroundImage';
+import { EASYCANCHA_URL } from '@/lib/enlaces';
 
 const CardCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -19,7 +20,8 @@ const CardCarousel = () => {
       descKey: 'card1_description',
       imageKey: 'card1_image',
       ctaKey: 'card1_cta_text',
-      ctaLink: "/arrendarcancha",
+      ctaLink: EASYCANCHA_URL,
+      externo: true,
       defaultTitle: "Cargando...",
       defaultDesc: "",
       defaultImage: null, // Sin imagen: mostrará placeholder gris
@@ -31,7 +33,8 @@ const CardCarousel = () => {
       descKey: 'card2_description',
       imageKey: 'card2_image',
       ctaKey: 'card2_cta_text',
-      ctaLink: "/arrendarcancha",
+      ctaLink: EASYCANCHA_URL,
+      externo: true,
       defaultTitle: "Cargando...",
       defaultDesc: "",
       defaultImage: null,
@@ -268,7 +271,7 @@ const CardCarousel = () => {
                         />
                       </div>
 
-                      <Link href={card.ctaLink}>
+                      <Link href={card.ctaLink} target={card.externo ? "_blank" : undefined} rel={card.externo ? "noopener noreferrer" : undefined}>
                         <button className="w-full py-4 px-6 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white rounded-xl font-bold text-lg tracking-wide uppercase shadow-lg transform transition-all duration-200 hover:scale-105 hover:shadow-xl border-2 border-transparent hover:border-green-300">
                           <EditableContent
                             pageKey="home"

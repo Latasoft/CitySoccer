@@ -9,6 +9,7 @@ import QuienessomosComponent from '@/components/QuienessomosComponent';
 import AcademiaFutbolSeccion from '@/components/AcademiaFutbolSeccion';
 import ClasesFutbolSeccion from '@/components/ClasesFutbolSeccion';
 import AcademiaPickleballSeccion from '@/components/AcademiaPickleballSeccion';
+import ClasesPickleballSeccion from '@/components/ClasesPickleballSeccion';
 
 export default function HomePageClient() {
   const { preloadPages } = useContent();
@@ -53,6 +54,9 @@ export default function HomePageClient() {
         </section>
         <section id="academia-pickleball">
           <AcademiaPickleballSeccion />
+        </section>
+        <section id="clases-pickleball">
+          <ClasesPickleballSeccion />
         </section>
       </div>
     </main>

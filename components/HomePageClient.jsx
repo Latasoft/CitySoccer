@@ -5,6 +5,7 @@ import { useContent } from '@/contexts/ContentContext';
 import localStorageService from '@/lib/localStorageService';
 import Hero from '@/components/Hero';
 import CardCarousel from '@/components/CardCarousel';
+import QuienessomosComponent from '@/components/QuienessomosComponent';
 
 export default function HomePageClient() {
   const { preloadPages } = useContent();
@@ -38,6 +39,9 @@ export default function HomePageClient() {
       <div className="min-h-screen w-full bg-[#3B3F44]">
         <Hero />
         <CardCarousel />
+        <section id="quienes-somos">
+          <QuienessomosComponent />
+        </section>
       </div>
     </main>
   );

@@ -12,6 +12,7 @@ import AcademiaPickleballSeccion from '@/components/AcademiaPickleballSeccion';
 import ClasesPickleballSeccion from '@/components/ClasesPickleballSeccion';
 import SummerCampSeccion from '@/components/SummerCampSeccion';
 import EventosSeccion from '@/components/EventosSeccion';
+import Contacto from '@/app/contacto/Contacto';
 
 export default function HomePageClient() {
   const { preloadPages } = useContent();
@@ -65,6 +66,9 @@ export default function HomePageClient() {
         </section>
         <section id="eventos">
           <EventosSeccion />
+        </section>
+        <section id="contacto">
+          <Contacto />
         </section>
       </div>
     </main>

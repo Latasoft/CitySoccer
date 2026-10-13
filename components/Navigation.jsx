@@ -7,33 +7,30 @@ import { AdminModeToggle, useAdminMode } from "@/contexts/AdminModeContext";
 import { useAuth } from "@/hooks/useAuth";
 import EditableNavLink from "./EditableNavLink";
 
-// Fallback estático (se usa si falla la carga desde archivo JSON)
+// Menú de la landing: cada opción baja a una sección de la página de inicio.
+// Ya no incluye los arriendos de canchas, porque ahora las reservas se hacen en Easycancha.
 const fallbackNavItems = [
     { id: 1, text: "Inicio", href: "/" },
-    { id: 2, text: "Quienes somos", href: "/quienessomos" },
+    { id: 2, text: "Quiénes somos", href: "/#quienes-somos" },
     {
         id: 3,
-        text: "Futbol",
+        text: "Fútbol",
         submenu: [
-            { id: 31, text: "Arriendos Futbol 7", href: "/arrendarcancha/futbol7" },
-            { id: 32, text: "Arriendos Futbol 9", href: "/arrendarcancha/futbol9" },
-            { id: 33, text: "Clases particulares Futbol", href: "/clasesparticularesfutbol" },
-            { id: 34, text: "Academia de futbol", href: "/academiadefutbol" },
+            { id: 33, text: "Clases particulares Fútbol", href: "/#clases-futbol" },
+            { id: 34, text: "Academia de Fútbol", href: "/#academia-futbol" },
         ],
     },
     {
         id: 4,
         text: "Pickleball",
         submenu: [
-            { id: 41, text: "Arriendos Pickleball Single", href: "/arrendarcancha/pickleball-individual" },
-            { id: 42, text: "Arriendos Pickleball Dobles", href: "/arrendarcancha/pickleball-dobles" },
-            { id: 43, text: "Clases particulares Pickleball", href: "/clasesparticularespickleball" },
-            { id: 44, text: "Academia de Pickeball", href: "/academiadepickleball" },
+            { id: 43, text: "Clases particulares Pickleball", href: "/#clases-pickleball" },
+            { id: 44, text: "Academia de Pickleball", href: "/#academia-pickleball" },
         ],
     },
-    { id: 5, text: "Summer Camp", href: "/summer-camp" },
-    { id: 6, text: "Eventos", href: "/eventos" },
-    { id: 7, text: "Contacto", href: "/contacto" },
+    { id: 5, text: "Summer Camp", href: "/#summer-camp" },
+    { id: 6, text: "Eventos", href: "/#eventos" },
+    { id: 7, text: "Contacto", href: "/#contacto" },
 ];
 
 const remToPixels = (rem) => {
@@ -59,6 +56,21 @@ export default function Navigation() {
         const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
         
         const loadMenuItems = async (forceRefresh = false) => {
+            // Landing: el menú usa siempre la lista escrita en este archivo (fallbackNavItems).
+            // El navigation.json guardado en el disco de Render tiene el menú antiguo (con arriendos)
+            // y no se actualiza al publicar, por eso ya no se carga desde ahí.
+            const USAR_MENU_DEL_CODIGO = true;
+            if (USAR_MENU_DEL_CODIGO) {
+                const itemsWithAuth = [...fallbackNavItems];
+                if (user) {
+                    itemsWithAuth.push({ id: 999, text: "Dashboard", href: "/dashboard" });
+                } else {
+                    itemsWithAuth.push({ id: 999, text: "Login", href: "/login" });
+                }
+                setNavItems(itemsWithAuth);
+                setLoadingNav(false);
+                return;
+            }
             try {
                 console.log('🔍🧭 Navigation: Iniciando carga de menú...', { forceRefresh });
                 

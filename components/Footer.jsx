@@ -5,6 +5,7 @@ import { useContent } from "@/contexts/ContentContext";
 import localStorageService from "@/lib/localStorageService";
 import EditableContent from "./EditableContent";
 import EditableImage from "./EditableImage";
+import { EASYCANCHA_URL } from '@/lib/enlaces';
 
 // Componente para links de redes sociales con URL dinámica
 function SocialLink({ pageKey, fieldKey, defaultUrl, ariaLabel, onClick, children }) {
@@ -277,7 +278,7 @@ export default function Footer() {
                 <ul className="space-y-3 text-sm">
                   <li>
                     <a
-                      href="/arrendarcancha/futbol7"
+                      href={EASYCANCHA_URL} target="_blank" rel="noopener noreferrer"
                       onClick={handleLinkClick}
                       className="text-yellow-100 hover:text-white transition-colors duration-300 font-medium flex items-center gap-2"
                     >
@@ -295,7 +296,7 @@ export default function Footer() {
 
                   <li>
                     <a
-                      href="/arrendarcancha/pickleball-individual"
+                      href={EASYCANCHA_URL} target="_blank" rel="noopener noreferrer"
                       onClick={handleLinkClick}
                       className="text-yellow-100 hover:text-white transition-colors duration-300 font-medium flex items-center gap-2"
                     >
@@ -313,7 +314,7 @@ export default function Footer() {
 
                   <li>
                     <a
-                      href="/arrendarcancha/pickleball-dobles"
+                      href={EASYCANCHA_URL} target="_blank" rel="noopener noreferrer"
                       onClick={handleLinkClick}
                       className="text-yellow-100 hover:text-white transition-colors duration-300 font-medium flex items-center gap-2"
                     >

@@ -6,6 +6,7 @@ import localStorageService from '@/lib/localStorageService';
 import Hero from '@/components/Hero';
 import CardCarousel from '@/components/CardCarousel';
 import QuienessomosComponent from '@/components/QuienessomosComponent';
+import AcademiaFutbolSeccion from '@/components/AcademiaFutbolSeccion';
 
 export default function HomePageClient() {
   const { preloadPages } = useContent();
@@ -41,6 +42,9 @@ export default function HomePageClient() {
         <CardCarousel />
         <section id="quienes-somos">
           <QuienessomosComponent />
+        </section>
+        <section id="academia-futbol">
+          <AcademiaFutbolSeccion />
         </section>
       </div>
     </main>

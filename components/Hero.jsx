@@ -7,6 +7,7 @@ import EditableImage from './EditableImage';
 import EditableContent from './EditableContent';
 import EditableVideo from './EditableVideo';
 import { useAdminMode } from '@/contexts/AdminModeContext';
+import { EASYCANCHA_URL } from '@/lib/enlaces';
 
 const Hero = () => {
   const videoRef = useRef(null);
@@ -200,7 +201,7 @@ const Hero = () => {
         />
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-          <Link href="/arrendarcancha">
+          <a href={EASYCANCHA_URL} target="_blank" rel="noopener noreferrer">
             <button
               className="text-2xl px-16 py-6 text-black rounded-lg font-black flex items-center justify-center gap-2 shadow-lg hover:opacity-90 transition-all duration-200 uppercase tracking-wider"
               style={{
@@ -216,7 +217,7 @@ const Hero = () => {
                 as="span"
               />
             </button>
-          </Link>
+          </a>
         </div>
       </div>
     </section>

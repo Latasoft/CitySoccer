@@ -7,6 +7,7 @@ import Hero from '@/components/Hero';
 import CardCarousel from '@/components/CardCarousel';
 import QuienessomosComponent from '@/components/QuienessomosComponent';
 import AcademiaFutbolSeccion from '@/components/AcademiaFutbolSeccion';
+import ClasesFutbolSeccion from '@/components/ClasesFutbolSeccion';
 
 export default function HomePageClient() {
   const { preloadPages } = useContent();
@@ -45,6 +46,9 @@ export default function HomePageClient() {
         </section>
         <section id="academia-futbol">
           <AcademiaFutbolSeccion />
+        </section>
+        <section id="clases-futbol">
+          <ClasesFutbolSeccion />
         </section>
       </div>
     </main>

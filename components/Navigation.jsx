@@ -298,10 +298,10 @@ export default function Navigation() {
             closeSubMenu(subMenuOpening);
             setOpenSubMenu(null);
         }
-        // Close menu on mobile when clicking a link
-        if (isMobile) {
-            setMenuOpen(false);
-        }
+        // Cerrar el menú al hacer clic en un link.
+        // En la landing los links bajan a una sección de la misma página (no cambia la página),
+        // así que también hay que cerrarlo aquí en computador, no solo en celular.
+        setMenuOpen(false);
     };
 
     const closeSubMenu = (index) => {
